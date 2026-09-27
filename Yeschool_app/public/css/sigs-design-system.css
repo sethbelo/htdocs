@@ -1,0 +1,138 @@
+/* 
+ * SIGS Pro Max Design System 2026
+ * Vercel-inspired Dark Theme + Modern Glassmorphism
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Light mode */
+    --sigs-bg: #fafafa;
+    --sigs-card: rgba(255, 255, 255, 0.7);
+    --sigs-border: rgba(226, 232, 240, 0.8);
+    
+    /* Design tokens */
+    --sigs-radius-sm: 12px;
+    --sigs-radius-md: 18px;
+    --sigs-radius-lg: 24px;
+    
+    --sigs-shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.05);
+    --sigs-shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.dark {
+    /* Vercel dark palette */
+    --sigs-bg: #0a0a0a;
+    --sigs-card: rgba(17, 17, 17, 0.8);
+    --sigs-border: #1a1a1a;
+    
+    --sigs-shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.3);
+    --sigs-shadow-glow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-space {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: var(--sigs-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--sigs-border);
+    border-radius: var(--sigs-radius-md);
+    box-shadow: var(--sigs-shadow-soft);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+    box-shadow: var(--sigs-shadow-glow);
+    transform: translateY(-2px);
+}
+
+.glass-pill {
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--sigs-border);
+    border-radius: 9999px;
+}
+
+.dark .glass-pill {
+    background: rgba(255,255,255,0.05);
+}
+
+/* Sidebar Utilities */
+.sidebar-link {
+    transition: all 0.2s ease;
+    border-radius: var(--sigs-radius-sm);
+}
+.sidebar-link:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: #0a0a0a;
+}
+.dark .sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fafafa;
+}
+.sidebar-link.active {
+    background: #0a0a0a;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.25);
+}
+.dark .sidebar-link.active {
+    background: #fafafa;
+    color: #0a0a0a;
+    box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Mesh Gradient Background */
+.mesh-bg {
+    background-color: #0a0a0a;
+    background-image: 
+        radial-gradient(at 40% 20%, hsla(250,100%,74%,1) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
+        radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, hsla(242,100%,70%,1) 0px, transparent 50%),
+        radial-gradient(at 0% 0%, hsla(343,100%,76%,1) 0px, transparent 50%);
+}
+
+/* Custom Scrollbar — Vercel style */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}

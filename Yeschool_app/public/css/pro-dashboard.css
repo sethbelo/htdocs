@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --pro-font-display: 'Space Grotesk', sans-serif;
+    --pro-font-body: 'Inter', sans-serif;
+    
+    /* Neon Glows */
+    --pro-glow-primary: rgba(37, 99, 235, 0.4);
+    --pro-glow-secondary: rgba(124, 58, 237, 0.4);
+    
+    /* Glassmorphism Defaults */
+    --pro-glass-bg: rgba(255, 255, 255, 0.7);
+    --pro-glass-border: rgba(255, 255, 255, 0.4);
+    --pro-glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.dark {
+    --pro-glass-bg: rgba(15, 23, 42, 0.6);
+    --pro-glass-border: rgba(255, 255, 255, 0.08);
+    --pro-glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Base Overrides for Dashboard */
+body, .fi-main {
+    font-family: var(--pro-font-body) !important;
+}
+
+h1, h2, h3, .font-display {
+    font-family: var(--pro-font-display) !important;
+    letter-spacing: -0.03em;
+}
+
+/* Glass Card Component (Bento Grid) */
+.pro-glass-card {
+    background: var(--pro-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--pro-glass-border);
+    border-radius: 1.5rem;
+    box-shadow: var(--pro-glass-shadow);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.pro-glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+}
+.dark .pro-glass-card:hover {
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Animated Gradient Backgrounds */
+.pro-gradient-mesh {
+    background-color: #ffffff;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,0.1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, transparent 50%);
+    background-size: 150% 150%;
+    animation: proMeshGradient 15s ease infinite alternate;
+}
+.dark .pro-gradient-mesh {
+    background-color: #0f172a;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,0.3) 0, transparent 50%);
+}
+
+@keyframes proMeshGradient {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* Text Gradients */
+.pro-text-gradient {
+    background: linear-gradient(135deg, #2563eb, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+.dark .pro-text-gradient {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Bento Grid Layout Utilities */
+.pro-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+.pro-bento-col-4 { grid-column: span 12; }
+.pro-bento-col-8 { grid-column: span 12; }
+.pro-bento-col-12 { grid-column: span 12; }
+
+@media (min-width: 768px) {
+    .pro-bento-col-4 { grid-column: span 6; }
+    .pro-bento-col-8 { grid-column: span 12; }
+}
+
+@media (min-width: 1024px) {
+    .pro-bento-col-4 { grid-column: span 4; }
+    .pro-bento-col-8 { grid-column: span 8; }
+}
+
+/* End of custom CSS */
