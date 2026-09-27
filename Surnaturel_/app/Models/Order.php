@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\OrderPriority;
 use App\Enums\OrderStatus;
 use App\Models\Concerns\BelongsToSite;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    use BelongsToSite, HasFactory, SoftDeletes, TracksActivity;
+    use BelongsToSite, HasEncryptedRouteKey, HasFactory, SoftDeletes, TracksActivity;
 
     protected $guarded = ['id'];
 

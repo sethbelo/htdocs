@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\ProofStatus;
 use App\Enums\ProofValidatorType;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Proof extends Model
 {
-    use TracksActivity;
+    use HasEncryptedRouteKey, TracksActivity;
 
     protected $guarded = ['id'];
 

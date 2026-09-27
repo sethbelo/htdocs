@@ -1,23 +1,22 @@
-@extends('pdf.layout')
+@extends('pdf.ticket-layout')
 
 @php($money = fn ($v) => \App\Services\Support\Money::format($v))
 
 @section('content')
-    @include('pdf.partials.ticket-header')
-    <div class="center bold" style="font-size: 10pt;">{{ $session->closed_at ? 'RAPPORT Z — CLÔTURE' : 'RAPPORT X — SITUATION' }}</div>
+    <div class="inverse title">{{ $session->closed_at ? 'Rapport Z — clôture' : 'Rapport X — situation' }}</div>
     <div class="center">{{ $session->number }} · {{ $session->register->code }}</div>
     <div class="center small">{{ $session->register->site->name }} · entrepôt {{ $r['warehouse']?->name ?? '—' }}</div>
-    <div class="dashed"></div>
-    <table class="ticket">
+    <div class="sep"></div>
+    <table>
         <tr><td>Caissier</td><td class="right">{{ $session->cashier->name }}</td></tr>
         <tr><td>Ouverture</td><td class="right">{{ $session->opened_at->format('d/m/Y H:i') }}</td></tr>
         @if ($session->closed_at)<tr><td>Clôture</td><td class="right">{{ $session->closed_at->format('d/m/Y H:i') }}</td></tr>@endif
         <tr><td>Durée</td><td class="right">{{ $r['duration'] }}</td></tr>
         <tr><td>Fond de caisse</td><td class="right">{{ $money($r['opening']) }}</td></tr>
     </table>
-    <div class="dashed"></div>
+    <div class="sep"></div>
     <div class="bold">Activité</div>
-    <table class="ticket">
+    <table>
         <tr><td>Ventes ({{ $r['sales_count'] }})</td><td class="right">{{ $money($r['sales_total']) }}</td></tr>
         <tr><td>dont remises</td><td class="right">{{ $money($r['discounts']) }}</td></tr>
         <tr><td>dont TVA</td><td class="right">{{ $money($r['tax']) }}</td></tr>
@@ -27,9 +26,9 @@
         <tr><td>Ventes à crédit</td><td class="right">{{ $money($r['credit_sales']) }}</td></tr>
         <tr><td>Points fidélité</td><td class="right">{{ $r['loyalty_points'] }}</td></tr>
     </table>
-    <div class="dashed"></div>
+    <div class="sep"></div>
     <div class="bold">Encaissements par moyen</div>
-    <table class="ticket">
+    <table>
         @forelse ($r['by_method'] as $row)
             <tr><td>{{ $row['method']->label() }}</td><td class="right">{{ $money($row['total']) }}</td></tr>
         @empty
@@ -38,26 +37,26 @@
         <tr><td class="bold">Total encaissé</td><td class="right bold">{{ $money($r['collected_total']) }}</td></tr>
     </table>
     @if ($r['disbursements']->isNotEmpty())
-        <div class="dashed"></div>
+        <div class="sep"></div>
         <div class="bold">Décaissements</div>
-        <table class="ticket">
+        <table>
             @foreach ($r['disbursements'] as $movement)
                 <tr><td class="small">{{ $movement->created_at->format('H:i') }} {{ $movement->description }}</td><td class="right">{{ $money($movement->amount) }}</td></tr>
             @endforeach
         </table>
     @endif
     @if ($r['top_products']->isNotEmpty())
-        <div class="dashed"></div>
+        <div class="sep"></div>
         <div class="bold">Articles vendus</div>
-        <table class="ticket">
+        <table>
             @foreach ($r['top_products'] as $product)
                 <tr><td class="small">{{ (float) $product->quantity }} × {{ $product->description }}</td><td class="right">{{ $money($product->total) }}</td></tr>
             @endforeach
         </table>
     @endif
-    <div class="dashed"></div>
+    <div class="sep"></div>
     <div class="bold">Espèces</div>
-    <table class="ticket">
+    <table>
         <tr><td>Solde théorique</td><td class="right bold">{{ $money($r['expected_cash']) }}</td></tr>
         @if ($session->closed_at)
             @foreach ($session->denominations ?? [] as $value => $count)
@@ -70,9 +69,12 @@
             @if ($session->supervisor)<tr><td>Écart validé par</td><td class="right">{{ $session->supervisor->name }}</td></tr>@endif
         @endif
     </table>
-    <div class="dashed"></div>
+    <div class="sep"></div>
     <div class="small">Comptabilité : {{ $r['accounting']['entries'] }} écriture(s) · {{ $r['accounting']['synced'] ? 'synchronisée' : $r['accounting']['missing'].' en attente' }}{{ $session->accounting_synced_at ? ' le '.$session->accounting_synced_at->format('d/m H:i') : '' }}</div>
     @if ($session->notes)<div class="small">Obs. : {{ $session->notes }}</div>@endif
-    <div class="dashed"></div>
-    <div class="center small" style="margin-top: 16pt;">Signature caissier ______________<br><br>Signature responsable ______________</div>
+    <div class="sep"></div>
+    @foreach (\App\Support\DocumentSignatures::for('cash_session') as $role)
+        <div class="small" style="margin-top: 12pt;">{{ $role }} :</div>
+        <div style="border-bottom: .8pt solid #000; height: 26pt;"></div>
+    @endforeach
 @endsection

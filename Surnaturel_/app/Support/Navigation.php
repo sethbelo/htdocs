@@ -20,6 +20,7 @@ class Navigation
                 ['label' => 'Tableau de bord', 'icon' => 'presentation-chart-line', 'route' => 'dashboard', 'permission' => 'dashboard.view'],
                 ['label' => 'Mes validations', 'icon' => 'check-badge', 'route' => 'approvals.index', 'permission' => 'approvals.view'],
                 ['label' => 'Tâches', 'icon' => 'clipboard-document-check', 'route' => 'tasks.index', 'permission' => 'tasks.view'],
+                ['label' => 'Visa des paies', 'icon' => 'document-check', 'route' => 'direction.payroll', 'permission' => 'direction.payroll_sign'],
             ]],
             ['heading' => 'Commercial', 'items' => [
                 ['label' => 'Clients', 'icon' => 'users', 'route' => 'clients.index', 'permission' => 'clients.view', 'match' => 'clients.*'],
@@ -28,13 +29,16 @@ class Navigation
                 ['label' => 'Commandes', 'icon' => 'clipboard-document-list', 'route' => 'orders.index', 'permission' => 'orders.view', 'match' => 'orders.*'],
                 ['label' => 'Fidélité', 'icon' => 'gift', 'route' => 'loyalty.index', 'permission' => 'loyalty.view'],
             ]],
+            ['heading' => 'Marketing', 'items' => [
+                ['label' => 'Suivi clients', 'icon' => 'phone-arrow-up-right', 'route' => 'followups.index', 'permission' => 'followups.view'],
+            ]],
             ['heading' => 'Caisse & boutique', 'items' => [
                 ['label' => 'Caisse commandes', 'icon' => 'banknotes', 'route' => 'cash.checkout', 'permission' => 'cash.collect'],
                 ['label' => 'Point de vente', 'icon' => 'shopping-cart', 'route' => 'pos', 'permission' => 'pos.create'],
                 ['label' => 'Sessions de caisse', 'icon' => 'calculator', 'route' => 'cash.sessions', 'permission' => 'cash.view'],
             ]],
             ['heading' => 'Production', 'items' => [
-                ['label' => 'Graphisme', 'icon' => 'paint-brush', 'route' => 'design.board', 'permission' => 'design.view'],
+                ['label' => 'Graphisme', 'icon' => 'paint-brush', 'route' => 'design.board', 'permission' => 'design.view', 'match' => 'design.*'],
                 ['label' => 'Salle d’impression', 'icon' => 'printer', 'route' => 'production.board', 'permission' => 'production.view'],
                 ['label' => 'Parc machines', 'icon' => 'cog-6-tooth', 'route' => 'machines.index', 'permission' => 'machines.view'],
                 ['label' => 'Livraisons', 'icon' => 'truck', 'route' => 'deliveries.index', 'permission' => 'deliveries.view'],
@@ -44,6 +48,7 @@ class Navigation
                 ['label' => 'Stocks', 'icon' => 'archive-box', 'route' => 'inventory.index', 'permission' => 'inventory.view'],
                 ['label' => 'Entrées & sorties', 'icon' => 'arrows-up-down', 'route' => 'inventory.operations', 'permission' => 'inventory.view'],
                 ['label' => 'Transferts', 'icon' => 'arrows-right-left', 'route' => 'inventory.transfers', 'permission' => 'inventory.view'],
+                ['label' => 'Rapport temps réel', 'icon' => 'signal', 'route' => 'inventory.report', 'permission' => 'inventory.view'],
                 ['label' => 'Achats', 'icon' => 'shopping-bag', 'route' => 'purchases.index', 'permission' => 'purchases.view'],
                 ['label' => 'Fournisseurs', 'icon' => 'building-storefront', 'route' => 'suppliers.index', 'permission' => 'suppliers.view'],
             ]],
@@ -55,11 +60,13 @@ class Navigation
                 ['label' => 'Bons', 'icon' => 'document-duplicate', 'route' => 'vouchers.index', 'permission' => 'vouchers.view'],
             ]],
             ['heading' => 'Ressources humaines', 'items' => [
-                ['label' => 'Employés', 'icon' => 'identification', 'route' => 'hr.employees', 'permission' => 'employees.view'],
+                ['label' => 'Employés', 'icon' => 'user-group', 'route' => 'hr.employees', 'permission' => 'employees.view'],
                 ['label' => 'Départements', 'icon' => 'rectangle-group', 'route' => 'hr.departments', 'permission' => 'departments.view'],
                 ['label' => 'Présence', 'icon' => 'clock', 'route' => 'hr.attendance', 'permission' => 'attendance.view'],
                 ['label' => 'Congés', 'icon' => 'calendar-days', 'route' => 'hr.leaves', 'permission' => 'leaves.view'],
                 ['label' => 'Paie', 'icon' => 'wallet', 'route' => 'hr.payroll', 'permission' => 'payroll.view'],
+                ['label' => 'Badges & cartes', 'icon' => 'identification', 'route' => 'hr.cards', 'permission' => 'cards.view'],
+                ['label' => 'Santé & assurance', 'icon' => 'heart', 'route' => 'hr.affiliations', 'permission' => 'affiliations.view'],
             ]],
             ['heading' => 'Administration', 'items' => [
                 ['label' => 'Documents', 'icon' => 'folder-open', 'route' => 'documents.index', 'permission' => 'documents.view'],

@@ -58,7 +58,7 @@ class Board extends Component
 
     private function baseQuery(): Builder
     {
-        return DesignJob::query()->with('order.client', 'designer', 'latestVersion')
+        return DesignJob::query()->with('order.client', 'designer', 'latestVersion', 'brief')
             ->whereHas('order', fn (Builder $q) => $q->visibleTo(auth()->user()));
     }
 

@@ -13,7 +13,7 @@ class EnsurePasswordIsChanged
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->must_change_password && $request->user()->usesPassword() && ! $request->routeIs('password.change', 'logout')) {
+        if ($request->user()?->must_change_password && ! $request->routeIs('password.change', 'logout')) {
             return redirect()->route('password.change');
         }
 

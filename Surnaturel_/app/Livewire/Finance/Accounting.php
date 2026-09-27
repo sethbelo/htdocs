@@ -37,7 +37,6 @@ class Accounting extends Component
     #[Url(as: 'journal')]
     public string $journalCode = '';
 
-    #[Url(as: 'compte')]
     public ?int $accountId = null;
 
     /** @var array<string, mixed> */

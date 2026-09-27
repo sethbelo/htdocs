@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\QuoteStatus;
 use App\Enums\QuoteType;
 use App\Models\Concerns\BelongsToSite;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Quote extends Model
 {
-    use BelongsToSite, SoftDeletes, TracksActivity;
+    use BelongsToSite, HasEncryptedRouteKey, SoftDeletes, TracksActivity;
 
     protected $guarded = ['id'];
 

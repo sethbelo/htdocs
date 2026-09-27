@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StockOperationReason;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  */
 class StockOperation extends Model
 {
-    use TracksActivity;
+    use HasEncryptedRouteKey, TracksActivity;
 
     protected $guarded = ['id'];
 

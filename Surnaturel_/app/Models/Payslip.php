@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payslip extends Model
 {
+    use HasEncryptedRouteKey;
+
     protected $guarded = ['id'];
 
     protected function casts(): array
@@ -20,6 +23,7 @@ class Payslip extends Model
             'days_worked' => 'decimal:1',
             'lines' => 'array',
             'paid_at' => 'datetime',
+            'dg_approved_at' => 'datetime',
         ];
     }
 
@@ -31,5 +35,15 @@ class Payslip extends Model
     public function period(): BelongsTo
     {
         return $this->belongsTo(PayrollPeriod::class, 'payroll_period_id');
+    }
+
+    public function dgApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dg_approved_by');
+    }
+
+    public function isApprovedByDirection(): bool
+    {
+        return $this->dg_status === 'approved';
     }
 }

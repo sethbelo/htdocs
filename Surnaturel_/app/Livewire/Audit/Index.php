@@ -21,7 +21,6 @@ class Index extends Component
     #[Url(as: 'module')]
     public string $logName = '';
 
-    #[Url(as: 'utilisateur')]
     public ?int $userId = null;
 
     #[Url(as: 'du')]

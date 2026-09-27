@@ -60,8 +60,7 @@ class DemoDataSeeder extends Seeder
             ]);
             $users[$role]->forceFill([
                 'pin_hash' => bcrypt('1234'),
-                'login_mode' => $definition['login'] ?? 'password',
-                'badge_code' => ($definition['login'] ?? null) === 'badge' ? DemoAccounts::badge($role) : null,
+                'badge_code' => in_array($role, ['magasinier', 'imprimeur', 'livreur'], true) ? DemoAccounts::badge($role) : null,
             ])->save();
             $users[$role]->syncRoles([$role]);
             $users[$role]->sites()->syncWithoutDetaching([$hq->id, $shop->id]);
@@ -70,7 +69,7 @@ class DemoDataSeeder extends Seeder
         $users['caissier-siege'] = User::query()->firstOrCreate(['username' => 'caissier.siege'], [
             'name' => 'Caissier Siège', 'email' => 'caissier.siege@demo.test', 'password' => 'password', 'must_change_password' => false, 'default_site_id' => $hq->id,
         ]);
-        $users['caissier-siege']->forceFill(['pin_hash' => bcrypt('1234'), 'login_mode' => 'pin'])->save();
+        $users['caissier-siege']->forceFill(['pin_hash' => bcrypt('1234')])->save();
         $users['caissier-siege']->syncRoles(['caissier']);
         $users['caissier-siege']->sites()->syncWithoutDetaching([$hq->id]);
 

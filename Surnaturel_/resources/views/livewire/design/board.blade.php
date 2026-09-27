@@ -24,6 +24,7 @@
                         <span @class(['text-red-600 font-medium' => $job->order->isOverdue()])>Délai {{ $job->order->due_at?->format('d/m H:i') ?? '—' }}</span>
                         <span>· {{ $job->designer?->name ?? 'Non assigné' }}</span>
                         @if ($job->latestVersion)<span>· v{{ $job->latestVersion->version }}</span>@endif
+                        @if ($job->brief?->validated_for_print_at)<flux:badge size="sm" color="emerald" icon="printer">Feu vert impression</flux:badge>@endif
                     </div>
                 </button>
             @empty
@@ -41,6 +42,7 @@
                             <flux:text>{{ $job->order->client->displayName() }} · délai {{ $job->order->due_at?->translatedFormat('d M H:i') ?? 'non défini' }}</flux:text>
                         </div>
                         <div class="flex flex-wrap gap-2">
+                            <flux:button size="sm" icon="book-open" :href="route('design.notebook', $job)" wire:navigate>Cahier de conception</flux:button>
                             @if (in_array($job->status->value, ['to_design', 'correction']))
                                 @can('design.work')<flux:button size="sm" variant="primary" icon="play" wire:click="takeAndStart">{{ $job->designer_id ? 'Démarrer' : 'Prendre & démarrer' }}</flux:button>@endcan
                             @endif

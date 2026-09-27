@@ -52,7 +52,7 @@ class Create extends Component
         $this->site_id = auth()->user()->default_site_id ?? auth()->user()->accessibleSiteIds()[0] ?? null;
         $this->deposit_rate = (string) Setting::get('orders.default_deposit_rate', 100);
         $this->due_at = now()->addDays(2)->setTime(17, 0)->format('Y-m-d\TH:i');
-        $this->client_id = request()->integer('client') ?: null;
+        $this->client_id = Client::findByRouteKey(request()->string('client')->toString() ?: null)?->id;
         $this->addItem();
     }
 

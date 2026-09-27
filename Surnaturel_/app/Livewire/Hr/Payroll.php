@@ -14,7 +14,6 @@ use App\Services\Hr\PayrollService;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -24,7 +23,6 @@ class Payroll extends Component
 {
     use InteractsWithToasts;
 
-    #[Url(as: 'periode')]
     public ?int $periodId = null;
 
     public string $newPeriod = '';

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EmploymentStatus;
 use App\Models\Concerns\BelongsToSite;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,10 +12,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Employee extends Model
 {
-    use BelongsToSite, HasFactory, SoftDeletes, TracksActivity;
+    use BelongsToSite, HasEncryptedRouteKey, HasFactory, SoftDeletes, TracksActivity;
 
     /**
      * Données RH sensibles : chiffrées en base, masquées à la sérialisation, exclues du journal d'activité.
@@ -37,6 +39,8 @@ class Employee extends Model
             'birth_date' => 'date',
             'hired_at' => 'date',
             'left_at' => 'date',
+            'card_issued_at' => 'date',
+            'card_expires_at' => 'date',
             'is_active' => 'boolean',
             'national_id' => 'encrypted',
             'base_salary' => 'encrypted',
@@ -104,5 +108,34 @@ class Employee extends Model
     public function baseSalary(): float
     {
         return (float) ($this->base_salary ?? 0);
+    }
+
+    public function dependents(): HasMany
+    {
+        return $this->hasMany(EmployeeDependent::class)->orderBy('birth_date');
+    }
+
+    public function affiliations(): HasMany
+    {
+        return $this->hasMany(Affiliation::class);
+    }
+
+    public function initials(): string
+    {
+        return mb_strtoupper(mb_substr((string) $this->first_name, 0, 1).mb_substr((string) $this->last_name, 0, 1));
+    }
+
+    /**
+     * Photo d'identité encodée pour les PDF (badges, cartes), ou null.
+     */
+    public function photoDataUri(): ?string
+    {
+        $disk = Storage::disk('local');
+
+        if (! $this->photo_path || ! $disk->exists($this->photo_path)) {
+            return null;
+        }
+
+        return 'data:'.$disk->mimeType($this->photo_path).';base64,'.base64_encode((string) $disk->get($this->photo_path));
     }
 }

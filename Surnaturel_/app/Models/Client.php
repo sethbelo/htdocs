@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ClientType;
 use App\Models\Concerns\BelongsToSite;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Notifications\Notifiable;
 
 class Client extends Model
 {
-    use BelongsToSite, HasFactory, Notifiable, SoftDeletes, TracksActivity;
+    use BelongsToSite, HasEncryptedRouteKey, HasFactory, Notifiable, SoftDeletes, TracksActivity;
 
     protected $guarded = ['id'];
 
@@ -28,6 +29,8 @@ class Client extends Model
             'allow_credit' => 'boolean',
             'credit_limit' => 'decimal:2',
             'is_active' => 'boolean',
+            'last_contacted_at' => 'datetime',
+            'next_follow_up_at' => 'datetime',
         ];
     }
 
@@ -105,5 +108,34 @@ class Client extends Model
             ->orWhere('number', 'like', "%{$term}%")
             ->orWhere('phone', 'like', "%{$term}%")
             ->orWhere('email', 'like', "%{$term}%")));
+    }
+
+    public function interactions(): HasMany
+    {
+        return $this->hasMany(ClientInteraction::class)->latest('occurred_at');
+    }
+
+    public function followUpOwner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'follow_up_owner_id');
+    }
+
+    /**
+     * Numéro WhatsApp international (chiffres uniquement), RDC par défaut.
+     */
+    public function whatsappNumber(): ?string
+    {
+        $raw = preg_replace('/\D+/', '', (string) ($this->whatsapp ?: $this->phone));
+
+        if ($raw === '') {
+            return null;
+        }
+
+        return match (true) {
+            str_starts_with($raw, '00') => substr($raw, 2),
+            str_starts_with($raw, '0') => '243'.substr($raw, 1),
+            strlen($raw) === 9 => '243'.$raw,
+            default => $raw,
+        };
     }
 }

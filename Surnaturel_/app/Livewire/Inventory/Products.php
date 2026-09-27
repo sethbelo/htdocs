@@ -26,7 +26,6 @@ class Products extends Component
     #[Url(as: 'type')]
     public string $type = '';
 
-    #[Url(as: 'categorie')]
     public ?int $categoryId = null;
 
     public ?int $editingId = null;

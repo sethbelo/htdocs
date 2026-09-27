@@ -30,7 +30,6 @@ class Index extends Component
     #[Url(as: 'priorite')]
     public string $priority = '';
 
-    #[Url(as: 'commercial')]
     public ?int $salesRepId = null;
 
     #[Url(as: 'du')]

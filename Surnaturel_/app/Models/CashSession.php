@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CashSessionStatus;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CashSession extends Model
 {
-    use TracksActivity;
+    use HasEncryptedRouteKey, TracksActivity;
 
     protected $guarded = ['id'];
 

@@ -28,7 +28,6 @@ class Stock extends Component
     #[Url(as: 'vue')]
     public string $tab = 'levels';
 
-    #[Url(as: 'entrepot')]
     public ?int $warehouseId = null;
 
     #[Url(as: 'q')]

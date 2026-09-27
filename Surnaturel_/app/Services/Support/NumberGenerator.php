@@ -67,6 +67,10 @@ class NumberGenerator
 
     public const StockTransfer = 'TRS';
 
+    public const Affiliation = 'AFF';
+
+    public const CareVoucher = 'PEC';
+
     public function next(string $prefix, ?Carbon $date = null, int $padding = 6): string
     {
         $year = ($date ?? now())->year;

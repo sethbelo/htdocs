@@ -19,6 +19,7 @@ use App\Models\Site;
 use App\Models\TreasuryAccount;
 use App\Models\Unit;
 use App\Models\Warehouse;
+use App\Support\DocumentSignatures;
 use Illuminate\Database\Seeder;
 
 /**
@@ -29,8 +30,10 @@ class ReferenceDataSeeder extends Seeder
     public function run(): void
     {
         foreach ([
-            'company.name' => 'Surnaturel Imprimerie',
-            'company.legal_name' => 'Surnaturel Imprimerie SARL',
+            'company.name' => 'Surnaturel Print',
+            'company.legal_name' => 'Surnaturel Print SARL',
+            'company.slogan' => 'L’impression qui marque les esprits',
+            'company.bank_details' => 'Rawbank 05100-00000000000-00 · Equity BCDC 00000-0000000000-00',
             'company.rccm' => 'CD/KIN/RCCM/00-B-00000',
             'company.id_nat' => '01-000-N00000X',
             'company.nif' => 'A0000000X',
@@ -56,6 +59,7 @@ class ReferenceDataSeeder extends Seeder
             'hr.overtime_rate' => 1.3,
             'inventory.allow_negative_stock' => false,
             'orders.default_deposit_rate' => 50,
+            'documents.signatures' => DocumentSignatures::DEFAULTS,
         ] as $key => $value) {
             Setting::put($key, $value);
         }

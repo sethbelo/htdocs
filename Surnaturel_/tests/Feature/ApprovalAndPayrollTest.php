@@ -101,7 +101,34 @@ class ApprovalAndPayrollTest extends TestCase
         $this->assertEquals(round(20 + 10 + 40, 2), (float) $payslip->total_deductions);
         $this->assertEquals(500, (float) $payslip->net_pay);
 
+        try {
+            $payroll->validate($period->fresh(), $this->userWithRole('responsable-rh'));
+            $this->fail('La paie ne doit pas être validée sans le visa de la Direction générale.');
+        } catch (BusinessRuleException $e) {
+            $this->assertStringContainsString('visa de la Direction générale', $e->getMessage());
+        }
+
+        $this->expectsRejection(fn () => $payroll->approveByDirection([$payslip], $this->userWithRole('responsable-rh')));
+        $director = $this->userWithRole('directeur-general');
+        $payroll->rejectByDirection($payslip->fresh('period'), $director, 'Prime non justifiée');
+        $this->assertSame('rejected', $payslip->fresh()->dg_status);
+
+        $payroll->compute($period->fresh());
+        $this->assertSame('pending', $payslip->fresh()->dg_status);
+        $this->assertSame(1, $payroll->approveByDirection($period->payslips()->with('period')->get(), $director));
+        $this->assertSame($director->id, $payslip->fresh()->dg_approved_by);
+
         $payroll->validate($period->fresh(), $this->userWithRole('responsable-rh'));
         $this->assertEquals(60, (float) EmployeeLoan::query()->value('balance'));
+    }
+
+    private function expectsRejection(callable $action): void
+    {
+        try {
+            $action();
+            $this->fail('Une exception métier était attendue.');
+        } catch (BusinessRuleException) {
+            $this->addToAssertionCount(1);
+        }
     }
 }

@@ -108,6 +108,9 @@ class PayrollService
                 'days_worked' => $daysWorked,
                 'overtime_hours' => $overtimeHours,
                 'lines' => $lines,
+                'dg_status' => 'pending',
+                'dg_approved_by' => null,
+                'dg_approved_at' => null,
             ],
         );
     }
@@ -119,6 +122,11 @@ class PayrollService
     {
         if ($period->status !== PayrollPeriodStatus::Computed) {
             throw new BusinessRuleException('Calculez la paie avant de la valider.');
+        }
+
+        $pending = $period->payslips()->where('dg_status', '!=', 'approved')->count();
+        if ($pending > 0) {
+            throw new BusinessRuleException("{$pending} fiche(s) de paie en attente du visa de la Direction générale.");
         }
 
         return DB::transaction(function () use ($period, $validator): PayrollPeriod {
@@ -142,5 +150,55 @@ class PayrollService
 
             return $period;
         });
+    }
+
+    /**
+     * Visa de la Direction générale sur une ou plusieurs fiches de paie (préalable à la validation comptable).
+     *
+     * @param  iterable<Payslip>  $payslips
+     */
+    public function approveByDirection(iterable $payslips, User $director): int
+    {
+        $this->ensureDirector($director);
+        $count = 0;
+
+        foreach ($payslips as $payslip) {
+            $this->ensureEditable($payslip);
+            $payslip->update(['dg_status' => 'approved', 'dg_approved_by' => $director->id, 'dg_approved_at' => now(), 'dg_comment' => null]);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Rejet motivé : la RH corrige les éléments variables puis relance le calcul.
+     */
+    public function rejectByDirection(Payslip $payslip, User $director, string $comment): Payslip
+    {
+        $this->ensureDirector($director);
+        $this->ensureEditable($payslip);
+
+        if (blank($comment)) {
+            throw new BusinessRuleException('Le motif du rejet est obligatoire.');
+        }
+
+        $payslip->update(['dg_status' => 'rejected', 'dg_approved_by' => $director->id, 'dg_approved_at' => now(), 'dg_comment' => $comment]);
+
+        return $payslip;
+    }
+
+    private function ensureDirector(User $user): void
+    {
+        if (! $user->can('direction.payroll_sign')) {
+            throw new BusinessRuleException('Seule la Direction générale peut viser les fiches de paie.');
+        }
+    }
+
+    private function ensureEditable(Payslip $payslip): void
+    {
+        if (in_array($payslip->period->status, [PayrollPeriodStatus::Validated, PayrollPeriodStatus::Paid], true)) {
+            throw new BusinessRuleException('Période de paie verrouillée.');
+        }
     }
 }

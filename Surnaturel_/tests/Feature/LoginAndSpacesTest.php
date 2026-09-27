@@ -10,7 +10,7 @@ use Livewire\Livewire;
 use Tests\Concerns\InteractsWithErp;
 use Tests\TestCase;
 
-class LoginModesAndSpacesTest extends TestCase
+class LoginAndSpacesTest extends TestCase
 {
     use InteractsWithErp, RefreshDatabase;
 
@@ -20,35 +20,42 @@ class LoginModesAndSpacesTest extends TestCase
         $this->setUpErp();
     }
 
-    public function test_cashier_logs_in_with_pin_and_lands_on_the_point_of_sale(): void
+    public function test_users_log_in_with_their_username_or_email_and_password(): void
     {
-        $cashier = User::factory()->withRole('caissier', $this->shop)->withPin('4321')->create(['username' => 'aline', 'login_mode' => 'pin']);
+        $cashier = User::factory()->withRole('caissier', $this->shop)->create(['username' => 'aline', 'email' => 'aline@surnaturel.cd']);
 
-        Livewire::test(Login::class)->call('setMode', 'password')->set('identifier', 'aline')->set('password', 'password')->call('login')
-            ->assertHasErrors('identifier');
+        Livewire::test(Login::class)->set('identifier', 'aline')->set('password', 'mauvais')->call('login')->assertHasErrors('identifier');
         $this->assertGuest();
 
-        Livewire::test(Login::class)->call('setMode', 'pin')->set('username', 'aline')->set('pin', '0000')->call('login')->assertHasErrors('username');
-
-        Livewire::test(Login::class)->call('setMode', 'pin')->set('username', 'aline')->set('pin', '4321')->call('login')
-            ->assertRedirect(route('pos'));
+        Livewire::test(Login::class)->set('identifier', 'ALINE@surnaturel.cd')->set('password', 'password')->call('login')->assertRedirect(route('pos'));
         $this->assertAuthenticatedAs($cashier);
-        $this->assertDatabaseHas('login_histories', ['user_id' => $cashier->id, 'succeeded' => true, 'method' => 'pin']);
+        $this->assertDatabaseHas('login_histories', ['user_id' => $cashier->id, 'succeeded' => true, 'method' => 'password']);
+
+        auth()->logout();
+        Livewire::test(Login::class)->set('identifier', 'aline')->set('password', 'password')->call('login')->assertRedirect(route('pos'));
     }
 
-    public function test_storekeeper_logs_in_with_badge_and_lands_on_entries_and_exits(): void
+    public function test_storekeeper_lands_on_entries_and_exits_and_inactive_accounts_are_refused(): void
     {
-        User::factory()->withRole('magasinier')->withPin('2468')->create(['login_mode' => 'badge', 'badge_code' => 'BADGE-042']);
+        User::factory()->withRole('magasinier')->create(['username' => 'stock.lim']);
+        Livewire::test(Login::class)->set('identifier', 'stock.lim')->set('password', 'password')->call('login')->assertRedirect(route('inventory.operations'));
+        auth()->logout();
 
-        Livewire::test(Login::class)->call('setMode', 'badge')->set('badge', 'BADGE-042')->set('pin', '2468')->call('login')
-            ->assertRedirect(route('inventory.operations'));
+        User::factory()->withRole('comptable')->create(['username' => 'ancien', 'is_active' => false]);
+        Livewire::test(Login::class)->set('identifier', 'ancien')->set('password', 'password')->call('login')->assertHasErrors('identifier');
+        $this->assertGuest();
     }
 
-    public function test_pin_users_are_not_forced_to_change_a_password(): void
+    public function test_login_is_throttled_after_five_failures(): void
     {
-        $cashier = User::factory()->withRole('caissier', $this->shop)->create(['login_mode' => 'pin', 'must_change_password' => true]);
+        User::factory()->withRole('comptable')->create(['username' => 'cible']);
 
-        $this->actingAs($cashier)->get(route('pos'))->assertOk();
+        foreach (range(1, 5) as $attempt) {
+            Livewire::test(Login::class)->set('identifier', 'cible')->set('password', 'faux-'.$attempt)->call('login');
+        }
+
+        Livewire::test(Login::class)->set('identifier', 'cible')->set('password', 'password')->call('login')->assertHasErrors('identifier');
+        $this->assertGuest();
     }
 
     public function test_each_role_is_redirected_to_its_own_space(): void
@@ -60,6 +67,8 @@ class LoginModesAndSpacesTest extends TestCase
             'comptable' => 'accounting.index',
             'livreur' => 'deliveries.index',
             'responsable-rh' => 'hr.employees',
+            'agent-marketing' => 'followups.index',
+            'responsable-entrepot' => 'inventory.report',
             'super-admin' => 'settings.users',
         ];
 

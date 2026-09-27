@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DesignJobStatus;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DesignJob extends Model
 {
-    use TracksActivity;
+    use HasEncryptedRouteKey, TracksActivity;
 
     protected $guarded = ['id'];
 
@@ -48,5 +49,15 @@ class DesignJob extends Model
     public function proofs(): HasMany
     {
         return $this->hasMany(Proof::class)->latest();
+    }
+
+    public function brief(): HasOne
+    {
+        return $this->hasOne(DesignBrief::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(DesignNote::class)->latest();
     }
 }

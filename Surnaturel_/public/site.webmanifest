@@ -1,0 +1,12 @@
+{
+    "name": "Surnaturel Print — ERP",
+    "short_name": "Surnaturel",
+    "icons": [
+        { "src": "/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "/brand/app-icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ],
+    "theme_color": "#E6007E",
+    "background_color": "#FFFFFF",
+    "display": "standalone",
+    "start_url": "/"
+}

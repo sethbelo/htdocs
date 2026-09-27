@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Printing\PdfRenderer;
 use App\Services\Reports\ReportBuilder;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -35,22 +34,16 @@ class Index extends Component
     #[Url(as: 'au')]
     public string $to = '';
 
-    #[Url(as: 'siege')]
     public ?int $siteId = null;
 
-    #[Url(as: 'caisse')]
     public ?int $cashRegisterId = null;
 
-    #[Url(as: 'entrepot')]
     public ?int $warehouseId = null;
 
-    #[Url(as: 'utilisateur')]
     public ?int $userId = null;
 
-    #[Url(as: 'client')]
     public ?int $clientId = null;
 
-    #[Url(as: 'article')]
     public ?int $productId = null;
 
     #[Url(as: 'statut')]
@@ -86,12 +79,11 @@ class Index extends Component
     public function exportPdf(PdfRenderer $renderer): StreamedResponse
     {
         $this->authorize('reports.export');
-        $pdf = Pdf::loadView('pdf.report', [
+        $pdf = $renderer->make('pdf.report', [
             'title' => ReportBuilder::REPORTS[$this->report]['label'],
             'from' => $this->from, 'to' => $this->to, 'data' => $this->data,
-            'company' => $renderer->company(), 'format' => 'a4',
             'site' => $this->siteId ? Site::query()->find($this->siteId)?->name : 'Tous les sièges',
-        ])->setPaper('a4', count($this->data['headings']) > 7 ? 'landscape' : 'portrait');
+        ], count($this->data['headings']) > 7 ? 'landscape' : 'a4');
 
         return response()->streamDownload(fn () => print ($pdf->output()), "rapport-{$this->report}-{$this->from}-{$this->to}.pdf");
     }

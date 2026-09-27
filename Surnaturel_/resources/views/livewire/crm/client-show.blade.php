@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <x-page-header :title="$client->displayName()" :subtitle="$client->number.' · '.$client->type->label().' · '.strtoupper($client->segment)">
         <x-slot:actions>
-            @can('orders.create')<flux:button size="sm" icon="plus" :href="route('orders.create', ['client' => $client->id])" wire:navigate variant="primary">Nouvelle commande</flux:button>@endcan
+            @can('orders.create')<flux:button size="sm" icon="plus" :href="route('orders.create', ['client' => $client->getRouteKey()])" wire:navigate variant="primary">Nouvelle commande</flux:button>@endcan
             @if ($client->loyaltyAccount)
                 <flux:button size="sm" icon="credit-card" :href="route('print.loyalty-card', $client)" target="_blank">Carte fidélité</flux:button>
             @else

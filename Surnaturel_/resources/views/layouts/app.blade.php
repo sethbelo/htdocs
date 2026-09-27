@@ -18,12 +18,9 @@
 
     <aside class="sidebar" :data-open="$store.shell.drawer" aria-label="Navigation principale">
         <div class="flex h-16 shrink-0 items-center justify-between gap-2 px-4">
-            <a href="{{ route('home') }}" wire:navigate class="flex min-w-0 items-center gap-2.5">
-                <x-app-logo class="size-9 shrink-0 rounded-[11px] ring-1 ring-white/15" />
-                <span class="sidebar-label min-w-0 leading-none">
-                    <span class="block truncate font-display text-[16px] font-bold tracking-wide">{{ \App\Models\Setting::get('company.name', 'ERP Imprimerie') }}</span>
-                    <span class="mt-1 block text-[10px] font-semibold tracking-[.2em] text-safran-300 uppercase">Imprimerie · Boutique</span>
-                </span>
+            <a href="{{ route('home') }}" wire:navigate class="sidebar-brand" title="{{ \App\Models\Setting::get('company.name', 'Surnaturel Print') }}">
+                <x-app-logo variant="full" tone="light" class="sidebar-logo-full h-10 w-auto max-w-[190px]" />
+                <x-app-logo class="sidebar-logo-mark size-11" />
             </a>
             <button type="button" class="shell-icon-btn text-white/70 hover:bg-white/10 hover:text-white lg:hidden" x-on:click="$store.shell.drawer = false" aria-label="Fermer le menu">
                 <flux:icon.x-mark variant="micro" />

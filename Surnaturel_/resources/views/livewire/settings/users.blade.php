@@ -19,9 +19,8 @@
                         <flux:table.cell class="max-w-56 truncate text-sm">{{ $user->sites->pluck('code')->implode(', ') }}</flux:table.cell>
                         <flux:table.cell class="text-sm">{{ $user->last_login_at?->diffForHumans() ?? 'Jamais' }}</flux:table.cell>
                         <flux:table.cell>
-                            <flux:badge size="sm" :icon="($user->login_mode ?? \App\Enums\LoginMode::Password)->icon()">{{ ($user->login_mode ?? \App\Enums\LoginMode::Password)->shortLabel() }}</flux:badge>
                             @if ($user->is_active)<flux:badge size="sm" color="emerald">Actif</flux:badge>@else<flux:badge size="sm" color="red">Désactivé</flux:badge>@endif
-                            @if ($user->must_change_password && $user->usesPassword())<flux:badge size="sm" color="amber">MDP à changer</flux:badge>@endif
+                            @if ($user->must_change_password)<flux:badge size="sm" color="amber">MDP à changer</flux:badge>@endif
                         </flux:table.cell>
                         <flux:table.cell>
                             @can('users.update')
@@ -50,10 +49,7 @@
                 <flux:input wire:model="form.username" label="Nom d’utilisateur" />
                 <flux:input wire:model="form.email" type="email" label="E-mail" />
                 <flux:input wire:model="form.phone" label="Téléphone" />
-                <flux:select wire:model.live="form.login_mode" label="Mode de connexion">
-                    @foreach (\App\Enums\LoginMode::cases() as $loginMode)<flux:select.option :value="$loginMode->value">{{ $loginMode->label() }}</flux:select.option>@endforeach
-                </flux:select>
-                <flux:input wire:model="form.badge_code" label="Badge employé (RFID / NFC / QR)" :description="($form['login_mode'] ?? '') === 'badge' ? 'Obligatoire pour la connexion par badge.' : null" />
+                <flux:input wire:model="form.badge_code" label="Badge employé (RFID / NFC / QR)" description="Pointage et identification (la connexion se fait toujours par identifiant et mot de passe)." />
                 <flux:input wire:model="form.session_timeout_minutes" type="number" label="Expiration de session (min, facultatif)" />
                 <flux:select wire:model="form.default_site_id" label="Siège par défaut">@foreach ($sites as $s)<flux:select.option :value="$s->id">{{ $s->name }}</flux:select.option>@endforeach</flux:select>
                 <flux:switch wire:model="form.is_active" label="Compte actif" />

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\LoginMode;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,7 +30,6 @@ class User extends Authenticatable
         'phone',
         'password',
         'badge_code',
-        'login_mode',
         'must_change_password',
         'session_timeout_minutes',
         'default_site_id',
@@ -55,7 +53,6 @@ class User extends Authenticatable
             'password_changed_at' => 'datetime',
             'last_login_at' => 'datetime',
             'must_change_password' => 'boolean',
-            'login_mode' => LoginMode::class,
             'is_active' => 'boolean',
         ];
     }
@@ -63,7 +60,7 @@ class User extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'username', 'email', 'is_active', 'default_site_id', 'must_change_password', 'login_mode'])
+            ->logOnly(['name', 'username', 'email', 'is_active', 'default_site_id', 'must_change_password'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges()
             ->useLogName('User');
@@ -125,11 +122,6 @@ class User extends Authenticatable
     public function isDirectorGeneral(): bool
     {
         return $this->hasRole('directeur-general');
-    }
-
-    public function usesPassword(): bool
-    {
-        return ($this->login_mode ?? LoginMode::Password) === LoginMode::Password;
     }
 
     public function setPin(string $pin): void

@@ -2,10 +2,8 @@
 
 namespace App\Support;
 
-use App\Enums\LoginMode;
-
 /**
- * Comptes de démonstration (environnement local uniquement) : un compte par rôle.
+ * Comptes de démonstration (environnement local uniquement) : un compte par rôle, connexion par identifiant et mot de passe.
  */
 class DemoAccounts
 {
@@ -24,7 +22,7 @@ class DemoAccounts
     }
 
     /**
-     * @return list<array{role: string, label: string, username: string, email: string, mode: LoginMode, badge: string|null, home: string, site: string}>
+     * @return list<array{role: string, label: string, username: string, email: string, home: string, site: string}>
      */
     public static function all(): array
     {
@@ -32,23 +30,17 @@ class DemoAccounts
         $accounts = [];
 
         foreach (config('erp.roles') as $role => $definition) {
-            $mode = LoginMode::from($definition['login'] ?? 'password');
             $accounts[] = [
                 'role' => $role,
                 'label' => $definition['label'],
                 'username' => self::username($role),
                 'email' => self::username($role).'@demo.test',
-                'mode' => $mode,
-                'badge' => $mode === LoginMode::Badge ? self::badge($role) : null,
                 'home' => $definition['home'] ?? 'home',
                 'site' => in_array($role, $shopRoles, true) ? 'Boutique Limete' : 'Siège Kinshasa',
             ];
         }
 
-        $accounts[] = [
-            'role' => 'caissier', 'label' => 'Caissier (caisse commandes du siège)', 'username' => 'caissier.siege', 'email' => 'caissier.siege@demo.test',
-            'mode' => LoginMode::Pin, 'badge' => null, 'home' => 'pos', 'site' => 'Siège Kinshasa',
-        ];
+        $accounts[] = ['role' => 'caissier', 'label' => 'Caissier (caisse commandes du siège)', 'username' => 'caissier.siege', 'email' => 'caissier.siege@demo.test', 'home' => 'pos', 'site' => 'Siège Kinshasa'];
 
         return $accounts;
     }

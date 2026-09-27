@@ -31,7 +31,6 @@ class Operations extends Component
     #[Url(as: 'type')]
     public string $type = '';
 
-    #[Url(as: 'entrepot')]
     public ?int $warehouseId = null;
 
     #[Url(as: 'q')]

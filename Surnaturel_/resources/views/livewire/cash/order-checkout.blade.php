@@ -21,9 +21,9 @@
                             <flux:callout.text>Monnaie à rendre : <strong><x-money :amount="$lastCheckout['change']" /></strong></flux:callout.text>
                         @endif
                         <x-slot name="actions">
-                            <flux:button size="sm" icon="printer" :href="route('print.invoice', [$lastCheckout['invoice_id'], 'ticket'])" target="_blank">Ticket</flux:button>
-                            <flux:button size="sm" icon="document" :href="route('print.invoice', [$lastCheckout['invoice_id'], 'a4'])" target="_blank">Facture A4</flux:button>
-                            <flux:button size="sm" icon="document" :href="route('print.invoice', [$lastCheckout['invoice_id'], 'a5'])" target="_blank">A5</flux:button>
+                            <flux:button size="sm" icon="printer" :href="route('print.invoice', [$lastCheckout['invoice_key'], 'ticket'])" target="_blank">Ticket</flux:button>
+                            <flux:button size="sm" icon="document" :href="route('print.invoice', [$lastCheckout['invoice_key'], 'a4'])" target="_blank">Facture A4</flux:button>
+                            <flux:button size="sm" icon="document" :href="route('print.invoice', [$lastCheckout['invoice_key'], 'a5'])" target="_blank">A5</flux:button>
                         </x-slot>
                     </flux:callout>
                 @endif

@@ -16,7 +16,15 @@
                                 @if (in_array($job->order->priority->value, ['urgent', 'high']))<flux:badge size="sm" :color="$job->order->priority->color()">{{ $job->order->priority->label() }}</flux:badge>@endif
                             </div>
                             <div class="mt-1 line-clamp-2 text-zinc-600 dark:text-zinc-300">{{ $job->orderItem?->description }}</div>
-                            <div class="mt-1 text-xs text-zinc-500">{{ $job->planned_quantity }} ex. · {{ $job->orderItem?->format }} {{ $job->orderItem?->paper }}</div>
+                            @php($brief = $job->order->designJob?->brief)
+                            <div class="mt-1 text-xs text-zinc-500">{{ $job->planned_quantity }} ex. · {{ $brief?->isValidatedForPrint() ? $brief->printSummary() : trim($job->orderItem?->format.' '.$job->orderItem?->paper) }}</div>
+                            @if ($job->order->requires_design && $job->status->value === 'queued')
+                                @if ($brief?->isValidatedForPrint())
+                                    <flux:badge size="sm" color="emerald" icon="check-circle" class="mt-1.5">Feu vert graphisme</flux:badge>
+                                @else
+                                    <flux:badge size="sm" color="amber" icon="clock" class="mt-1.5">Attente feu vert graphisme</flux:badge>
+                                @endif
+                            @endif
                             <div class="mt-1 flex justify-between text-xs text-zinc-500">
                                 <span>{{ $job->machine?->code ?? 'Machine ?' }}</span>
                                 <span @class(['font-medium text-red-600' => $job->order->isOverdue()])>{{ $job->order->due_at?->format('d/m H:i') }}</span>
@@ -49,6 +57,20 @@
                     <div><span class="text-zinc-500">Début :</span> {{ $job->started_at?->format('d/m H:i') ?? '—' }}</div>
                     <div><span class="text-zinc-500">Fin :</span> {{ $job->finished_at?->format('d/m H:i') ?? '—' }}</div>
                 </div>
+
+                @php($brief = $job->order->designJob?->brief)
+                @if ($brief?->isValidatedForPrint())
+                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="font-semibold text-emerald-800 dark:text-emerald-200">Feu vert du graphisme — {{ $brief->validator?->name }}, {{ $brief->validated_for_print_at->format('d/m H:i') }}</span>
+                            <flux:button size="xs" icon="document-arrow-down" :href="route('print.design-brief', $job->order->designJob)" target="_blank">Fiche technique</flux:button>
+                        </div>
+                        <div class="mt-1 font-mono text-[13px]">{{ $brief->printSummary() }}{{ (float) $brief->bleed_mm ? ' · fonds perdus '.(float) $brief->bleed_mm.' mm' : '' }}</div>
+                        @if ($brief->print_notes)<div class="mt-1 text-zinc-600 dark:text-zinc-300">{{ $brief->print_notes }}</div>@endif
+                    </div>
+                @elseif ($job->order->requires_design)
+                    <flux:callout variant="warning" icon="clock" heading="En attente du feu vert du graphisme" text="Le graphiste doit valider la conception (fiche technique et contrôles pré-presse) avant le lancement de l’impression." />
+                @endif
 
                 @if ($job->proof)
                     <div class="flex items-center gap-2 text-sm">

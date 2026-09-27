@@ -60,12 +60,8 @@
 
     {{-- En-tête : marque + compteur --}}
     <div class="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 sm:p-5">
-        <div class="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-2.5 py-1.5 text-white backdrop-blur-xl sm:px-3 sm:py-2">
-            <x-app-logo class="size-7" />
-            <div class="leading-tight">
-                <div class="text-sm font-semibold">{{ \App\Models\Setting::get('company.name', 'ERP Imprimerie') }}</div>
-                <div class="hidden text-[11px] text-white/70 sm:block">Imprimerie · Boutique · Livraison</div>
-            </div>
+        <div class="rounded-2xl border border-white/15 bg-black/20 px-3 py-2 backdrop-blur-xl">
+            <x-app-logo variant="full" tone="light" class="h-8 w-auto sm:h-9" />
         </div>
         <div class="rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs font-medium tabular-nums text-white backdrop-blur" aria-live="polite">
             <span x-text="String(current + 1).padStart(2, '0')"></span> / {{ str_pad((string) count($slides), 2, '0', STR_PAD_LEFT) }}

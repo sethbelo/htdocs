@@ -28,7 +28,7 @@ class OrderCheckout extends Component
     /** @var list<array{method: string, amount: string, reference: string}> */
     public array $payments = [];
 
-    /** @var array{invoice_id: int, change: float, order_number: string}|null */
+    /** @var array{invoice_key: string, change: float, order_number: string}|null */
     public ?array $lastCheckout = null;
 
     public function mount(): void
@@ -119,7 +119,7 @@ class OrderCheckout extends Component
         $result = $this->attempt(fn () => $checkout->checkout($this->order, PaymentData::collection($this->payments), $this->session, auth()->user()));
 
         if ($result) {
-            $this->lastCheckout = ['invoice_id' => $result['invoice']->id, 'change' => $result['change'], 'order_number' => $result['order']->number];
+            $this->lastCheckout = ['invoice_key' => $result['invoice']->getRouteKey(), 'change' => $result['change'], 'order_number' => $result['order']->number];
             $this->toast("Paiement enregistré — facture {$result['invoice']->number}. Statut : {$result['order']->status->label()}.");
             $this->js('window.open('.json_encode(route('print.invoice', [$result['invoice'], 'ticket'])).', "_blank")');
             $this->orderId = null;

@@ -47,6 +47,7 @@
                 <flux:input wire:model="form.email" label="E-mail" />
                 <flux:input wire:model="form.address" label="Adresse" class="md:col-span-2" />
                 <flux:input wire:model="form.emergency_contact" label="Contact d’urgence" />
+                <flux:select wire:model="form.blood_group" label="Groupe sanguin"><flux:select.option value="">—</flux:select.option>@foreach (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $group)<flux:select.option :value="$group">{{ $group }}</flux:select.option>@endforeach</flux:select>
             </div>
             <flux:separator text="Affectation & contrat" />
             <div class="grid gap-3 md:grid-cols-3">

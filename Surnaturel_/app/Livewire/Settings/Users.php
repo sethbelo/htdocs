@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Settings;
 
-use App\Enums\LoginMode;
 use App\Livewire\Concerns\InteractsWithToasts;
 use App\Models\Site;
 use App\Models\User;
@@ -40,7 +39,7 @@ class Users extends Component
     {
         $this->authorize('users.create');
         $this->editingId = null;
-        $this->form = ['name' => '', 'username' => '', 'email' => '', 'phone' => '', 'badge_code' => '', 'login_mode' => 'password', 'default_site_id' => auth()->user()->default_site_id, 'session_timeout_minutes' => '', 'is_active' => true];
+        $this->form = ['name' => '', 'username' => '', 'email' => '', 'phone' => '', 'badge_code' => '', 'default_site_id' => auth()->user()->default_site_id, 'session_timeout_minutes' => '', 'is_active' => true];
         $this->roles = [];
         $this->siteIds = [auth()->user()->default_site_id];
         $this->modal('user')->show();
@@ -51,7 +50,7 @@ class Users extends Component
         $this->authorize('users.update');
         $user = User::query()->findOrFail($id);
         $this->editingId = $id;
-        $this->form = $user->only(['name', 'username', 'email', 'phone', 'badge_code', 'default_site_id', 'session_timeout_minutes', 'is_active']) + ['login_mode' => ($user->login_mode ?? LoginMode::Password)->value];
+        $this->form = $user->only(['name', 'username', 'email', 'phone', 'badge_code', 'default_site_id', 'session_timeout_minutes', 'is_active']);
         $this->roles = $user->getRoleNames()->all();
         $this->siteIds = $user->sites()->pluck('sites.id')->all();
         $this->modal('user')->show();
@@ -66,8 +65,7 @@ class Users extends Component
             'form.username' => ['required', 'alpha_dash:ascii', 'max:50', Rule::unique('users', 'username')->ignore($this->editingId)],
             'form.email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->editingId)],
             'form.phone' => ['nullable', 'string', 'max:30'],
-            'form.badge_code' => ['nullable', 'required_if:form.login_mode,badge', 'string', 'max:64', Rule::unique('users', 'badge_code')->ignore($this->editingId)],
-            'form.login_mode' => ['required', Rule::enum(LoginMode::class)],
+            'form.badge_code' => ['nullable', 'string', 'max:64', Rule::unique('users', 'badge_code')->ignore($this->editingId)],
             'form.default_site_id' => ['nullable', 'exists:sites,id'],
             'form.session_timeout_minutes' => ['nullable', 'integer', 'min:5', 'max:1440'],
             'form.is_active' => ['boolean'],

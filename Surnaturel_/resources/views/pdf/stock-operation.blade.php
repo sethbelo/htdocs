@@ -1,55 +1,52 @@
-@extends('pdf.layout')
+{{-- Bon d'entrée / de sortie magasin --}}
+@php($money = fn ($v) => \App\Services\Support\Money::format($v))
+@extends('pdf.layout', [
+    'docTitle' => $operation->typeLabel(),
+    'docReference' => 'N° '.$operation->number,
+    'docSubtitle' => $operation->operated_at->format('d/m/Y à H:i').' · '.$operation->reason->label(),
+])
 
 @section('content')
-    @component('pdf.partials.company-header', ['company' => $company])
-        <div style="font-size: 16pt;" class="bold">{{ mb_strtoupper($operation->typeLabel()) }}</div>
-        <div class="bold">N° {{ $operation->number }}</div>
-        <div class="muted">{{ $operation->operated_at->format('d/m/Y à H:i') }}</div>
-        <div style="margin-top: 4pt;"><span class="badge">{{ $operation->reason->label() }}</span></div>
-    @endcomponent
-
-    <table style="margin-bottom: 12pt;">
+    <table>
         <tr>
-            <td style="width: 50%; padding-right: 6pt;"><div class="box">
-                <div class="muted small">ENTREPÔT</div>
-                <div class="bold">{{ $operation->warehouse->name }}</div>
-                <div class="small">{{ $operation->warehouse->site->name }}</div>
-                <div class="small">{{ $operation->isEntry() ? 'Provenance' : 'Destination' }} : {{ $operation->counterpartyLabel() }}</div>
-                @if ($operation->reference)<div class="small">Référence : {{ $operation->reference }}</div>@endif
+            <td style="width: 50%; vertical-align: top; padding-right: 6pt;"><div class="box-fill">
+                <div class="label">Entrepôt</div>
+                <div class="value" style="font-size: 10pt;">{{ $operation->warehouse->name }}</div>
+                <table class="kv" style="margin-top: 3pt;">
+                    <tr><td class="k">Siège</td><td>{{ $operation->warehouse->site->name }}</td></tr>
+                    <tr><td class="k">{{ $operation->isEntry() ? 'Provenance' : 'Destination' }}</td><td>{{ $operation->counterpartyLabel() }}</td></tr>
+                    @if ($operation->reference)<tr><td class="k">Référence</td><td>{{ $operation->reference }}</td></tr>@endif
+                </table>
             </div></td>
-            <td style="width: 50%; padding-left: 6pt;"><div class="box">
-                <div class="muted small">{{ $operation->isEntry() ? 'LIVRÉ PAR' : 'RETIRÉ PAR' }}</div>
-                <div class="bold">{{ $operation->performed_by_name }}</div>
+            <td style="width: 50%; vertical-align: top; padding-left: 6pt;"><div class="box">
+                <div class="label">{{ $operation->isEntry() ? 'Livré par' : 'Retiré par' }}</div>
+                <div class="value" style="font-size: 10pt;">{{ $operation->performed_by_name }}</div>
                 <div class="small">{{ $operation->performed_by_phone }}</div>
-                <div class="muted small" style="margin-top: 4pt;">ENREGISTRÉ PAR</div>
-                <div>{{ $operation->recorder->name }}</div>
+                <div class="label" style="margin-top: 5pt;">Enregistré par</div>
+                <div>{{ $operation->recorder->name }} · {{ $operation->created_at->format('d/m/Y H:i') }}</div>
             </div></td>
         </tr>
     </table>
 
-    <table class="items">
-        <thead><tr><th>Article</th><th class="right">Quantité</th><th class="right">Stock après</th><th class="right">Coût unitaire</th><th class="right">Valeur</th></tr></thead>
+    <div class="section-title">Articles {{ $operation->isEntry() ? 'réceptionnés' : 'sortis' }}</div>
+    <table class="lines">
+        <thead><tr><th style="width: 4%;">#</th><th>Article</th><th class="right" style="width: 13%;">Quantité</th><th class="right" style="width: 13%;">Stock après</th><th class="right" style="width: 15%;">Coût unitaire</th><th class="right" style="width: 15%;">Valeur</th></tr></thead>
         <tbody>
             @foreach ($operation->movements as $movement)
-                <tr>
-                    <td>{{ $movement->product->name }} <span class="muted small">{{ $movement->product->sku }}</span></td>
-                    <td class="right">{{ abs((float) $movement->quantity) }} {{ $movement->product->unit?->symbol }}</td>
+                <tr class="{{ $loop->even ? 'even' : '' }}">
+                    <td class="muted">{{ $loop->iteration }}</td>
+                    <td><span class="bold">{{ $movement->product->name }}</span> <span class="muted small">{{ $movement->product->sku }}</span></td>
+                    <td class="right nowrap">{{ abs((float) $movement->quantity) }} {{ $movement->product->unit?->symbol }}</td>
                     <td class="right">{{ (float) $movement->balance_after }}</td>
-                    <td class="right">{{ \App\Services\Support\Money::format($movement->unit_cost) }}</td>
-                    <td class="right">{{ \App\Services\Support\Money::format(abs((float) $movement->quantity) * (float) $movement->unit_cost) }}</td>
+                    <td class="right nowrap">{{ $money($movement->unit_cost) }}</td>
+                    <td class="right nowrap">{{ $money(abs((float) $movement->quantity) * (float) $movement->unit_cost) }}</td>
                 </tr>
             @endforeach
-            <tr class="bold"><td colspan="4">Valeur totale</td><td class="right">{{ \App\Services\Support\Money::format($operation->total_value) }}</td></tr>
+            <tr class="total"><td colspan="5" class="right">VALEUR TOTALE</td><td class="right nowrap">{{ $money($operation->total_value) }}</td></tr>
         </tbody>
     </table>
-    @if ($operation->notes)<p><span class="bold">Observations :</span> {{ $operation->notes }}</p>@endif
+    @if ($operation->notes)<div class="section-title">Observations</div><p>{!! nl2br(e($operation->notes)) !!}</p>@endif
 
-    <table style="margin-top: 36pt;">
-        <tr>
-            <td style="width: 33%;">Magasinier<br><span class="small muted">{{ $operation->recorder->name }}</span><br><br>____________________</td>
-            <td style="width: 33%;" class="center">{{ $operation->isEntry() ? 'Livreur' : 'Bénéficiaire' }}<br><span class="small muted">{{ $operation->performed_by_name }}</span><br><br>____________________</td>
-            <td style="width: 33%;" class="right">Responsable entrepôt<br><br><br>____________________</td>
-        </tr>
-    </table>
-    <div class="center" style="margin-top: 14pt;"><img src="{{ \App\Services\Support\Codes::barcodeDataUri($operation->number, 1, 30) }}" style="height: 26pt;"></div>
+    @include('pdf.partials.signatures', ['type' => 'stock_operation', 'names' => [0 => [$operation->recorder->name, $operation->operated_at], 1 => [$operation->performed_by_name, null]]])
+    <div class="center" style="margin-top: 10pt;"><img src="{{ \App\Services\Support\Codes::barcodeDataUri($operation->number, 1, 28) }}" style="height: 22pt;"></div>
 @endsection

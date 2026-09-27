@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Affiliation;
+use App\Models\CareVoucher;
 use App\Models\CashSession;
 use App\Models\Client;
 use App\Models\Delivery;
+use App\Models\DesignJob;
+use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payslip;
@@ -16,7 +20,9 @@ use App\Models\StockTransfer;
 use App\Models\Voucher;
 use App\Services\Cash\CashSessionReport;
 use App\Services\Crm\LoyaltyService;
+use App\Services\Design\DesignNotebookService;
 use App\Services\Printing\PdfRenderer;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
@@ -50,7 +56,7 @@ class PrintController extends Controller
         abort_unless(auth()->user()->canAccessSite($invoice->site_id), 403);
         $invoice->load('items', 'client', 'order', 'sale', 'payments', 'site', 'creator');
 
-        return $this->pdf->render('pdf.invoice', ['invoice' => $invoice, 'lines' => $invoice->items->count() * 2 + $invoice->payments->count()], "{$invoice->number}.pdf", $format);
+        return $this->pdf->render($format === 'ticket' ? 'pdf.invoice-ticket' : 'pdf.invoice', ['invoice' => $invoice, 'lines' => $invoice->items->count() * 2 + $invoice->payments->count()], "{$invoice->number}.pdf", $format);
     }
 
     public function saleReceipt(Sale $sale): Response
@@ -128,5 +134,60 @@ class PrintController extends Controller
         $voucher->load('creator', 'approver', 'approvalRequest.actions.user');
 
         return $this->pdf->render('pdf.voucher', ['voucher' => $voucher], "{$voucher->number}.pdf");
+    }
+
+    /**
+     * Fiche technique d'impression (bon à imprimer) issue du cahier de conception.
+     */
+    public function designBrief(DesignJob $designJob, DesignNotebookService $notebook): Response
+    {
+        abort_unless(auth()->user()->can('design.view') || auth()->user()->can('production.view'), 403);
+        abort_unless($designJob->order()->visibleTo(auth()->user())->exists(), 404);
+        $brief = $notebook->briefFor($designJob);
+        $designJob->load('order.client', 'order.items', 'order.salesRep', 'designer', 'latestVersion', 'notes.user');
+
+        return $this->pdf->render('pdf.design-brief', ['job' => $designJob, 'brief' => $brief->load('validator')], "fiche-impression-{$designJob->order->number}.pdf");
+    }
+
+    public function affiliation(Affiliation $affiliation): Response
+    {
+        $affiliation->load('employee.department', 'dependent', 'policy', 'creator');
+        $this->authorizeAffiliation($affiliation);
+
+        return $this->pdf->render('pdf.affiliation', ['affiliation' => $affiliation], "attestation-{$affiliation->member_number}.pdf");
+    }
+
+    public function memberCard(Affiliation $affiliation): Response
+    {
+        $affiliation->load('employee', 'dependent', 'policy');
+        $this->authorizeAffiliation($affiliation);
+
+        return $this->pdf->render('pdf.member-card', ['affiliation' => $affiliation], "carte-{$affiliation->member_number}.pdf", 'card');
+    }
+
+    public function careVoucher(CareVoucher $careVoucher): Response
+    {
+        $careVoucher->load('affiliation.employee.department', 'affiliation.dependent', 'affiliation.policy', 'issuer');
+        $this->authorizeAffiliation($careVoucher->affiliation);
+
+        return $this->pdf->render('pdf.care-voucher', ['voucher' => $careVoucher], "{$careVoucher->number}.pdf");
+    }
+
+    /**
+     * Page publique de vérification d'une carte de service (lien signé contenu dans le QR code).
+     */
+    public function verifyEmployee(Employee $employee): View
+    {
+        return view('verify-employee', [
+            'employee' => $employee->load('department'),
+            'valid' => $employee->is_active && $employee->card_expires_at?->isFuture(),
+            'company' => $this->pdf->company(),
+        ]);
+    }
+
+    private function authorizeAffiliation(Affiliation $affiliation): void
+    {
+        $user = auth()->user();
+        abort_unless($user->can('affiliations.view') || $affiliation->employee->user_id === $user->id, 403);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SaleStatus;
 use App\Models\Concerns\BelongsToSite;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Sale extends Model
 {
-    use BelongsToSite, TracksActivity;
+    use BelongsToSite, HasEncryptedRouteKey, TracksActivity;
 
     protected $guarded = ['id'];
 

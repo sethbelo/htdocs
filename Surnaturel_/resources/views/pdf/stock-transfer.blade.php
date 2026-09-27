@@ -1,34 +1,48 @@
-@extends('pdf.layout')
+{{-- Bon de transfert inter-entrepôts --}}
+@extends('pdf.layout', [
+    'docTitle' => 'Bon de transfert',
+    'docReference' => 'N° '.$transfer->number,
+    'docSubtitle' => 'Demandé le '.$transfer->requested_at->format('d/m/Y à H:i').' par '.$transfer->requester->name,
+    'watermark' => $transfer->status->value === 'cancelled' ? 'ANNULÉ' : null,
+])
 
 @section('content')
-    @component('pdf.partials.company-header', ['company' => $company])
-        <div style="font-size: 16pt;" class="bold">BON DE TRANSFERT</div>
-        <div class="bold">N° {{ $transfer->number }}</div>
-        <div class="muted">Demandé le {{ $transfer->requested_at->format('d/m/Y H:i') }}</div>
-        <div style="margin-top: 4pt;"><span class="badge">{{ $transfer->status->label() }}</span></div>
-    @endcomponent
-
-    <table style="margin-bottom: 12pt;">
+    <table>
         <tr>
-            <td style="width: 50%; padding-right: 6pt;"><div class="box"><div class="muted small">ENTREPÔT SOURCE</div><div class="bold">{{ $transfer->from->name }}</div>
-                <div class="small">Expédié par {{ $transfer->shipper?->name ?? '—' }} {{ $transfer->shipped_at?->format('d/m/Y H:i') }}</div>
-                <div class="small">Convoyeur : {{ $transfer->carrier_name ?? '—' }}</div></div></td>
-            <td style="width: 50%; padding-left: 6pt;"><div class="box"><div class="muted small">ENTREPÔT DESTINATION</div><div class="bold">{{ $transfer->to->name }}</div>
-                <div class="small">Réceptionné par {{ $transfer->receiver?->name ?? '—' }} {{ $transfer->received_at?->format('d/m/Y H:i') }}</div>
-                <div class="small">Demandé par {{ $transfer->requester->name }}</div></div></td>
+            <td style="width: 46%; vertical-align: top;"><div class="box-fill">
+                <div class="label">Entrepôt source</div>
+                <div class="value" style="font-size: 10pt;">{{ $transfer->from->name }}</div>
+                <table class="kv" style="margin-top: 3pt;">
+                    <tr><td class="k">Expédié par</td><td>{{ $transfer->shipper?->name ?? '—' }}</td></tr>
+                    <tr><td class="k">Le</td><td>{{ $transfer->shipped_at?->format('d/m/Y H:i') ?? '—' }}</td></tr>
+                    <tr><td class="k">Convoyeur</td><td>{{ $transfer->carrier_name ?? '—' }}</td></tr>
+                </table>
+            </div></td>
+            <td style="width: 8%; text-align: center; vertical-align: middle; font-size: 18pt; color: #E6007E;">&raquo;</td>
+            <td style="width: 46%; vertical-align: top;"><div class="box">
+                <div class="label">Entrepôt destination</div>
+                <div class="value" style="font-size: 10pt;">{{ $transfer->to->name }}</div>
+                <table class="kv" style="margin-top: 3pt;">
+                    <tr><td class="k">Réceptionné par</td><td>{{ $transfer->receiver?->name ?? '—' }}</td></tr>
+                    <tr><td class="k">Le</td><td>{{ $transfer->received_at?->format('d/m/Y H:i') ?? '—' }}</td></tr>
+                    <tr><td class="k">Statut</td><td>@include('pdf.partials.status', ['status' => $transfer->status])</td></tr>
+                </table>
+            </div></td>
         </tr>
     </table>
 
-    <table class="items">
-        <thead><tr><th>Article</th><th class="right">Demandé</th><th class="right">Expédié</th><th class="right">Reçu</th><th class="right">Écart</th></tr></thead>
+    <div class="section-title">Articles transférés</div>
+    <table class="lines">
+        <thead><tr><th style="width: 4%;">#</th><th>Article</th><th class="right" style="width: 13%;">Demandé</th><th class="right" style="width: 13%;">Expédié</th><th class="right" style="width: 13%;">Reçu</th><th class="right" style="width: 11%;">Écart</th></tr></thead>
         <tbody>
             @foreach ($transfer->items as $item)
-                <tr>
-                    <td>{{ $item->product->name }}</td>
+                <tr class="{{ $loop->even ? 'even' : '' }}">
+                    <td class="muted">{{ $loop->iteration }}</td>
+                    <td class="bold">{{ $item->product->name }} <span class="muted small">{{ $item->product->unit?->symbol }}</span></td>
                     <td class="right">{{ (float) $item->quantity_requested }}</td>
                     <td class="right">{{ $item->quantity_shipped !== null ? (float) $item->quantity_shipped : '' }}</td>
                     <td class="right">{{ $item->quantity_received !== null ? (float) $item->quantity_received : '' }}</td>
-                    <td class="right">{{ $item->discrepancy() ?: '' }}</td>
+                    <td class="right {{ $item->discrepancy() ? 'magenta bold' : '' }}">{{ $item->discrepancy() ?: '' }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -36,12 +50,6 @@
     @if ($transfer->notes)<p class="small"><span class="bold">Demande :</span> {{ $transfer->notes }}</p>@endif
     @if ($transfer->reception_notes)<p class="small"><span class="bold">Réception :</span> {{ $transfer->reception_notes }}</p>@endif
 
-    <table style="margin-top: 36pt;">
-        <tr>
-            <td style="width: 33%;">Expéditeur<br><br><br>____________________</td>
-            <td style="width: 33%;" class="center">Convoyeur<br><span class="small muted">{{ $transfer->carrier_name }}</span><br><br>____________________</td>
-            <td style="width: 33%;" class="right">Réceptionnaire<br><br><br>____________________</td>
-        </tr>
-    </table>
-    <div class="center" style="margin-top: 14pt;"><img src="{{ \App\Services\Support\Codes::barcodeDataUri($transfer->number, 1, 30) }}" style="height: 26pt;"></div>
+    @include('pdf.partials.signatures', ['type' => 'stock_transfer', 'names' => [0 => [$transfer->shipper?->name, $transfer->shipped_at], 1 => [$transfer->carrier_name, null], 2 => [$transfer->receiver?->name, $transfer->received_at]]])
+    <div class="center" style="margin-top: 10pt;"><img src="{{ \App\Services\Support\Codes::barcodeDataUri($transfer->number, 1, 28) }}" style="height: 22pt;"></div>
 @endsection

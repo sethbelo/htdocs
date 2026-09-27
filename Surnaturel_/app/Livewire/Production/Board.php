@@ -40,7 +40,7 @@ class Board extends Component
     #[Computed]
     public function columns(): array
     {
-        $jobs = PrintJob::query()->with('order.client', 'orderItem', 'machine', 'operator', 'proof.designJob.designer')
+        $jobs = PrintJob::query()->with('order.client', 'order.designJob.brief', 'orderItem', 'machine', 'operator', 'proof.designJob.designer')
             ->whereHas('order', fn (Builder $q) => $q->visibleTo(auth()->user()))
             ->where(fn (Builder $q) => $q->where('status', '!=', PrintJobStatus::Ready)->orWhere('finished_at', '>=', today()))
             ->get()
@@ -54,7 +54,7 @@ class Board extends Component
     #[Computed]
     public function job(): ?PrintJob
     {
-        return $this->jobId ? PrintJob::query()->with('order.client', 'order.items', 'orderItem', 'machine', 'operator', 'proof.version', 'consumptions.product')->find($this->jobId) : null;
+        return $this->jobId ? PrintJob::query()->with('order.client', 'order.items', 'order.designJob.brief.validator', 'orderItem', 'machine', 'operator', 'proof.version', 'consumptions.product')->find($this->jobId) : null;
     }
 
     /**

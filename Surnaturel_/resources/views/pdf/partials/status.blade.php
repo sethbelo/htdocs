@@ -1,0 +1,2 @@
+@php($tone = ['emerald' => 'green', 'green' => 'green', 'lime' => 'green', 'red' => 'red', 'rose' => 'red', 'amber' => 'yellow', 'yellow' => 'yellow', 'orange' => 'yellow', 'sky' => 'cyan', 'cyan' => 'cyan', 'teal' => 'cyan', 'blue' => 'cyan', 'indigo' => 'magenta', 'purple' => 'magenta', 'violet' => 'magenta', 'fuchsia' => 'magenta'][method_exists($status, 'color') ? $status->color() : 'zinc'] ?? null)
+<span class="badge {{ $tone ? 'badge-'.$tone : '' }}">{{ method_exists($status, 'label') ? $status->label() : $status }}</span>

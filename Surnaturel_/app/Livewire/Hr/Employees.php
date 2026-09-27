@@ -27,7 +27,6 @@ class Employees extends Component
     #[Url(as: 'statut')]
     public string $status = '';
 
-    #[Url(as: 'departement')]
     public ?int $departmentId = null;
 
     #[Url(as: 'fonction')]
@@ -47,7 +46,7 @@ class Employees extends Component
         $this->authorize('employees.create');
         $this->editingId = null;
         $this->photo = null;
-        $this->form = ['matricule' => 'EMP-'.str_pad((string) (Employee::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT), 'first_name' => '', 'last_name' => '', 'gender' => '', 'birth_date' => '', 'birth_place' => '', 'nationality' => 'Congolaise', 'phone' => '', 'email' => '', 'address' => '', 'job_title' => '', 'department_id' => '', 'site_id' => auth()->user()->default_site_id, 'manager_id' => '', 'user_id' => '', 'employment_status' => 'permanent', 'hired_at' => today()->toDateString(), 'salary_type' => 'monthly', 'emergency_contact' => '', 'badge_code' => '', 'national_id' => '', 'base_salary' => '', 'bank_name' => '', 'bank_account' => '', 'mobile_money_number' => ''];
+        $this->form = ['matricule' => 'EMP-'.str_pad((string) (Employee::withTrashed()->count() + 1), 5, '0', STR_PAD_LEFT), 'first_name' => '', 'last_name' => '', 'gender' => '', 'birth_date' => '', 'birth_place' => '', 'nationality' => 'Congolaise', 'phone' => '', 'email' => '', 'address' => '', 'job_title' => '', 'department_id' => '', 'site_id' => auth()->user()->default_site_id, 'manager_id' => '', 'user_id' => '', 'employment_status' => 'permanent', 'hired_at' => today()->toDateString(), 'salary_type' => 'monthly', 'emergency_contact' => '', 'blood_group' => '', 'badge_code' => '', 'national_id' => '', 'base_salary' => '', 'bank_name' => '', 'bank_account' => '', 'mobile_money_number' => ''];
         $this->modal('employee')->show();
     }
 
@@ -57,7 +56,7 @@ class Employees extends Component
         $this->authorize('update', $employee);
         $this->editingId = $id;
         $this->photo = null;
-        $this->form = $employee->only(['matricule', 'first_name', 'last_name', 'gender', 'birth_place', 'nationality', 'phone', 'email', 'address', 'job_title', 'department_id', 'site_id', 'manager_id', 'user_id', 'salary_type', 'emergency_contact', 'badge_code'])
+        $this->form = $employee->only(['matricule', 'first_name', 'last_name', 'gender', 'birth_place', 'nationality', 'phone', 'email', 'address', 'job_title', 'department_id', 'site_id', 'manager_id', 'user_id', 'salary_type', 'emergency_contact', 'blood_group', 'badge_code'])
             + ['employment_status' => $employee->employment_status->value, 'birth_date' => $employee->birth_date?->toDateString(), 'hired_at' => $employee->hired_at?->toDateString()];
 
         if (auth()->user()->can('viewSensitive', $employee)) {
@@ -92,6 +91,7 @@ class Employees extends Component
             'form.hired_at' => ['nullable', 'date'],
             'form.salary_type' => ['required', 'in:monthly,daily,hourly'],
             'form.emergency_contact' => ['nullable', 'string', 'max:255'],
+            'form.blood_group' => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
             'form.badge_code' => ['nullable', 'string', 'max:64', Rule::unique('employees', 'badge_code')->ignore($this->editingId)],
             'photo' => ['nullable', 'image', 'max:4096'],
         ];

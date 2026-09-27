@@ -7,6 +7,8 @@ use App\Enums\OrderStatus;
 use App\Enums\PrintJobStatus;
 use App\Enums\StockMovementType;
 use App\Exceptions\BusinessRuleException;
+use App\Models\DesignBrief;
+use App\Models\DesignJob;
 use App\Models\Machine;
 use App\Models\PrintJob;
 use App\Models\Product;
@@ -38,6 +40,11 @@ class PrintJobService
     {
         if (! in_array($job->status, [PrintJobStatus::Queued, PrintJobStatus::Rework], true)) {
             throw new BusinessRuleException('Ce travail est déjà en production.');
+        }
+
+        $designJobs = DesignJob::query()->where('order_id', $job->order_id);
+        if ($job->order->requires_design && $designJobs->exists() && ! DesignBrief::query()->whereIn('design_job_id', $designJobs->select('id'))->whereNotNull('validated_for_print_at')->exists()) {
+            throw new BusinessRuleException('En attente du feu vert du graphisme : la conception n’a pas encore été validée pour l’impression.');
         }
 
         if ($machine->status !== MachineStatus::Operational) {

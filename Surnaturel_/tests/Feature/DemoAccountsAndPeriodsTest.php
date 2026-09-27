@@ -24,7 +24,7 @@ class DemoAccountsAndPeriodsTest extends TestCase
         $this->setUpErp();
     }
 
-    public function test_demo_accounts_cover_every_role_and_prefill_the_right_mode(): void
+    public function test_demo_accounts_cover_every_role_and_prefill_the_login_form(): void
     {
         $this->app->detectEnvironment(fn () => 'local');
 
@@ -32,10 +32,10 @@ class DemoAccountsAndPeriodsTest extends TestCase
         $this->assertEqualsCanonicalizing(array_keys(config('erp.roles')), $roles->all());
 
         Livewire::test(Login::class)->call('useDemoAccount', 'magasinier')
-            ->assertSet('mode', 'badge')->assertSet('badge', DemoAccounts::badge('magasinier'))->assertSet('pin', DemoAccounts::PIN);
+            ->assertSet('identifier', 'magasinier')->assertSet('password', DemoAccounts::PASSWORD);
 
         Livewire::test(Login::class)->call('useDemoAccount', 'comptable')
-            ->assertSet('mode', 'password')->assertSet('identifier', 'comptable')->assertSet('password', DemoAccounts::PASSWORD);
+            ->assertSet('identifier', 'comptable')->assertSet('password', DemoAccounts::PASSWORD);
 
         $this->get(route('login'))->assertOk()->assertSee('Comptes de démonstration');
     }

@@ -8,12 +8,8 @@
         {{-- Colonne formulaire --}}
         <main class="flex flex-1 items-start justify-center px-5 py-8 sm:px-8 md:items-center md:overflow-y-auto md:py-10">
             <div class="w-full max-w-md">
-                <div class="animate-element mb-8 hidden items-center gap-3 md:flex">
-                    <x-app-logo class="size-10" />
-                    <div class="leading-tight">
-                        <div class="font-semibold">{{ \App\Models\Setting::get('company.name', 'ERP Imprimerie') }}</div>
-                        <div class="text-xs text-zinc-500">Imprimerie · Boutique · Points de vente</div>
-                    </div>
+                <div class="animate-element mb-8 hidden md:block">
+                    <x-app-logo variant="full" class="h-14 w-auto" />
                 </div>
                 {{ $slot }}
                 <p class="mt-10 text-center text-xs text-zinc-400">© {{ now()->year }} {{ \App\Models\Setting::get('company.legal_name', \App\Models\Setting::get('company.name')) }}</p>

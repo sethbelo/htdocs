@@ -8,5 +8,8 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
 @endif
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="theme-color" content="#E6007E" />
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance

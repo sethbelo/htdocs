@@ -6,6 +6,7 @@ use App\Contracts\Approvable;
 use App\Enums\VoucherStatus;
 use App\Enums\VoucherType;
 use App\Models\Concerns\BelongsToSite;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Voucher extends Model implements Approvable
 {
-    use BelongsToSite, TracksActivity;
+    use BelongsToSite, HasEncryptedRouteKey, TracksActivity;
 
     protected $guarded = ['id'];
 

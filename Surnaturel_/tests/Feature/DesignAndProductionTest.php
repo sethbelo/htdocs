@@ -3,15 +3,18 @@
 namespace Tests\Feature;
 
 use App\Enums\DesignJobStatus;
+use App\Enums\DesignNoteType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PrintJobStatus;
 use App\Enums\ProofValidatorType;
 use App\Exceptions\BusinessRuleException;
+use App\Models\DesignBrief;
 use App\Models\Machine;
 use App\Models\Order;
 use App\Services\Cash\OrderCheckoutService;
 use App\Services\Cash\PaymentData;
+use App\Services\Design\DesignNotebookService;
 use App\Services\Design\DesignService;
 use App\Services\Design\ProofService;
 use App\Services\Production\PrintJobService;
@@ -72,7 +75,35 @@ class DesignAndProductionTest extends TestCase
 
         $operator = $this->userWithRole('imprimeur');
         $service = app(PrintJobService::class);
-        $service->start($printJob, $operator, Machine::query()->create(['code' => 'M1', 'name' => 'Numérique', 'type' => 'digital_printer', 'status' => 'operational', 'site_id' => $this->headquarters->id]));
+        $machine = Machine::query()->create(['code' => 'M1', 'name' => 'Numérique', 'type' => 'digital_printer', 'status' => 'operational', 'site_id' => $this->headquarters->id]);
+
+        try {
+            $service->start($printJob, $operator, $machine);
+            $this->fail('L’impression ne doit pas démarrer sans le feu vert du graphisme.');
+        } catch (BusinessRuleException $e) {
+            $this->assertStringContainsString('feu vert du graphisme', $e->getMessage());
+        }
+
+        $notebook = app(DesignNotebookService::class);
+        $notebook->addNote($job->fresh(), $designer, DesignNoteType::Idea, 'Fond dégradé magenta, logo centré');
+        $brief = $notebook->briefFor($job->fresh());
+        $this->assertSame('A5', $brief->final_format);
+        $notebook->saveBrief($job->fresh(), ['width_mm' => 148, 'height_mm' => 210, 'colors' => 'Quadri 4/4', 'quantity' => 500, 'checklist' => ['cmyk' => true]]);
+
+        try {
+            $notebook->validateForPrint($job->fresh(), $designer);
+            $this->fail('Les contrôles pré-presse doivent être cochés.');
+        } catch (BusinessRuleException $e) {
+            $this->assertStringContainsString('pré-presse', $e->getMessage());
+        }
+
+        $notebook->saveBrief($job->fresh(), ['checklist' => array_fill_keys(array_keys(DesignBrief::CHECKLIST), true)]);
+        $notebook->validateForPrint($job->fresh(), $designer);
+        $this->assertTrue($job->fresh()->brief->isValidatedForPrint());
+        $this->assertTrue($operator->notifications()->exists());
+        $this->assertStringContainsString('148 × 210 mm', $brief->fresh()->printSummary());
+
+        $service->start($printJob, $operator, $machine);
         $this->assertSame(OrderStatus::Printing, $order->fresh()->status);
 
         $service->advance($printJob->fresh(), $operator);

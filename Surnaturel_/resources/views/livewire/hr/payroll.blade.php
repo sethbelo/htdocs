@@ -21,6 +21,10 @@
             @can('payroll.export')<flux:button size="sm" icon="arrow-down-tray" wire:click="export">Fichier de paie (Excel)</flux:button>@endcan
         </div>
 
+        @if ($payslips->isNotEmpty() && $payslips->where('dg_status', '!=', 'approved')->isNotEmpty() && ! $locked)
+            <flux:callout icon="information-circle" variant="warning" :heading="$payslips->where('dg_status', '!=', 'approved')->count().' fiche(s) en attente du visa de la Direction générale'" text="La validation comptable de la paie est possible une fois toutes les fiches visées par le Directeur Général." />
+        @endif
+
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
             <x-kpi label="Bulletins" :value="$payslips->count()" icon="document-text" />
             <x-kpi label="Masse brute" :value="\App\Services\Support\Money::format($payslips->sum('gross_earnings'))" icon="banknotes" color="indigo" />
@@ -32,7 +36,7 @@
             <div class="panel p-4 xl:col-span-2">
                 <flux:heading>État mensuel</flux:heading>
                 <flux:table class="mt-2">
-                    <flux:table.columns><flux:table.column>Employé</flux:table.column><flux:table.column align="end">Jours</flux:table.column><flux:table.column align="end">HS</flux:table.column><flux:table.column align="end">Brut</flux:table.column><flux:table.column align="end">Retenues</flux:table.column><flux:table.column align="end">Net</flux:table.column><flux:table.column></flux:table.column></flux:table.columns>
+                    <flux:table.columns><flux:table.column>Employé</flux:table.column><flux:table.column align="end">Jours</flux:table.column><flux:table.column align="end">HS</flux:table.column><flux:table.column align="end">Brut</flux:table.column><flux:table.column align="end">Retenues</flux:table.column><flux:table.column align="end">Net</flux:table.column><flux:table.column>Visa DG</flux:table.column><flux:table.column></flux:table.column></flux:table.columns>
                     <flux:table.rows>
                         @forelse ($payslips as $payslip)
                             <flux:table.row :key="$payslip->id">
@@ -42,10 +46,17 @@
                                 <flux:table.cell align="end"><x-money :amount="$payslip->gross_earnings" /></flux:table.cell>
                                 <flux:table.cell align="end"><x-money :amount="$payslip->total_deductions" /></flux:table.cell>
                                 <flux:table.cell align="end" class="font-semibold"><x-money :amount="$payslip->net_pay" /></flux:table.cell>
+                                <flux:table.cell>
+                                    @switch($payslip->dg_status)
+                                        @case('approved')<flux:badge size="sm" color="emerald" icon="check-badge">Visée</flux:badge>@break
+                                        @case('rejected')<flux:badge size="sm" color="red" icon="x-circle" :title="$payslip->dg_comment">Rejetée</flux:badge>@break
+                                        @default<flux:badge size="sm" color="amber">En attente</flux:badge>
+                                    @endswitch
+                                </flux:table.cell>
                                 <flux:table.cell><flux:button size="xs" variant="ghost" icon="document-arrow-down" :href="route('print.payslip', $payslip)" target="_blank" /></flux:table.cell>
                             </flux:table.row>
                         @empty
-                            <flux:table.row><flux:table.cell colspan="7"><x-empty-state icon="wallet" title="Paie non calculée" text="Saisissez les éléments variables puis lancez le calcul." /></flux:table.cell></flux:table.row>
+                            <flux:table.row><flux:table.cell colspan="8"><x-empty-state icon="wallet" title="Paie non calculée" text="Saisissez les éléments variables puis lancez le calcul." /></flux:table.cell></flux:table.row>
                         @endforelse
                     </flux:table.rows>
                 </flux:table>

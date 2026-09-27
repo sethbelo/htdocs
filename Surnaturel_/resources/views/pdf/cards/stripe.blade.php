@@ -1,0 +1,1 @@
+<div class="stripe" style="{{ $pos }};"><span style="width: 40%; background: #00A6E6;"></span><span style="width: 35%; background: #E6007E;"></span><span style="width: 25%; background: #FFE500;"></span></div>

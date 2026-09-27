@@ -4,14 +4,12 @@ namespace App\Livewire\Concerns;
 
 use App\Models\Site;
 use Illuminate\Support\Collection;
-use Livewire\Attributes\Url;
 
 /**
  * Filtre par siège commun aux écrans : restreint aux sièges accessibles de l'utilisateur.
  */
 trait ScopesToSite
 {
-    #[Url(as: 'siege')]
     public ?int $siteId = null;
 
     /**

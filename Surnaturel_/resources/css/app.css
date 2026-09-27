@@ -204,6 +204,20 @@
         content: ''; @apply absolute top-2 bottom-2 -left-3 w-[3px] rounded-r-full bg-safran-400;
     }
     .sidebar-group { @apply px-3 pt-5 pb-1.5 text-[10.5px] font-semibold tracking-[.14em] text-cyan2-300/70 uppercase; }
+
+    /* Logo : horizontal déplié, monogramme en rail (format rétractable) */
+    .sidebar-brand { @apply flex min-w-0 items-center rounded-xl transition hover:opacity-90; }
+    .sidebar-logo-mark { display: none; }
+    @media (min-width: 1024px) {
+        .sidebar-collapsed .sidebar-logo-full { display: none; }
+        .sidebar-collapsed .sidebar-logo-mark { display: block; }
+        .sidebar-collapsed .sidebar-brand { @apply mx-auto; }
+    }
+    @media (min-width: 1024px) and (max-width: 1279.98px) {
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-logo-full { display: none; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-logo-mark { display: block; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-brand { @apply mx-auto; }
+    }
     @media (min-width: 1024px) {
         .sidebar-collapsed .sidebar-label, .sidebar-collapsed .sidebar-group-text, .sidebar-collapsed .sidebar-extra { display: none; }
         .sidebar-collapsed .sidebar-link { @apply justify-center px-0; }
@@ -291,7 +305,8 @@
     .sortable-ghost { @apply opacity-40; }
 
     /* 6.4 Bandeau de marque : filet CMJN */
-    .brand-rule { height: 4px; background: linear-gradient(90deg, var(--color-brand-600) 0 65%, var(--color-safran-400) 65% 80%, var(--color-cyan2-400) 80% 92%, var(--color-carmin-500) 92%); }
+    .brand-rule { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #16161d 0 64%, #00a6e6 64% 78%, #e6007e 78% 92%, #ffe500 92%); }
+    .dark .brand-rule { background: linear-gradient(90deg, #ffffff 0 64%, #00a6e6 64% 78%, #e6007e 78% 92%, #ffe500 92%); }
 
     /* 6.5 Palette de commandes & menus flottants génériques */
     .modal { @apply relative z-50 w-full max-w-lg rounded-2xl border border-line bg-surface shadow-[var(--shadow-pop)]; }
