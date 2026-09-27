@@ -1,0 +1,12 @@
+{
+  "name": "yeboox-acs-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "nfc-pcsc": "0.8.1"
+  }
+}

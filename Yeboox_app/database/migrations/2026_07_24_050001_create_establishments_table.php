@@ -1,0 +1,42 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('establishments', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->string('type')->default('restaurant'); // restaurant, bar, cafe, snack, hotel, boutique, retail
+            $table->string('logo_path')->nullable();
+            $table->string('rccm')->nullable();
+            $table->string('id_nat')->nullable();
+            $table->string('nif')->nullable();
+            $table->text('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('country', 3)->default('CD');
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('website')->nullable();
+            $table->uuid('default_currency_id')->nullable();
+            $table->string('timezone')->default('Africa/Kinshasa');
+            $table->date('fiscal_year_start')->nullable();
+            $table->json('settings')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('type');
+            $table->index('is_active');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('establishments');
+    }
+};
