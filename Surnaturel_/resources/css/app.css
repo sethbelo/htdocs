@@ -1,0 +1,384 @@
+/* =============================================================================
+   SURNATUREL IMPRIMERIE — Système de design
+   -----------------------------------------------------------------------------
+   Charte adaptée du métier de l'imprimerie (encre CMJN) :
+     • Encre     #4F46E5 (indigo)  → couleur d'autorité (navigation, titres, actions)
+     • Safran    #F5B50B (ambre)   → accent / action principale (≈ 10 %)
+     • Cyan      #16B8C4           → information, liens, états « en cours »
+     • Carmin    #E11D3D (rouge)   → alertes, rejets, suppression (usage rare)
+   Règle 60 / 30 / 10 : 60 % surfaces neutres, 30 % encre, 10 % safran.
+   Typographies : Sora (titres, chiffres clés — géométrique, imprimée)
+                  Instrument Sans (interface, données, chiffres tabulaires).
+
+   Sommaire
+     1. Imports & sources
+     2. Jetons de couleur (palette + sémantique clair / sombre)
+     3. Base
+     4. Structure (sidebar, topbar, contenu)
+     5. Composants (boutons, champs, cartes, tableaux, badges…)
+     6. Modules spécifiques (kanban, POS, stepper, palette de commandes)
+     7. Illustrations de l'écran de connexion (SVG animées)
+     8. Utilitaires, impression & accessibilité
+   ============================================================================= */
+
+/* ─── 1. IMPORTS & SOURCES ──────────────────────────────────────────────────── */
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+@source '../views';
+@source '../../app/Livewire';
+@source '../../app/Enums';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── 2. JETONS DE COULEUR ──────────────────────────────────────────────────── */
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Sora', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Neutres — gris légèrement teintés d'encre (violet-indigo), remplace le zinc par défaut :
+       chaque classe zinc-* déjà posée dans l'application (500+ occurrences) hérite donc
+       automatiquement de la nouvelle identité, sans qu'aucune vue n'ait à être modifiée. */
+    --color-zinc-50: #f6f6fb;
+    --color-zinc-100: #ececf6;
+    --color-zinc-200: #dadaeb;
+    --color-zinc-300: #b9b9d6;
+    --color-zinc-400: #9191b5;
+    --color-zinc-500: #6f6f96;
+    --color-zinc-600: #56567d;
+    --color-zinc-700: #434364;
+    --color-zinc-800: #2d2d48;
+    --color-zinc-900: #1c1c30;
+    --color-zinc-950: #101019;
+
+    /* Encre — indigo, couleur d'autorité (navigation, titres, actions principales) */
+    --color-brand-50: #eef0fd;
+    --color-brand-100: #e0e3fc;
+    --color-brand-200: #c5c9f9;
+    --color-brand-300: #a1a4f3;
+    --color-brand-400: #8280ec;
+    --color-brand-500: #6a5de3;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #362f9e;
+    --color-brand-900: #1e1b4b;
+    --color-brand-950: #14123a;
+
+    /* Safran — accent chaud (≈ 10 %), boutons d'action, indicateur actif */
+    --color-safran-50: #fffbea;
+    --color-safran-100: #fff3c4;
+    --color-safran-200: #ffe587;
+    --color-safran-300: #ffd24a;
+    --color-safran-400: #fac015;
+    --color-safran-500: #f5b50b;
+    --color-safran-600: #d38f06;
+    --color-safran-700: #a8660a;
+    --color-safran-800: #89510f;
+    --color-safran-900: #734311;
+
+    /* Cyan — information, liens, états « en cours » (encre cyan) */
+    --color-cyan2-50: #edfcfd;
+    --color-cyan2-100: #d1f6f9;
+    --color-cyan2-200: #a8ecf3;
+    --color-cyan2-300: #6ddbe7;
+    --color-cyan2-400: #2fc1d4;
+    --color-cyan2-500: #16a3b8;
+    --color-cyan2-600: #147f92;
+    --color-cyan2-700: #176677;
+    --color-cyan2-800: #1a5262;
+    --color-cyan2-900: #1a4453;
+
+    /* Carmin — alertes, rejets, suppression (encre rouge) */
+    --color-carmin-50: #fef2f3;
+    --color-carmin-100: #fde3e6;
+    --color-carmin-200: #fbccd2;
+    --color-carmin-300: #f7a5ae;
+    --color-carmin-400: #f17182;
+    --color-carmin-500: #e6465e;
+    --color-carmin-600: #d1264a;
+    --color-carmin-700: #af1a3f;
+    --color-carmin-800: #92193b;
+    --color-carmin-900: #7c1938;
+
+    --color-accent: var(--color-brand-600);
+    --color-accent-content: var(--color-brand-600);
+    --color-accent-foreground: var(--color-white);
+
+    /* Sémantique clair / sombre — pilotée par --ui-* défini plus bas (:root / .dark) */
+    --color-canvas: var(--ui-canvas);
+    --color-surface: var(--ui-surface);
+    --color-surface-2: var(--ui-surface-2);
+    --color-line: var(--ui-line);
+    --color-line-strong: var(--ui-line-strong);
+    --color-fg: var(--ui-fg);
+    --color-fg-muted: var(--ui-fg-muted);
+    --color-fg-subtle: var(--ui-fg-subtle);
+
+    --radius-card: 14px;
+    --shadow-card: 0 1px 2px rgb(30 27 75 / .04), 0 1px 1px rgb(30 27 75 / .03);
+    --shadow-pop: 0 18px 50px -12px rgb(16 16 25 / .28), 0 4px 12px -4px rgb(16 16 25 / .14);
+
+    --animate-fade-in: fade-in .18s ease-out;
+    --animate-slide-in: slide-in .24s cubic-bezier(.2, .8, .2, 1);
+    @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @keyframes slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+
+@layer theme {
+    .dark {
+        --color-accent: var(--color-brand-500);
+        --color-accent-content: var(--color-brand-400);
+        --color-accent-foreground: var(--color-white);
+    }
+}
+
+:root {
+    --ui-canvas: #f7f7fb;
+    --ui-surface: #ffffff;
+    --ui-surface-2: #fbfbfe;
+    --ui-line: #ececf3;
+    --ui-line-strong: #dadaeb;
+    --ui-fg: #16162a;
+    --ui-fg-muted: #56567d;
+    --ui-fg-subtle: #9191b5;
+    --sidebar-w: 268px;
+    color-scheme: light;
+}
+
+.dark {
+    --ui-canvas: #101019;
+    --ui-surface: #17172a;
+    --ui-surface-2: #1c1c30;
+    --ui-line: #2a2a44;
+    --ui-line-strong: #363656;
+    --ui-fg: #f1f1f8;
+    --ui-fg-muted: #b3b3d1;
+    --ui-fg-subtle: #7c7ca3;
+    color-scheme: dark;
+}
+
+/* ─── 3. BASE ───────────────────────────────────────────────────────────────── */
+@layer base {
+    [x-cloak] { display: none !important; }
+    /* Les colonnes de grille peuvent rétrécir : les tableaux défilent dans leur panneau au lieu d'élargir la page. */
+    .grid > * { min-width: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { @apply bg-canvas font-sans text-[14px] text-fg antialiased; font-feature-settings: 'cv11', 'ss01'; }
+    :where(h1, h2, h3, [data-flux-heading], .font-display) { font-family: var(--font-display); letter-spacing: -.01em; }
+    button, a, [role='button'] { -webkit-tap-highlight-color: transparent; }
+    ::selection { background: var(--color-safran-300); color: var(--color-brand-900); }
+    :focus-visible { outline: 2px solid var(--color-cyan2-400); outline-offset: 2px; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    * { scrollbar-width: thin; scrollbar-color: var(--ui-line-strong) transparent; }
+}
+
+/* ─── 4. STRUCTURE ──────────────────────────────────────────────────────────── */
+@layer components {
+    .app-shell { @apply min-h-dvh; }
+    .app-main { @apply min-w-0 transition-[padding] duration-200; }
+    @media (min-width: 1024px) {
+        .app-main { padding-left: var(--sidebar-w); }
+        .sidebar-collapsed { --sidebar-w: 76px; }
+    }
+
+    /* 4.2 Barre latérale « encre » */
+    .sidebar {
+        @apply fixed inset-y-0 left-0 z-40 flex flex-col text-white transition-[transform,width] duration-200;
+        width: var(--sidebar-w);
+        background: linear-gradient(180deg, var(--color-brand-800) 0%, var(--color-brand-900) 55%, var(--color-brand-950) 100%);
+    }
+    @media (max-width: 1023.98px) {
+        .sidebar { width: 288px; transform: translateX(-100%); box-shadow: var(--shadow-pop); }
+        .sidebar[data-open='true'] { transform: none; }
+    }
+    .sidebar-link {
+        @apply relative flex h-10 items-center gap-3 rounded-lg px-3 text-[13.5px] font-medium text-white/70 transition hover:bg-white/8 hover:text-white;
+    }
+    .sidebar-link[aria-current='page'] { @apply bg-white/10 text-white; }
+    .sidebar-link[aria-current='page']::before {
+        content: ''; @apply absolute top-2 bottom-2 -left-3 w-[3px] rounded-r-full bg-safran-400;
+    }
+    .sidebar-group { @apply px-3 pt-5 pb-1.5 text-[10.5px] font-semibold tracking-[.14em] text-cyan2-300/70 uppercase; }
+    @media (min-width: 1024px) {
+        .sidebar-collapsed .sidebar-label, .sidebar-collapsed .sidebar-group-text, .sidebar-collapsed .sidebar-extra { display: none; }
+        .sidebar-collapsed .sidebar-link { @apply justify-center px-0; }
+        .sidebar-collapsed .sidebar-group { @apply mx-auto h-px w-6 bg-white/12 p-0 my-3; }
+    }
+    /* Tablette paysage (1024–1279 px) : rail d'icônes par défaut pour libérer l'espace de travail */
+    @media (min-width: 1024px) and (max-width: 1279.98px) {
+        .app-shell:not(.sidebar-expanded-tablet) { --sidebar-w: 76px; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-label,
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-group-text,
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-extra { display: none; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-link { @apply justify-center px-0; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-group { @apply mx-auto my-3 h-px w-6 bg-white/12 p-0; }
+    }
+
+    /* 4.3 Barre supérieure */
+    .topbar { @apply sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-line bg-surface/85 px-3 backdrop-blur-lg sm:gap-3 sm:px-6; }
+    .page { @apply mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7; }
+    .shell-icon-btn {
+        @apply grid size-10 shrink-0 place-items-center rounded-lg text-fg-muted transition hover:bg-zinc-100 hover:text-fg disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-white/8;
+    }
+
+    /* ─── 5. COMPOSANTS ─────────────────────────────────────────────────────── */
+
+    /* 5.3 Cartes — .panel / .kpi-card sont déjà posées dans toutes les pages existantes */
+    .panel, .card { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]; }
+    .card-header { @apply flex items-center justify-between gap-3 border-b border-line px-5 py-3.5; }
+    .card-title { @apply font-display text-[15px] font-semibold text-fg; }
+    .card-body { @apply p-5; }
+
+    /* 5.4 Tableaux de données (pour les tableaux hors flux:table) */
+    .table-wrap { @apply overflow-x-auto; }
+    .table { @apply w-full min-w-[640px] text-left text-[13.5px]; }
+    .table thead th { @apply sticky top-0 border-b border-line bg-surface-2 px-4 py-2.5 text-[11px] font-semibold tracking-wider whitespace-nowrap text-fg-subtle uppercase; }
+    .table tbody td { @apply border-b border-line/70 px-4 py-3 align-middle; }
+    .table tbody tr { @apply transition-colors; }
+    .table tbody tr:hover { @apply bg-brand-50/40 dark:bg-white/[.025]; }
+    .table tbody tr:last-child td { @apply border-b-0; }
+    .table .num { @apply text-right tabular-nums whitespace-nowrap; }
+
+    /* 5.5 Indicateurs clés (kpi-card, déjà posé par le composant <x-kpi>) */
+    .kpi-card { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] relative overflow-hidden; }
+    .kpi-value { @apply mt-1 font-display text-[26px] leading-tight font-semibold tracking-tight text-fg tabular-nums; }
+    .kpi-label { @apply text-[12.5px] font-medium text-fg-muted; }
+
+    /* 5.6 Onglets */
+    .tabs { @apply -mb-px flex gap-1 overflow-x-auto border-b border-line; }
+    .tab { @apply relative flex h-11 shrink-0 items-center gap-2 px-3.5 text-[13.5px] font-semibold text-fg-subtle transition hover:text-fg; }
+    .tab[aria-selected='true'] { @apply text-brand-600 dark:text-cyan2-300; }
+    .tab[aria-selected='true']::after { content: ''; @apply absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-safran-400; }
+    .segmented { @apply inline-flex rounded-lg bg-zinc-100 p-1 dark:bg-white/6; }
+    .segmented > * { @apply rounded-md px-3 py-1.5 text-[12.5px] font-semibold text-fg-muted transition; }
+    .segmented > [aria-pressed='true'] { @apply bg-surface text-fg shadow-sm; }
+
+    /* 5.7 Divers */
+    .avatar { @apply inline-grid shrink-0 place-items-center rounded-full font-semibold uppercase; }
+    .kbd { @apply rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-fg-subtle; }
+    .link { @apply font-semibold text-brand-600 hover:text-brand-500 hover:underline dark:text-cyan2-300; }
+    .divider { @apply border-t border-line; }
+    .muted { @apply text-fg-muted; }
+    .subtle { @apply text-fg-subtle; }
+    .eyebrow { @apply text-[11px] font-semibold tracking-[.16em] text-cyan2-600 uppercase dark:text-cyan2-300; }
+    .overlay { @apply fixed inset-0 z-50 bg-brand-950/45 backdrop-blur-[2px]; }
+
+    /* ─── 6. MODULES ────────────────────────────────────────────────────────── */
+
+    /* 6.1 Étapes du suivi de commande (frise de progression) */
+    .stepper { @apply flex items-start overflow-x-auto pb-1; }
+    .step { @apply relative flex min-w-[112px] flex-1 flex-col items-center text-center; }
+    .step::before { content: ''; @apply absolute top-4 right-1/2 left-[-50%] h-0.5 bg-line-strong; }
+    .step:first-child::before { display: none; }
+    .step[data-state='done']::before, .step[data-state='current']::before { @apply bg-brand-500; }
+    .step-dot { @apply relative z-10 grid size-8 place-items-center rounded-full border-2 border-line-strong bg-surface text-[12px] font-bold text-fg-subtle; }
+    .step[data-state='done'] .step-dot { @apply border-brand-600 bg-brand-600 text-white; }
+    .step[data-state='current'] .step-dot { @apply border-safran-400 bg-safran-400 text-brand-900 ring-4 ring-safran-400/25; }
+    .step-label { @apply mt-2 px-1 text-[11.5px] font-semibold text-fg-subtle; }
+    .step[data-state='done'] .step-label, .step[data-state='current'] .step-label { @apply text-fg; }
+
+    /* 6.2 Point de vente — grille tactile */
+    .pos-tile { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] flex flex-col overflow-hidden text-left transition hover:border-brand-300 hover:shadow-md active:scale-[.98]; }
+
+    /* 6.3 Kanban glisser-déposer (pipeline, tâches) */
+    .kanban-col { @apply flex w-[290px] shrink-0 flex-col rounded-[var(--radius-card)] bg-zinc-100/60 p-2 dark:bg-white/[.03]; }
+    .kanban-card { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] cursor-grab p-3.5 transition hover:border-brand-200 hover:shadow-md active:cursor-grabbing; }
+    .sortable-ghost { @apply opacity-40; }
+
+    /* 6.4 Bandeau de marque : filet CMJN */
+    .brand-rule { height: 4px; background: linear-gradient(90deg, var(--color-brand-600) 0 65%, var(--color-safran-400) 65% 80%, var(--color-cyan2-400) 80% 92%, var(--color-carmin-500) 92%); }
+
+    /* 6.5 Palette de commandes & menus flottants génériques */
+    .modal { @apply relative z-50 w-full max-w-lg rounded-2xl border border-line bg-surface shadow-[var(--shadow-pop)]; }
+}
+
+/* ─── 7. ÉCRAN DE CONNEXION : ILLUSTRATIONS SVG ANIMÉES ─────────────────────── */
+.erp-spin, .erp-spin-reverse, .erp-pop, .erp-stamp, .erp-pulse { transform-box: fill-box; transform-origin: center; }
+.erp-spin { animation: erp-spin 3s linear infinite; }
+.erp-spin-reverse { animation: erp-spin 3s linear infinite reverse; }
+.erp-sheet { animation: erp-sheet 3.2s ease-in-out infinite; }
+.erp-grow { transform-box: fill-box; transform-origin: bottom; animation: erp-grow 3.2s ease-in-out infinite; }
+.erp-drip { animation: erp-drip 2.4s ease-in infinite; }
+.erp-draw { stroke-dasharray: 520; stroke-dashoffset: 520; animation: erp-draw 4s ease-in-out infinite; }
+.erp-pulse { animation: erp-pulse 1.8s ease-in-out infinite; }
+.erp-pop { animation: erp-pop 2.4s ease-in-out infinite; }
+.erp-stamp { animation: erp-stamp 4s ease-out infinite; }
+.erp-cursor { animation: erp-cursor 4s ease-in-out infinite; }
+.erp-receipt { animation: erp-receipt 3s ease-in-out infinite; }
+.erp-scan { animation: erp-scan 1.2s ease-in-out infinite alternate; }
+.erp-float { animation: erp-float 2.6s ease-in-out infinite; }
+.erp-road { animation: erp-road 1s linear infinite; }
+.erp-truck { animation: erp-truck 6s ease-in-out infinite; }
+.erp-bounce { animation: erp-bounce 1.6s ease-in-out infinite; }
+
+@keyframes erp-spin { to { transform: rotate(360deg); } }
+@keyframes erp-sheet { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: 1; } 55% { transform: translate(190px, 60px); } 85% { transform: translate(368px, 108px); opacity: 1; } 100% { transform: translate(368px, 108px); opacity: 0; } }
+@keyframes erp-grow { 0%, 70% { transform: scaleY(.2); } 100% { transform: scaleY(1); } }
+@keyframes erp-drip { 0% { transform: translateY(-14px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(40px); opacity: 0; } }
+@keyframes erp-draw { 0% { stroke-dashoffset: 520; } 60%, 100% { stroke-dashoffset: 0; } }
+@keyframes erp-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .7; } }
+@keyframes erp-pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+@keyframes erp-stamp { 0%, 55% { transform: scale(2.2); opacity: 0; } 70% { transform: scale(.95); opacity: 1; } 80%, 100% { transform: scale(1); opacity: 1; } }
+@keyframes erp-cursor { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-90px, 70px); } }
+@keyframes erp-receipt { 0% { transform: translateY(-70px); clip-path: inset(70px 0 0 0); } 60%, 100% { transform: translateY(0); clip-path: inset(0 0 0 0); } }
+@keyframes erp-scan { from { opacity: .3; transform: translateY(-4px); } to { opacity: 1; transform: translateY(4px); } }
+@keyframes erp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes erp-road { to { stroke-dashoffset: -32; } }
+@keyframes erp-truck { 0% { transform: translateX(-40px); } 50% { transform: translateX(230px); } 100% { transform: translateX(-40px); } }
+@keyframes erp-bounce { 0%, 100% { transform: translate(380px, 70px); } 50% { transform: translate(380px, 56px); } }
+
+/* ——— Carrousel des services ——— */
+.erp-scene {
+    mask-image: linear-gradient(to bottom, #000 70%, transparent), linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+    mask-composite: intersect;
+}
+.erp-kenburns { animation: erp-kenburns 9s ease-out both; }
+.erp-sheet-long { animation: erp-sheet-long 3.4s ease-in-out infinite; }
+.erp-sheet-short { animation: erp-sheet-short 2.6s ease-in-out infinite; }
+.erp-sway { transform-box: fill-box; transform-origin: top center; animation: erp-sway 5s ease-in-out infinite; }
+.erp-blade { animation: erp-blade 1.8s ease-in-out infinite; }
+.erp-ride { animation: erp-ride .6s ease-in-out infinite alternate; }
+.erp-bounce-pin { animation: erp-bounce-pin 1.6s ease-in-out infinite; }
+
+@keyframes erp-kenburns { from { transform: scale(1.06) translateY(6px); } to { transform: scale(1) translateY(0); } }
+@keyframes erp-sheet-long { 0% { transform: translateX(0); opacity: 0; } 10% { opacity: 1; } 80% { transform: translateX(390px); opacity: 1; } 100% { transform: translateX(390px); opacity: 0; } }
+@keyframes erp-sheet-short { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(26px); } }
+@keyframes erp-sway { 0%, 100% { transform: rotate(-.6deg); } 50% { transform: rotate(.6deg); } }
+@keyframes erp-blade { 0%, 100% { transform: translateY(0); } 45%, 55% { transform: translateY(26px); } }
+@keyframes erp-ride { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes erp-bounce-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+/* ——— Apparition des éléments du formulaire (inspirée du composant sign-in) ——— */
+.animate-element { opacity: 0; transform: translateY(14px); filter: blur(4px); animation: erp-fade-slide-in .6s ease-out forwards; }
+.animate-slide-right { opacity: 0; transform: translateX(28px); filter: blur(6px); animation: erp-slide-right-in .9s ease-out forwards; }
+.animate-delay-100 { animation-delay: .1s; } .animate-delay-200 { animation-delay: .2s; } .animate-delay-300 { animation-delay: .3s; }
+.animate-delay-400 { animation-delay: .4s; } .animate-delay-500 { animation-delay: .5s; } .animate-delay-600 { animation-delay: .6s; }
+.animate-delay-700 { animation-delay: .7s; } .animate-delay-800 { animation-delay: .8s; }
+
+@keyframes erp-fade-slide-in { to { opacity: 1; filter: blur(0); transform: translateY(0); } }
+@keyframes erp-slide-right-in { to { opacity: 1; filter: blur(0); transform: translateX(0); } }
+
+/* ─── 8. UTILITAIRES, IMPRESSION & ACCESSIBILITÉ ─────────────────────────────── */
+@utility scrollbar-none {
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    [class^='erp-'], [class*=' erp-'] { animation: none !important; }
+    .animate-element, .animate-slide-right { animation: none !important; opacity: 1; transform: none; filter: none; }
+    .erp-draw { stroke-dashoffset: 0; }
+}
+
+@media print {
+    .sidebar, .topbar, .no-print { display: none !important; }
+    .app-main { padding: 0 !important; }
+    body { background: #fff; }
+    .panel, .card { box-shadow: none; }
+}
