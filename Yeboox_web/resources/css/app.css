@@ -1,0 +1,168 @@
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-yeboox-ink: #101a46;
+    --color-yeboox-blue: #3154f4;
+    --color-yeboox-violet: #6d39ea;
+    --color-yeboox-amber: #f1a33b;
+    --color-yeboox-cream: #f8f8f4;
+}
+
+html { scroll-behavior: smooth; }
+body { overflow-x: hidden; }
+
+section[id] { scroll-margin-top: 5rem; }
+
+.yb-grid-pattern {
+    background-image:
+        linear-gradient(to right, rgb(49 84 244 / .065) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(49 84 244 / .065) 1px, transparent 1px);
+    background-size: 42px 42px;
+}
+
+.yb-dot-pattern {
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1.5px);
+    background-size: 18px 18px;
+}
+
+.yb-glow {
+    box-shadow: 0 28px 90px -36px rgb(49 84 244 / .55);
+}
+
+.yb-gradient-text {
+    background: linear-gradient(100deg, #8db4ff 0%, #d7c5ff 48%, #ffb547 100%);
+    background-clip: text;
+    color: transparent;
+}
+
+.yb-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    color: #3154f4;
+    font-size: .75rem;
+    font-weight: 900;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.yb-kicker::before {
+    width: 1.75rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    content: '';
+}
+
+.yb-kicker-light { color: #a9c3ff; }
+
+.yb-hero-frame {
+    animation: yb-float 7s ease-in-out infinite;
+}
+
+.yb-orbit { animation: yb-orbit 28s linear infinite; transform-origin: center; }
+
+.yb-partner-mask {
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.yb-partner-track {
+    display: flex;
+    width: max-content;
+    gap: 1rem;
+    padding: 1rem;
+    animation: yb-partners 24s linear infinite;
+}
+
+.yb-partner-track:hover { animation-play-state: paused; }
+
+.yb-offcanvas { animation: yb-slide-in .35s cubic-bezier(.22, 1, .36, 1); }
+
+.yb-desktop-mockup {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgb(148 163 184 / .25);
+    border-radius: 1.25rem;
+    background: white;
+    box-shadow: 0 35px 80px -30px rgb(15 23 42 / .45);
+}
+
+.dark .yb-desktop-mockup {
+    border-color: rgb(255 255 255 / .12);
+    background: #090e1e;
+    box-shadow: 0 35px 80px -30px rgb(0 0 0 / .75);
+}
+
+.yb-float-action {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    border: 1px solid rgb(226 232 240);
+    border-radius: 999px;
+    background: white;
+    padding: .4rem .4rem .4rem 1rem;
+    color: #101a46;
+    font-size: .78rem;
+    font-weight: 800;
+    box-shadow: 0 12px 30px -12px rgb(15 23 42 / .35);
+    transition: transform .2s ease;
+}
+
+.yb-float-action:hover { transform: translateX(-.3rem); }
+
+.yb-float-icon {
+    display: grid;
+    width: 2.35rem;
+    height: 2.35rem;
+    place-items: center;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3154f4;
+}
+
+.dark .yb-float-action {
+    border-color: rgb(255 255 255 / .12);
+    background: #111831;
+    color: white;
+}
+
+.dark .yb-float-icon { background: rgb(255 255 255 / .09); }
+
+@keyframes yb-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes yb-orbit { to { transform: rotate(360deg); } }
+@keyframes yb-partners { to { transform: translateX(-50%); } }
+@keyframes yb-slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.yb-marquee { animation: yb-marquee 26s linear infinite; }
+@keyframes yb-marquee { to { transform: translateX(-50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .yb-marquee { animation: none; }
+    .yb-hero-frame { animation: none; }
+    .yb-orbit, .yb-partner-track { animation: none; }
+}
+
+@media (max-width: 639px) {
+    .yb-partner-mask {
+        mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+    }
+
+    .yb-float-action {
+        max-width: calc(100vw - 2.5rem);
+    }
+}
