@@ -1,0 +1,1 @@
+<flux:checkbox {{ $attributes }} />

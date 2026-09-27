@@ -1,0 +1,215 @@
+openapi: 3.1.0
+info:
+  title: API SaaS Yeboox
+  version: 2.0.0
+  description: API multi-entreprise pour administration, POS, catalogue, stock, comptabilité OHADA, devises et taxes.
+servers:
+  - url: https://votre-domaine.example/api/v2
+security:
+  - bearerAuth: []
+tags:
+  - { name: Authentification }
+  - { name: Contexte }
+  - { name: Plateforme }
+  - { name: Société }
+  - { name: Catalogue }
+  - { name: Stock }
+  - { name: Comptabilité }
+  - { name: Configuration }
+paths:
+  /auth/login:
+    post:
+      tags: [Authentification]
+      security: []
+      summary: Connecter un utilisateur et sélectionner éventuellement son PDV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, device_name]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                device_name: { type: string, maxLength: 80 }
+                point_of_sale_id: { type: integer }
+      responses:
+        '200': { description: Jeton, utilisateur, capacités et contexte }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /context:
+    get:
+      tags: [Contexte]
+      summary: Lire le tenant et l’abonnement actifs
+      responses:
+        '200': { description: Contexte et PDV disponibles }
+    put:
+      tags: [Contexte]
+      summary: Changer de point de vente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [point_of_sale_id]
+              properties: { point_of_sale_id: { type: integer } }
+      responses:
+        '200': { description: Nouveau contexte }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /bootstrap:
+    get:
+      tags: [Contexte]
+      summary: Charger la configuration et les référentiels du terminal
+      responses: { '200': { description: Données de démarrage } }
+  /master/companies:
+    get:
+      tags: [Plateforme]
+      summary: Lister les entreprises (master)
+      responses: { '200': { description: Entreprises paginées } }
+    post:
+      tags: [Plateforme]
+      summary: Provisionner une entreprise complète (master)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompanyProvisioning' }
+      responses:
+        '201': { description: Entreprise, établissement, PDV, abonnement et administrateur }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /master/companies/{id}:
+    get:
+      tags: [Plateforme]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Entreprise complète }, '404': { description: Introuvable } }
+    put:
+      tags: [Plateforme]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Entreprise mise à jour } }
+  /company/locations:
+    get:
+      tags: [Société]
+      summary: Établissements, PDV et abonnements
+      responses: { '200': { description: Structure de la société } }
+  /company/establishments:
+    post:
+      tags: [Société]
+      summary: Créer un établissement
+      responses: { '201': { description: Établissement créé } }
+  /company/establishments/{id}/points-of-sale:
+    post:
+      tags: [Société]
+      summary: Créer et initialiser un PDV
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '201': { description: PDV créé } }
+  /company/users:
+    get:
+      tags: [Société]
+      summary: Lister les utilisateurs de la société
+      responses: { '200': { description: Utilisateurs } }
+    post:
+      tags: [Société]
+      summary: Créer un utilisateur et ses affectations PDV
+      responses: { '201': { description: Utilisateur créé } }
+  /products:
+    get:
+      tags: [Catalogue]
+      summary: Produits du PDV actif
+      responses: { '200': { description: Catalogue paginé } }
+    post:
+      tags: [Catalogue]
+      summary: Créer un produit dans le PDV actif
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Product' } } }
+      responses: { '201': { description: Produit créé }, '402': { $ref: '#/components/responses/SubscriptionRequired' } }
+  /products/{id}:
+    get:
+      tags: [Catalogue]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Produit }, '404': { description: Introuvable dans ce tenant } }
+    put:
+      tags: [Catalogue]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Produit modifié } }
+    delete:
+      tags: [Catalogue]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Produit supprimé ou désactivé } }
+  /stock/movements:
+    get:
+      tags: [Stock]
+      summary: Historique des mouvements du PDV
+      responses: { '200': { description: Mouvements paginés } }
+  /stock/products/{id}/adjust:
+    post:
+      tags: [Stock]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation, quantity, reason]
+              properties:
+                operation: { type: string, enum: [set, increase, decrease] }
+                quantity: { type: number, exclusiveMinimum: 0 }
+                reason: { type: string }
+                reference: { type: string }
+                unit_cost: { type: number, minimum: 0 }
+      responses: { '201': { description: Stock et mouvement enregistrés }, '422': { $ref: '#/components/responses/ValidationError' } }
+  /accounting/records:
+    get:
+      tags: [Comptabilité]
+      summary: Journal OHADA filtré avec synthèse débit/crédit
+      responses: { '200': { description: Écritures et balance } }
+  /configuration:
+    get:
+      tags: [Configuration]
+      summary: Identité, devises et taxes du contexte
+      responses: { '200': { description: Configuration } }
+    put:
+      tags: [Configuration]
+      summary: Modifier identité, taux de change et fiscalité
+      responses: { '200': { description: Configuration mise à jour }, '422': { $ref: '#/components/responses/ValidationError' } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: Sanctum }
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: integer } }
+  schemas:
+    CompanyProvisioning:
+      type: object
+      required: [name, administrator_name, administrator_email, administrator_password, administrator_password_confirmation]
+      properties:
+        name: { type: string }
+        legal_name: { type: string }
+        administrator_name: { type: string }
+        administrator_email: { type: string, format: email }
+        administrator_password: { type: string, format: password, minLength: 12 }
+        administrator_password_confirmation: { type: string, format: password }
+        base_currency: { type: string, enum: [USD, CDF] }
+        secondary_currency: { type: string, enum: [USD, CDF] }
+        exchange_rate: { type: number, exclusiveMinimum: 0 }
+        plan_code: { type: string, enum: [starter, professional, enterprise] }
+        subscription_days: { type: integer, minimum: 1, maximum: 3650 }
+    Product:
+      type: object
+      required: [name, sku, category, type, price]
+      properties:
+        name: { type: string }
+        sku: { type: string }
+        category: { type: string }
+        type: { type: string, enum: [product, service, combo] }
+        price: { type: number, minimum: 0 }
+        cost: { type: number, minimum: 0 }
+        sales_tax_rate: { type: number, minimum: 0, maximum: 100 }
+        tax_included: { type: boolean }
+        stock_qty: { type: number, minimum: 0 }
+        alert_qty: { type: number, minimum: 0 }
+  responses:
+    ValidationError: { description: Données invalides }
+    Forbidden: { description: Capacité, permission ou tenant refusé }
+    SubscriptionRequired: { description: Abonnement du PDV expiré ou suspendu }

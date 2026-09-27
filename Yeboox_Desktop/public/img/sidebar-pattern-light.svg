@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="640" viewBox="0 0 420 640" fill="none">
+  <defs>
+    <linearGradient id="light-glow" x1="78" y1="96" x2="370" y2="594" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#06B6D4" stop-opacity=".05"/>
+    </linearGradient>
+    <pattern id="light-dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#7C3AED" fill-opacity=".11"/>
+    </pattern>
+  </defs>
+  <rect width="420" height="640" fill="url(#light-dots)"/>
+  <circle cx="347" cy="516" r="166" fill="url(#light-glow)"/>
+  <path d="M58 482c68-81 162-111 282-91" stroke="#8B5CF6" stroke-opacity=".11" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 534c103-78 214-91 350-40" stroke="#06B6D4" stroke-opacity=".08" stroke-width="2" stroke-linecap="round"/>
+  <g stroke="#7C3AED" stroke-opacity=".12" stroke-width="2">
+    <rect x="262" y="432" width="88" height="104" rx="18"/>
+    <path d="M282 460h48M282 477h32M282 507h19M314 507h16" stroke-linecap="round"/>
+    <circle cx="333" cy="456" r="5" fill="#7C3AED" fill-opacity=".08"/>
+  </g>
+</svg>

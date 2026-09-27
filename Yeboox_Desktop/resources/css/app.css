@@ -1,0 +1,293 @@
+@import "tailwindcss";
+@import "../../vendor/livewire/flux/dist/flux.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+[x-cloak] {
+    display: none;
+}
+
+@layer base {
+    html {
+        color-scheme: light;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+
+    body {
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    button, a, input, select, textarea {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+@layer components {
+    /* Densité transversale pilotée depuis Configuration > Affichage & écran. */
+    html[data-yb-density="compact"] .yb-app-surface {
+        --yb-space-factor: .8;
+    }
+
+    html[data-yb-density="compact"] .yb-app-surface [data-flux-card] {
+        padding: 1rem !important;
+    }
+
+    html[data-yb-density="compact"] .yb-app-surface [data-flux-column],
+    html[data-yb-density="compact"] .yb-app-surface [data-flux-cell] {
+        padding-block: .625rem !important;
+        padding-inline: .875rem !important;
+    }
+
+    html[data-yb-density="compact"] .yb-pos-header {
+        height: 3.5rem;
+    }
+
+    html[data-yb-density="compact"] .yb-pos-product-card {
+        min-height: 8.5rem;
+    }
+
+    html[data-yb-density="compact"] .yb-pos-product-card > div:first-child {
+        height: 4.5rem;
+    }
+
+    @media (min-width: 1180px) and (max-width: 1279px) {
+        .yb-pos-products {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .yb-pos-cart-panel {
+            width: 21rem;
+        }
+    }
+
+    @media (max-width: 1179px) and (min-width: 768px) {
+        .yb-pos-products {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 860px) and (min-width: 640px) {
+        .yb-pos-products {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .yb-pos-header {
+            min-height: 3.5rem;
+            height: auto;
+        }
+    }
+
+    @media (min-width: 1600px) {
+        .yb-pos-products {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-height: 760px) and (min-width: 768px) {
+        .yb-pos-header {
+            height: 3.5rem;
+        }
+
+        .yb-pos-product-card {
+            min-height: 8.25rem;
+        }
+
+        .yb-pos-product-card > div:first-child {
+            height: 4.25rem;
+        }
+    }
+
+    @media (max-height: 620px) {
+        .yb-pos-product-card {
+            min-height: 7.5rem;
+        }
+
+        .yb-pos-product-card > div:first-child {
+            height: 3.75rem;
+        }
+    }
+
+    /* Illustration locale différenciée pour les apparences claire et sombre. */
+    .yb-sidebar-art {
+        background-image: url('../../public/img/sidebar-pattern-light.svg');
+        background-repeat: no-repeat;
+        background-position: center bottom;
+        background-size: 22rem auto;
+    }
+
+    .dark .yb-sidebar-art {
+        background-image: url('../../public/img/sidebar-pattern-dark.svg');
+    }
+
+    /*
+     * Shared data-table language for every authenticated management screen.
+     * Flux keeps the semantics and keyboard behaviour; this layer only
+     * normalises rhythm, alignment, contrast and responsive scrolling.
+     */
+    .yb-app-surface ui-table-scroll-area {
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in oklab, var(--color-zinc-400) 45%, transparent) transparent;
+        overscroll-behavior-inline: contain;
+    }
+
+    .yb-app-surface [data-flux-table] {
+        width: 100%;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .yb-app-surface [data-flux-columns] {
+        background: color-mix(in oklab, var(--color-zinc-100) 72%, transparent);
+    }
+
+    .dark .yb-app-surface [data-flux-columns] {
+        background: color-mix(in oklab, var(--color-zinc-950) 62%, transparent);
+    }
+
+    .yb-app-surface [data-flux-column] {
+        padding-block: 0.875rem !important;
+        padding-inline: 1.25rem !important;
+        vertical-align: middle;
+        color: var(--color-zinc-600);
+        font-size: 0.6875rem;
+        font-weight: 700;
+        line-height: 1rem;
+        letter-spacing: 0.075em;
+        text-transform: uppercase;
+    }
+
+    .dark .yb-app-surface [data-flux-column] {
+        color: var(--color-zinc-300);
+    }
+
+    .yb-app-surface [data-flux-cell] {
+        padding-block: 0.875rem !important;
+        padding-inline: 1.25rem !important;
+        vertical-align: middle;
+        line-height: 1.35rem;
+    }
+
+    .yb-app-surface [data-flux-row] [data-flux-cell] {
+        transition: background-color 150ms ease, border-color 150ms ease;
+    }
+
+    .yb-app-surface [data-flux-rows] [data-flux-row]:hover > [data-flux-cell] {
+        background: color-mix(in oklab, var(--color-violet-50) 60%, transparent);
+    }
+
+    .dark .yb-app-surface [data-flux-rows] [data-flux-row]:hover > [data-flux-cell] {
+        background: color-mix(in oklab, var(--color-violet-950) 28%, transparent);
+    }
+
+    .yb-app-surface [data-flux-cell][align="right"],
+    .yb-app-surface [data-flux-column][align="right"] {
+        text-align: right;
+    }
+
+    .yb-action-group {
+        width: max-content;
+        max-width: 100%;
+        margin-inline-start: auto;
+        justify-content: flex-end;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 2px color-mix(in oklab, var(--color-zinc-950) 8%, transparent);
+    }
+
+    .yb-action-trigger {
+        margin-inline-start: auto;
+        color: var(--color-violet-700) !important;
+        background: color-mix(in oklab, var(--color-violet-100) 75%, transparent) !important;
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-violet-300) 65%, transparent);
+    }
+
+    .yb-action-trigger:hover {
+        background: var(--color-violet-200) !important;
+    }
+
+    .dark .yb-action-trigger {
+        color: var(--color-violet-300) !important;
+        background: color-mix(in oklab, var(--color-violet-500) 15%, transparent) !important;
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-violet-400) 30%, transparent);
+    }
+
+    .yb-app-surface table:not([data-flux-table]) {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .yb-app-surface table:not([data-flux-table]) th {
+        padding: 0.875rem 1.25rem;
+        background: color-mix(in oklab, var(--color-zinc-100) 72%, transparent);
+        color: var(--color-zinc-600);
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.075em;
+        text-transform: uppercase;
+    }
+
+    .yb-app-surface table:not([data-flux-table]) td {
+        padding: 0.875rem 1.25rem;
+        vertical-align: middle;
+    }
+
+    @media (max-width: 640px) {
+        .yb-app-surface [data-flux-column],
+        .yb-app-surface [data-flux-cell],
+        .yb-app-surface table:not([data-flux-table]) th,
+        .yb-app-surface table:not([data-flux-table]) td {
+            padding-inline: 1rem !important;
+        }
+    }
+
+    @media print {
+        .yb-app-surface [data-flux-column],
+        .yb-app-surface [data-flux-cell] {
+            padding-block: 0.35rem !important;
+            padding-inline: 0.45rem !important;
+        }
+
+        .yb-app-surface [data-flux-rows] [data-flux-row]:hover > [data-flux-cell] {
+            background: transparent;
+        }
+    }
+}
+
+@layer utilities {
+    .yb-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in oklab, var(--color-zinc-400) 45%, transparent) transparent;
+    }
+}
+
+@media (max-width: 640px) {
+    .yb-app-surface,
+    .yb-app-surface > *,
+    .yb-app-surface form,
+    .yb-app-surface [data-flux-card] {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .yb-app-surface ui-table-scroll-area {
+        width: calc(100% + 1.5rem);
+        max-width: calc(100% + 1.5rem);
+        margin-inline: -0.75rem;
+        padding-inline: 0.75rem;
+    }
+
+    .yb-app-surface [data-flux-button-group] {
+        max-width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+}

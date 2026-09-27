@@ -1,0 +1,13 @@
+{
+    "Whoops! Something went wrong.": "Une erreur est survenue.",
+    "The provided password does not match your current password.": "Le mot de passe actuel est incorrect.",
+    "Unauthenticated.": "Vous devez vous connecter pour continuer.",
+    "This action is unauthorized.": "Vous n’êtes pas autorisé à effectuer cette action.",
+    "Page Expired": "La page a expiré",
+    "Server Error": "Erreur interne du serveur",
+    "Service Unavailable": "Service temporairement indisponible",
+    "Not Found": "Page introuvable",
+    "Forbidden": "Accès refusé",
+    "Too Many Requests": "Trop de requêtes",
+    "The given data was invalid.": "Les informations fournies ne sont pas valides."
+}

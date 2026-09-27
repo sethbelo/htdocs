@@ -1,0 +1,1 @@
+@include('errors.simple', ['code' => 503, 'title' => 'Service temporairement indisponible', 'message' => 'L’application effectue une opération de maintenance. Réessayez dans quelques instants.', 'retry' => true])

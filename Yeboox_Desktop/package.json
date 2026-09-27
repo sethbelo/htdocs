@@ -1,0 +1,121 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "name": "yeboox-pos",
+  "version": "9.0.0",
+    "description": "Yeboox Desktop — gestion commerciale et point de vente par Yetoo Tech",
+    "author": "Yetoo Tech",
+    "copyright": "Copyright © 2026 Yetoo Tech",
+    "private": true,
+    "type": "module",
+    "main": "main.cjs",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "electron:dev": "electron .",
+        "electron:build:mac": "npm run build && electron-builder --mac",
+        "postgres:prepare:win": "node scripts/prepare-postgres-runtime.cjs",
+        "electron:verify": "php -d memory_limit=512M vendor/bin/phpunit && node --check main.cjs && node --check postgres-runtime.cjs && node scripts/verify-electron-runtime.cjs",
+        "electron:build:win": "npm run electron:verify && npm run build && electron-builder --win nsis --x64",
+        "electron:build:portable": "npm run electron:verify && npm run build && electron-builder --win portable --x64",
+        "postinstall": "electron-builder install-app-deps"
+    },
+    "build": {
+        "appId": "com.yeboox.desktop",
+        "productName": "Yeboox Desktop",
+        "asar": false,
+        "directories": {
+            "output": "dist-electron"
+        },
+        "files": [
+            "**/*",
+            "!dist-electron/**/*",
+            "!output/**/*",
+            "!tmp/**/*",
+            "!.git/**/*",
+            "!.github/**/*",
+            "!tests/**/*",
+            "!.env*",
+            "!application-key.txt",
+            "!bootstrap/cache/config.php",
+            "!bootstrap/cache/routes*.php",
+            "!bootstrap/cache/events.php",
+            "!storage/app/**/*",
+            "!public/storage/**/*",
+            "!postgres-win/**/*",
+            "!database/database.sqlite",
+            "!database/backups/**/*",
+            "!database/*.sqlite-*",
+            "!node_modules/.cache/**/*",
+            "!storage/logs/**/*",
+            "!storage/framework/cache/data/**/*",
+            "!storage/framework/sessions/**/*",
+            "!storage/framework/views/**/*",
+            "!php-win/**/*",
+            "!postgres-runtime.cjs"
+        ],
+        "extraResources": [
+            {
+                "from": "php-win",
+                "to": "php",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ],
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "build/icon.ico",
+            "artifactName": "${productName}-${version}-Setup-${arch}.${ext}"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "include": "build/installer.nsh",
+            "language": "1036",
+            "installerLanguages": [
+                "fr_FR"
+            ],
+            "allowElevation": true,
+            "allowToChangeInstallationDirectory": true,
+            "installerIcon": "build/icon.ico",
+            "uninstallerIcon": "build/icon.ico",
+            "installerSidebar": "build/installer-slides/yetu-restaurant.bmp",
+            "uninstallerSidebar": "build/uninstallerSidebar.bmp",
+            "installerHeader": "build/installerHeader.bmp",
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "menuCategory": "Yetoo Tech",
+      "shortcutName": "Yeboox Desktop 9.0",
+            "deleteAppDataOnUninstall": false
+        },
+        "portable": {
+            "artifactName": "${productName}-${version}-Portable-${arch}.${ext}"
+        },
+        "mac": {
+            "target": [
+                "dmg"
+            ],
+            "icon": "build/icon.png",
+            "category": "public.app-category.business"
+        }
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "autoprefixer": "^10.4.16",
+        "concurrently": "^9.2.4",
+        "electron": "^43.3.0",
+        "electron-builder": "^26.15.3",
+        "laravel-vite-plugin": "^3.1",
+        "postcss": "^8.4.32",
+        "tailwindcss": "^4.0.0",
+        "vite": "^8.0.0",
+        "wait-on": "^9.1.0"
+    }
+}
