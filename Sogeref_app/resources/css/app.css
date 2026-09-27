@@ -1,0 +1,349 @@
+/* =============================================================================
+   SOGEREF ERP — Système de design
+   -----------------------------------------------------------------------------
+   Charte issue du Brand Guideline SOGEREF :
+     • Bleu SOGEREF   #104A63  → couleur d'autorité (navigation, titres, actions)
+     • Jaune Toiture  #FFCE31  → accent / action principale (≈ 10 %)
+     • Turquoise      #3ACECE  → information, liens, états « en cours »
+     • Rouge Drapeau  #F7313A  → alertes, rejets, suppression (usage rare)
+   Règle 60 / 30 / 10 : 60 % surfaces neutres, 30 % bleu, 10 % jaune.
+   Typographies : Saira (titres, chiffres clés — géométrie proche du logo)
+                  Inter  (interface, données, chiffres tabulaires).
+
+   Sommaire
+     1. Imports & sources
+     2. Jetons de couleur (palette + sémantique clair / sombre)
+     3. Base
+     4. Structure (sidebar, topbar, contenu)
+     5. Composants (boutons, champs, cartes, tableaux, badges…)
+     6. Modules spécifiques (kanban, POS, présences, stepper)
+     7. Utilitaires, impression & accessibilité
+   ============================================================================= */
+
+/* ─── 1. IMPORTS & SOURCES ──────────────────────────────────────────────────── */
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/saira/500.css';
+@import '@fontsource/saira/600.css';
+@import '@fontsource/saira/700.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../views/**/*.blade.php';
+@source '../../app/Livewire/**/*.php';
+@source '../../app/Support/**/*.php';
+@source '../../config/erp.php';
+
+/* ─── 2. JETONS DE COULEUR ──────────────────────────────────────────────────── */
+@theme {
+    --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Saira', 'Inter Variable', ui-sans-serif, sans-serif;
+
+    /* Bleu SOGEREF — 600 = couleur exacte du logo */
+    --color-brand-50: #edf5f8;
+    --color-brand-100: #d3e7ee;
+    --color-brand-200: #a8cedc;
+    --color-brand-300: #74aec4;
+    --color-brand-400: #3e88a6;
+    --color-brand-500: #1d6887;
+    --color-brand-600: #104a63;
+    --color-brand-700: #0d3d52;
+    --color-brand-800: #0b3243;
+    --color-brand-900: #092836;
+    --color-brand-950: #061a24;
+
+    /* Jaune Toiture — 400 = logo */
+    --color-sun-50: #fffbea;
+    --color-sun-100: #fff3c5;
+    --color-sun-200: #ffe78a;
+    --color-sun-300: #ffd94f;
+    --color-sun-400: #ffce31;
+    --color-sun-500: #f5b50b;
+    --color-sun-600: #d98e05;
+    --color-sun-700: #b46508;
+    --color-sun-800: #924e0e;
+    --color-sun-900: #78400f;
+
+    /* Turquoise — 400 = logo */
+    --color-lagoon-50: #edfcfc;
+    --color-lagoon-100: #d2f6f6;
+    --color-lagoon-200: #a9edee;
+    --color-lagoon-300: #6fdfe1;
+    --color-lagoon-400: #3acece;
+    --color-lagoon-500: #1fb0b2;
+    --color-lagoon-600: #1a8d91;
+    --color-lagoon-700: #1b7175;
+    --color-lagoon-800: #1d5b5f;
+    --color-lagoon-900: #1c4c50;
+
+    /* Rouge Drapeau — 500 = logo */
+    --color-flame-50: #fff1f1;
+    --color-flame-100: #ffe0e1;
+    --color-flame-200: #ffc6c8;
+    --color-flame-300: #ff9ea2;
+    --color-flame-400: #fd666c;
+    --color-flame-500: #f7313a;
+    --color-flame-600: #e3141d;
+    --color-flame-700: #bf0d15;
+    --color-flame-800: #9e0f16;
+    --color-flame-900: #831419;
+
+    /* Neutres froids, légèrement teintés de bleu */
+    --color-ink-25: #fafcfd;
+    --color-ink-50: #f4f7f9;
+    --color-ink-100: #e9eef2;
+    --color-ink-200: #d6dfe6;
+    --color-ink-300: #b6c4cf;
+    --color-ink-400: #8a9dac;
+    --color-ink-500: #667c8c;
+    --color-ink-600: #4e6272;
+    --color-ink-700: #3c4e5c;
+    --color-ink-800: #293946;
+    --color-ink-900: #1a2733;
+    --color-ink-950: #0f1820;
+
+    /* Sémantique : pilotée par les variables ci-dessous (clair / sombre) */
+    --color-canvas: var(--ui-canvas);
+    --color-surface: var(--ui-surface);
+    --color-surface-2: var(--ui-surface-2);
+    --color-line: var(--ui-line);
+    --color-line-strong: var(--ui-line-strong);
+    --color-fg: var(--ui-fg);
+    --color-fg-muted: var(--ui-fg-muted);
+    --color-fg-subtle: var(--ui-fg-subtle);
+
+    --radius-card: 14px;
+    --shadow-card: 0 1px 2px rgb(16 74 99 / .04), 0 1px 1px rgb(16 74 99 / .03);
+    --shadow-pop: 0 18px 50px -12px rgb(6 26 36 / .28), 0 4px 12px -4px rgb(6 26 36 / .12);
+
+    --animate-fade-in: fade-in .18s ease-out;
+    --animate-slide-in: slide-in .24s cubic-bezier(.2, .8, .2, 1);
+    @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @keyframes slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+
+:root {
+    --ui-canvas: #f4f7f9;
+    --ui-surface: #ffffff;
+    --ui-surface-2: #f8fafb;
+    --ui-line: #e3e9ee;
+    --ui-line-strong: #cfd9e1;
+    --ui-fg: #0f2733;
+    --ui-fg-muted: #4e6272;
+    --ui-fg-subtle: #8a9dac;
+    --sidebar-w: 264px;
+    color-scheme: light;
+}
+
+.dark {
+    --ui-canvas: #061a24;
+    --ui-surface: #0b2531;
+    --ui-surface-2: #0e2c3a;
+    --ui-line: #173a4a;
+    --ui-line-strong: #22495b;
+    --ui-fg: #e8f0f4;
+    --ui-fg-muted: #a8bccb;
+    --ui-fg-subtle: #6f8a9b;
+    color-scheme: dark;
+}
+
+/* ─── 3. BASE ───────────────────────────────────────────────────────────────── */
+@layer base {
+    [x-cloak] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { @apply bg-canvas font-sans text-[14px] text-fg antialiased; font-feature-settings: 'cv11', 'ss01'; }
+    h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -.01em; }
+    button, a, [role='button'] { -webkit-tap-highlight-color: transparent; }
+    ::selection { background: var(--color-sun-300); color: var(--color-brand-900); }
+    :focus-visible { outline: 2px solid var(--color-lagoon-400); outline-offset: 2px; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    * { scrollbar-width: thin; scrollbar-color: var(--ui-line-strong) transparent; }
+}
+
+/* ─── 4. STRUCTURE ──────────────────────────────────────────────────────────── */
+@layer components {
+    /* 4.1 Coquille : sidebar fixe + colonne de contenu */
+    .app-shell { @apply min-h-dvh; }
+    .app-main { @apply min-w-0 transition-[padding] duration-200; }
+    @media (min-width: 1024px) {
+        .app-main { padding-left: var(--sidebar-w); }
+        .sidebar-collapsed { --sidebar-w: 76px; }
+    }
+
+    /* 4.2 Barre latérale bleu SOGEREF */
+    .sidebar {
+        @apply fixed inset-y-0 left-0 z-40 flex flex-col text-white transition-[transform,width] duration-200;
+        width: var(--sidebar-w);
+        background: linear-gradient(180deg, var(--color-brand-700) 0%, var(--color-brand-800) 55%, var(--color-brand-900) 100%);
+    }
+    @media (max-width: 1023.98px) {
+        .sidebar { width: 288px; transform: translateX(-100%); box-shadow: var(--shadow-pop); }
+        .sidebar[data-open='true'] { transform: none; }
+    }
+    .sidebar-link {
+        @apply relative flex h-10 items-center gap-3 rounded-lg px-3 text-[13.5px] font-medium text-white/70 transition hover:bg-white/8 hover:text-white;
+    }
+    .sidebar-link[aria-current='page'] { @apply bg-white/10 text-white; }
+    .sidebar-link[aria-current='page']::before {
+        content: ''; @apply absolute top-2 bottom-2 -left-3 w-[3px] rounded-r-full bg-sun-400;
+    }
+    .sidebar-group { @apply px-3 pt-5 pb-1.5 text-[10.5px] font-semibold tracking-[.14em] text-lagoon-300/70 uppercase; }
+    @media (min-width: 1024px) {
+        .sidebar-collapsed .sidebar-label, .sidebar-collapsed .sidebar-group-text, .sidebar-collapsed .sidebar-extra { display: none; }
+        .sidebar-collapsed .sidebar-link { @apply justify-center px-0; }
+        .sidebar-collapsed .sidebar-group { @apply mx-auto h-px w-6 bg-white/12 p-0 my-3; }
+    }
+    /* Tablette paysage (1024–1279 px) : rail d'icônes par défaut pour libérer l'espace de travail */
+    @media (min-width: 1024px) and (max-width: 1279.98px) {
+        .app-shell { --sidebar-w: 76px; }
+        .sidebar-label, .sidebar-group-text, .sidebar-extra { display: none; }
+        .sidebar-link { @apply justify-center px-0; }
+        .sidebar-group { @apply mx-auto my-3 h-px w-6 bg-white/12 p-0; }
+    }
+
+    /* 4.3 Barre supérieure */
+    .topbar { @apply sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur-lg sm:px-6; }
+    .page { @apply mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7; }
+
+    /* ─── 5. COMPOSANTS ─────────────────────────────────────────────────────── */
+
+    /* 5.1 Boutons — hauteur 40 px (44 px sur tablette tactile) */
+    .btn {
+        @apply inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-[13.5px] font-semibold whitespace-nowrap transition select-none disabled:pointer-events-none disabled:opacity-50;
+    }
+    @media (pointer: coarse) { .btn { @apply h-11; } }
+    .btn-sm { @apply h-8 gap-1.5 px-3 text-[12.5px]; }
+    .btn-lg { @apply h-12 px-6 text-[15px]; }
+    .btn-icon { @apply w-10 px-0; }
+    .btn-sm.btn-icon { @apply w-8; }
+    .btn-primary { @apply bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:bg-brand-800; }
+    .btn-accent { @apply bg-sun-400 text-brand-900 shadow-sm hover:bg-sun-300 active:bg-sun-500; }
+    .btn-secondary { @apply border border-line-strong bg-surface text-fg shadow-sm hover:bg-surface-2; }
+    .btn-ghost { @apply text-fg-muted hover:bg-ink-100 hover:text-fg dark:hover:bg-white/6; }
+    .btn-danger { @apply bg-flame-500 text-white shadow-sm hover:bg-flame-600; }
+    .btn-soft { @apply bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-white/8 dark:text-brand-100 dark:hover:bg-white/12; }
+    .btn-success { @apply bg-emerald-600 text-white shadow-sm hover:bg-emerald-700; }
+
+    /* 5.2 Champs de formulaire */
+    .label { @apply mb-1.5 block text-[12.5px] font-semibold text-fg-muted; }
+    .input {
+        @apply block h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-[14px] text-fg shadow-[inset_0_1px_1px_rgb(16_74_99/.04)] transition placeholder:text-fg-subtle focus:border-lagoon-400 focus:ring-3 focus:ring-lagoon-400/20 focus:outline-none disabled:bg-surface-2 disabled:text-fg-subtle;
+    }
+    @media (pointer: coarse) { .input { @apply h-11 text-[15px]; } }
+    textarea.input { @apply h-auto py-2.5; }
+    select.input { @apply appearance-none bg-no-repeat pr-9; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238a9dac'%3e%3cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z'/%3e%3c/svg%3e"); background-position: right .6rem center; background-size: 1.1rem; }
+    .input-error { @apply border-flame-400 focus:border-flame-500 focus:ring-flame-500/15; }
+    .field-error { @apply mt-1 text-[12px] font-medium text-flame-600; }
+    .field-hint { @apply mt-1 text-[12px] text-fg-subtle; }
+    .checkbox { @apply size-4.5 rounded border-line-strong text-brand-600 focus:ring-lagoon-400/30; }
+
+    /* 5.3 Cartes */
+    .card { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]; }
+    .card-header { @apply flex items-center justify-between gap-3 border-b border-line px-5 py-3.5; }
+    .card-title { @apply font-display text-[15px] font-semibold text-fg; }
+    .card-body { @apply p-5; }
+
+    /* 5.4 Tableaux de données */
+    .table-wrap { @apply overflow-x-auto; }
+    .table { @apply w-full min-w-[640px] text-left text-[13.5px]; }
+    .table thead th { @apply sticky top-0 border-b border-line bg-surface-2 px-4 py-2.5 text-[11px] font-semibold tracking-wider whitespace-nowrap text-fg-subtle uppercase; }
+    .table tbody td { @apply border-b border-line/70 px-4 py-3 align-middle; }
+    .table tbody tr { @apply transition-colors; }
+    .table tbody tr:hover { @apply bg-brand-50/40 dark:bg-white/[.025]; }
+    .table tbody tr:last-child td { @apply border-b-0; }
+    .table .num { @apply text-right tabular-nums whitespace-nowrap; }
+    @media (pointer: coarse) { .table tbody td { @apply py-3.5; } }
+
+    /* 5.5 Badges de statut — tons */
+    .badge { @apply inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold whitespace-nowrap; }
+    .badge-dot::before { content: ''; @apply size-1.5 rounded-full bg-current; }
+    .tone-neutral { @apply bg-ink-100 text-ink-600 dark:bg-white/8 dark:text-ink-300; }
+    .tone-info { @apply bg-lagoon-50 text-lagoon-700 dark:bg-lagoon-400/12 dark:text-lagoon-300; }
+    .tone-brand { @apply bg-brand-50 text-brand-600 dark:bg-brand-400/15 dark:text-brand-200; }
+    .tone-accent { @apply bg-violet-50 text-violet-700 dark:bg-violet-400/12 dark:text-violet-300; }
+    .tone-warning { @apply bg-sun-100 text-sun-800 dark:bg-sun-400/15 dark:text-sun-300; }
+    .tone-success { @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-400/12 dark:text-emerald-300; }
+    .tone-danger { @apply bg-flame-50 text-flame-700 dark:bg-flame-400/12 dark:text-flame-300; }
+
+    /* 5.6 Onglets */
+    .tabs { @apply -mb-px flex gap-1 overflow-x-auto border-b border-line; }
+    .tab { @apply relative flex h-11 shrink-0 items-center gap-2 px-3.5 text-[13.5px] font-semibold text-fg-subtle transition hover:text-fg; }
+    .tab[aria-selected='true'] { @apply text-brand-600 dark:text-lagoon-300; }
+    .tab[aria-selected='true']::after { content: ''; @apply absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-sun-400; }
+    .segmented { @apply inline-flex rounded-lg bg-ink-100 p-1 dark:bg-white/6; }
+    .segmented > * { @apply rounded-md px-3 py-1.5 text-[12.5px] font-semibold text-fg-muted transition; }
+    .segmented > [aria-pressed='true'] { @apply bg-surface text-fg shadow-sm; }
+
+    /* 5.7 Panneau latéral & fenêtres modales */
+    .overlay { @apply fixed inset-0 z-50 bg-brand-950/45 backdrop-blur-[2px]; }
+    .drawer { @apply fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-surface shadow-[var(--shadow-pop)] sm:max-w-xl; }
+    .drawer-lg { @apply sm:max-w-3xl; }
+    .drawer-xl { @apply sm:max-w-5xl; }
+    .modal { @apply relative z-50 w-full max-w-lg rounded-2xl border border-line bg-surface shadow-[var(--shadow-pop)]; }
+
+    /* 5.8 KPI */
+    .kpi { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] relative overflow-hidden p-4 sm:p-5; }
+    .kpi-value { @apply mt-1 font-display text-[26px] leading-tight font-semibold tracking-tight text-fg tabular-nums; }
+    .kpi-label { @apply text-[12.5px] font-medium text-fg-muted; }
+
+    /* 5.9 Divers */
+    .avatar { @apply inline-grid shrink-0 place-items-center rounded-full font-semibold uppercase; }
+    .kbd { @apply rounded border border-line-strong bg-surface-2 px-1.5 py-0.5 font-sans text-[10.5px] font-semibold text-fg-subtle; }
+    .link { @apply font-semibold text-brand-600 hover:text-brand-500 hover:underline dark:text-lagoon-300; }
+    .divider { @apply border-t border-line; }
+    .muted { @apply text-fg-muted; }
+    .subtle { @apply text-fg-subtle; }
+    .eyebrow { @apply text-[11px] font-semibold tracking-[.16em] text-lagoon-600 uppercase dark:text-lagoon-300; }
+
+    /* ─── 6. MODULES ────────────────────────────────────────────────────────── */
+
+    /* 6.1 Kanban (commandes, CRM, atelier, tâches) */
+    .kanban { @apply flex gap-4 overflow-x-auto pb-4 snap-x; }
+    .kanban-col { @apply flex w-[290px] shrink-0 snap-start flex-col rounded-[var(--radius-card)] bg-ink-100/60 p-2 dark:bg-white/[.03]; }
+    .kanban-card { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] cursor-grab p-3.5 transition hover:border-brand-200 hover:shadow-md active:cursor-grabbing; }
+    .sortable-ghost { @apply opacity-40; }
+
+    /* 6.2 Stepper du suivi de commande */
+    .stepper { @apply flex items-start overflow-x-auto pb-1; }
+    .step { @apply relative flex min-w-[112px] flex-1 flex-col items-center text-center; }
+    .step::before { content: ''; @apply absolute top-4 right-1/2 left-[-50%] h-0.5 bg-line-strong; }
+    .step:first-child::before { display: none; }
+    .step[data-state='done']::before, .step[data-state='current']::before { @apply bg-brand-500; }
+    .step-dot { @apply relative z-10 grid size-8 place-items-center rounded-full border-2 border-line-strong bg-surface text-[12px] font-bold text-fg-subtle; }
+    .step[data-state='done'] .step-dot { @apply border-brand-600 bg-brand-600 text-white; }
+    .step[data-state='current'] .step-dot { @apply border-sun-400 bg-sun-400 text-brand-900 ring-4 ring-sun-400/25; }
+    .step-label { @apply mt-2 px-1 text-[11.5px] font-semibold text-fg-subtle; }
+    .step[data-state='done'] .step-label, .step[data-state='current'] .step-label { @apply text-fg; }
+
+    /* 6.3 Point de vente — grille tactile */
+    .pos-tile { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] flex flex-col overflow-hidden text-left transition hover:border-brand-300 hover:shadow-md active:scale-[.98]; }
+
+    /* 6.4 Présences — boutons d'état tactiles */
+    .presence-btn { @apply grid h-10 min-w-10 place-items-center rounded-lg border border-line-strong px-2 text-[12px] font-bold text-fg-subtle transition; }
+    .presence-btn[aria-pressed='true'][data-status='present'] { @apply border-emerald-500 bg-emerald-500 text-white; }
+    .presence-btn[aria-pressed='true'][data-status='late'] { @apply border-sun-400 bg-sun-400 text-brand-900; }
+    .presence-btn[aria-pressed='true'][data-status='half'] { @apply border-violet-500 bg-violet-500 text-white; }
+    .presence-btn[aria-pressed='true'][data-status='absent'] { @apply border-flame-500 bg-flame-500 text-white; }
+    .presence-btn[aria-pressed='true'][data-status='leave'] { @apply border-lagoon-500 bg-lagoon-500 text-white; }
+
+    /* 6.5 Bandeau de marque : filet tricolore issu du logo */
+    .brand-rule { height: 4px; background: linear-gradient(90deg, var(--color-brand-600) 0 70%, var(--color-sun-400) 70% 85%, var(--color-lagoon-400) 85% 95%, var(--color-flame-500) 95%); }
+}
+
+/* ─── 7. UTILITAIRES, IMPRESSION & ACCESSIBILITÉ ────────────────────────────── */
+@utility scrollbar-none {
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+@media print {
+    .sidebar, .topbar, .no-print { display: none !important; }
+    .app-main { padding: 0 !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; }
+}

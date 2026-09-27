@@ -1,0 +1,45 @@
+CONTRAT DE LICENCE D’EXPLORATION — YUKI COMPTABILITÉ
+Version 1.0 — SOGEREF Sarl — 24 août 2026
+
+IMPORTANT : VEUILLEZ LIRE ATTENTIVEMENT CE CONTRAT AVANT L’INSTALLATION.
+
+En installant ou en utilisant SOGEREF ERP (« le Logiciel »), l’utilisateur accepte les conditions ci-dessous conclues avec SOGEREF Sarl (« l’Éditeur »). Si ces conditions ne sont pas acceptées, l’installation doit être annulée.
+
+1. OBJET DE LA LICENCE
+L’Éditeur accorde une licence personnelle, limitée, non exclusive, non transférable et révocable permettant d’installer et d’explorer le Logiciel à des fins d’évaluation interne.
+
+2. DURÉE D’EXPLORATION
+La licence est valable pendant trois cent soixante-cinq (365) jours à compter de la première activation du Logiciel. La date de fin est enregistrée localement. La désinstallation, la réinstallation ou la modification de l’horloge du système ne prolonge pas la durée accordée. À l’expiration, une nouvelle licence fournie par SOGEREF Sarl est nécessaire.
+
+3. UTILISATION AUTORISÉE
+La présente édition est destinée à l’exploration, aux essais fonctionnels, à la formation et à la validation interne. Elle ne constitue pas une licence commerciale définitive. L’utilisateur demeure responsable de la vérification de ses obligations fiscales, comptables, sociales et réglementaires.
+
+4. RESTRICTIONS
+Il est interdit de vendre, louer, sous-licencier, redistribuer ou mettre le Logiciel à la disposition d’un tiers sans accord écrit de l’Éditeur. Il est également interdit de contourner le mécanisme de durée, de supprimer les mentions de propriété, ou de tenter de désassembler le Logiciel, sauf disposition impérative contraire de la loi applicable.
+
+5. DONNÉES ET SAUVEGARDES
+Les données de l’édition Desktop sont stockées localement sur l’ordinateur de l’utilisateur. L’utilisateur est seul responsable de la qualité des informations saisies, de la confidentialité des accès et de la réalisation de sauvegardes régulières. Avant toute désinstallation ou intervention technique, une copie de la base de données et des pièces jointes doit être conservée.
+
+6. PROPRIÉTÉ INTELLECTUELLE
+Le Logiciel, sa documentation, ses composants, sa marque et ses éléments graphiques demeurent la propriété de SOGEREF Sarl et de leurs ayants droit respectifs. La licence ne transfère aucun droit de propriété.
+
+7. GARANTIE LIMITÉE
+L’édition d’exploration est fournie en l’état afin de permettre son évaluation. Dans les limites permises par la loi, l’Éditeur ne garantit pas l’absence totale d’erreurs ni l’adéquation à un besoin particulier. Toute anomalie doit être signalée avec les informations permettant sa reproduction.
+
+8. RESPONSABILITÉ
+Dans les limites autorisées par la loi, SOGEREF Sarl ne pourra être tenue responsable des pertes indirectes, pertes d’exploitation, erreurs de saisie ou pertes de données résultant notamment d’une absence de sauvegarde, d’une mauvaise configuration ou d’un usage non conforme.
+
+9. MISES À JOUR ET ASSISTANCE
+Les mises à jour, services d’assistance, migrations de données et prestations de déploiement peuvent faire l’objet d’un accord séparé. L’installation de cette édition n’implique pas automatiquement un contrat de maintenance.
+
+10. RÉSILIATION
+La licence prend fin automatiquement à son expiration ou en cas de violation substantielle du présent contrat. À la fin de la licence, l’utilisateur doit cesser d’utiliser le Logiciel, sous réserve des opérations autorisées de sauvegarde ou d’exportation.
+
+11. DROIT APPLICABLE
+Le présent contrat est régi par le droit applicable au siège de l’Éditeur, sous réserve des règles impératives protégeant l’utilisateur. Les parties rechercheront d’abord une résolution amiable de tout différend.
+
+12. CONTACT
+Éditeur : SOGEREF Sarl
+Produit : SOGEREF ERP — Édition Exploration
+
+EN CLIQUANT SUR « J’ACCEPTE », L’UTILISATEUR RECONNAÎT AVOIR LU ET ACCEPTÉ LE PRÉSENT CONTRAT.

@@ -1,0 +1,6 @@
+{{-- Monogramme SOGEREF (toit jaune + sourire turquoise), pour icône d'application --}}
+<svg viewBox="0 0 64 64" fill="none" {{ $attributes->merge(['class' => 'size-9']) }} aria-hidden="true">
+    <rect width="64" height="64" rx="15" fill="#104A63"/>
+    <path d="M13 36V27.5L32 14l19 13.5V36" stroke="#FFCE31" stroke-width="6" stroke-linejoin="miter" fill="none"/>
+    <path d="M23 38h18c-1.8 4.6-5.3 7-9 7s-7.2-2.4-9-7Z" fill="#3ACECE"/>
+</svg>

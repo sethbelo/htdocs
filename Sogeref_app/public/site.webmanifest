@@ -1,0 +1,23 @@
+{
+    "name": "Yuki Comptabilité",
+    "short_name": "Yuki",
+    "description": "CRM, facturation et comptabilité OHADA",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f7f8fb",
+    "theme_color": "#2563eb",
+    "icons": [
+        {
+            "src": "/branding/yuki-icon-light.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/branding/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
+
