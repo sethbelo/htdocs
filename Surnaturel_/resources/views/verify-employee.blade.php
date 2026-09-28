@@ -16,7 +16,7 @@
             @endif
             <div>
                 <h1 class="font-display text-2xl font-bold text-zinc-900 dark:text-white">{{ $employee->fullName() }}</h1>
-                <p class="font-semibold text-[#E6007E]">{{ $employee->job_title ?? 'Agent' }}</p>
+                <p class="font-semibold text-[#DB0D17]">{{ $employee->job_title ?? 'Agent' }}</p>
                 <p class="text-sm text-zinc-500">{{ $employee->department?->name }} · {{ $employee->matricule }}</p>
             </div>
             @if ($valid)

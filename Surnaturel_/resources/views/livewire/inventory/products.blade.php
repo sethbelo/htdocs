@@ -1,6 +1,7 @@
 <div class="space-y-6">
     <x-page-header title="Articles" subtitle="Services d’impression, papiers, encres, consommables, produits finis et marchandises boutique.">
         <x-slot:actions>
+            <livewire:import-data type="products" :key="'import-products'" />
             @can('products.create')<flux:button size="sm" variant="primary" icon="plus" wire:click="create">Nouvel article</flux:button>@endcan
         </x-slot:actions>
     </x-page-header>
@@ -40,7 +41,7 @@
                         <flux:table.cell align="end" @class(['font-medium', 'text-red-600' => $product->is_stockable && (float) $product->stock_total <= (float) $product->min_stock])>
                             {{ $product->is_stockable ? rtrim(rtrim(number_format((float) $product->stock_total, 3, ',', ' '), '0'), ',').' '.$product->unit?->symbol : '—' }}
                         </flux:table.cell>
-                        <flux:table.cell>@can('products.update')<flux:button size="xs" variant="ghost" icon="pencil" wire:click="edit({{ $product->id }})" />@endcan</flux:table.cell>
+                        <flux:table.cell>@can('products.update')<x-edit-button wire:click="edit({{ $product->id }})" />@endcan</flux:table.cell>
                     </flux:table.row>
                 @endforeach
             </flux:table.rows>

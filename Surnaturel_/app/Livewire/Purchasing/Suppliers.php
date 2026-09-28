@@ -14,6 +14,10 @@ class Suppliers extends Component
 {
     use InteractsWithToasts, WithPagination;
 
+    public string $city = '';
+
+    public string $state = 'active';
+
     public string $search = '';
 
     public ?int $editingId = null;
@@ -66,8 +70,11 @@ class Suppliers extends Component
                 ->withCount('purchaseOrders')
                 ->withSum(['invoices as invoiced' => fn ($q) => $q->where('status', '!=', 'cancelled')], 'total')
                 ->withSum(['invoices as settled' => fn ($q) => $q->where('status', '!=', 'cancelled')], 'amount_paid')
-                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('code', 'like', "%{$this->search}%"))
+                ->when($this->search, fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$this->search}%")->orWhere('code', 'like', "%{$this->search}%")->orWhere('contact_name', 'like', "%{$this->search}%")->orWhere('phone', 'like', "%{$this->search}%")))
+                ->when($this->city, fn ($q) => $q->where('city', $this->city))
+                ->when($this->state !== '', fn ($q) => $q->where('is_active', $this->state === 'active'))
                 ->orderBy('name')->paginate(20),
+            'cities' => Supplier::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city'),
         ]);
     }
 }

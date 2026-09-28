@@ -49,7 +49,7 @@ class ScreensRenderTest extends TestCase
             $this->assertSame(200, $response->status(), "L’écran « {$name} » ne s’affiche pas : ".$response->exception?->getMessage());
         }
 
-        $this->get(route('home'))->assertRedirect(route('dashboard'));
+        $this->get(route('home'))->assertRedirect(route('launcher'));
 
         $order = Order::query()->firstOrFail();
         $this->get(route('orders.show', $order))->assertOk()->assertSee($order->number);

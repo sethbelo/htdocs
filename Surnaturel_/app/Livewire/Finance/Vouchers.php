@@ -5,8 +5,12 @@ namespace App\Livewire\Finance;
 use App\Enums\VoucherStatus;
 use App\Enums\VoucherType;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
+use App\Models\Account;
+use App\Models\TreasuryAccount;
 use App\Models\Voucher;
 use App\Services\Approvals\ApprovalService;
+use App\Services\Finance\ReceivablesService;
 use App\Services\Support\NumberGenerator;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
@@ -17,7 +21,10 @@ use Livewire\WithPagination;
 #[Title('Bons')]
 class Vouchers extends Component
 {
-    use InteractsWithToasts, WithPagination;
+    use InteractsWithToasts, WithListFilters, WithPagination;
+
+    #[Url(as: 'statut', except: '')]
+    public string $status = '';
 
     #[Url(as: 'type')]
     public string $type = '';
@@ -27,6 +34,11 @@ class Vouchers extends Component
 
     /** @var list<array<string, string>> */
     public array $lines = [];
+
+    public ?int $executeId = null;
+
+    /** @var array<string, string> */
+    public array $execution = ['treasury_account_id' => '', 'expense_account' => '605'];
 
     /**
      * Préfixes de numérotation des bons administratifs.
@@ -85,8 +97,49 @@ class Vouchers extends Component
     {
         return view('livewire.finance.vouchers', [
             'vouchers' => Voucher::query()->with('creator', 'approvalRequest.currentStep')->visibleTo(auth()->user())
-                ->when($this->type, fn ($q) => $q->where('type', $this->type))->latest()->paginate(20),
+                ->when($this->type, fn ($q) => $q->where('type', $this->type))
+                ->when($this->status, fn ($q) => $q->where('status', $this->status))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'beneficiary', 'description']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'created_at'))
+                ->latest()->paginate(20),
             'types' => VoucherType::options(),
+            'executing' => $this->executeId ? Voucher::query()->find($this->executeId) : null,
+            'treasuryAccounts' => TreasuryAccount::query()->where('is_active', true)->where(fn ($q) => $q->whereNull('site_id')->orWhereIn('site_id', auth()->user()->accessibleSiteIds()))->orderBy('name')->get(),
+            'expenseAccounts' => Account::query()->where('class', 6)->where('is_postable', true)->orderBy('code')->get(['code', 'name']),
         ]);
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['status', 'type'];
+    }
+
+    public function openExecute(int $id): void
+    {
+        $this->authorize('vouchers.disburse');
+        $this->executeId = Voucher::query()->visibleTo(auth()->user())->findOrFail($id)->id;
+        $this->execution = ['treasury_account_id' => '', 'expense_account' => '605'];
+        $this->modal('execute-voucher')->show();
+    }
+
+    public function execute(ReceivablesService $finance): void
+    {
+        $this->authorize('vouchers.disburse');
+        $voucher = Voucher::query()->visibleTo(auth()->user())->findOrFail($this->executeId);
+        $pays = in_array($voucher->type, [VoucherType::DisbursementVoucher, VoucherType::CashVoucher], true);
+
+        if ($pays) {
+            $this->validate([
+                'execution.treasury_account_id' => ['required', 'exists:treasury_accounts,id'],
+                'execution.expense_account' => ['required', 'exists:accounts,code'],
+            ], [], ['execution.treasury_account_id' => 'compte de trésorerie', 'execution.expense_account' => 'compte de charge']);
+        }
+
+        $done = $this->attempt(fn () => $finance->executeVoucher($voucher, auth()->user(), $pays ? TreasuryAccount::query()->find($this->execution['treasury_account_id']) : null, $pays ? $this->execution['expense_account'] : null), $pays ? 'Bon payé et comptabilisé.' : 'Bon marqué comme exécuté.');
+
+        if ($done) {
+            $this->modal('execute-voucher')->close();
+            $this->reset('executeId');
+        }
     }
 }

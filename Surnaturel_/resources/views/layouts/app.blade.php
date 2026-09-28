@@ -9,101 +9,134 @@
     $navigation = \App\Support\Navigation::for($user);
     $palette = \App\Support\Navigation::flat($user);
     $isActive = fn (array $item): bool => request()->routeIs($item['match'] ?? $item['route']);
+    $departments = \App\Support\Navigation::departments($user);
+    $current = \App\Support\Navigation::current($user);
+    $badges = \App\Support\Navigation::badges($user);
 @endphp
-<body class="app-shell h-full font-sans antialiased" x-data :class="{ 'sidebar-collapsed': $store.shell.collapsed }">
+<body class="app-shell h-full font-sans antialiased" data-settings-url="{{ Route::has('settings.company') && $user->can('settings.view') ? route('settings.company') : '' }}" x-data :class="{ 'sidebar-collapsed': $store.shell.collapsed }">
 
     {{-- ═══ 1. BARRE LATÉRALE ═══════════════════════════════════════════════════
          Bureau : fixe, rétractable (icônes seules). Mobile : tiroir. ═══════════ --}}
     <div x-show="$store.shell.drawer" x-transition.opacity x-on:click="$store.shell.drawer = false" class="overlay z-30 lg:hidden" x-cloak></div>
 
-    <aside class="sidebar" :data-open="$store.shell.drawer" aria-label="Navigation principale">
-        <div class="flex h-16 shrink-0 items-center justify-between gap-2 px-4">
-            <a href="{{ route('home') }}" wire:navigate class="sidebar-brand" title="{{ \App\Models\Setting::get('company.name', 'Surnaturel Print') }}">
-                <x-app-logo variant="full" tone="light" class="sidebar-logo-full h-10 w-auto max-w-[190px]" />
-                <x-app-logo class="sidebar-logo-mark size-11" />
+    <aside class="sidebar" :data-open="$store.shell.drawer" aria-label="Navigation principale"
+        x-data="{ switcher: false }" x-init="$store.nav.ensure(@js($current['department']['key'] ?? null))">
+        {{-- Marque + sélecteur de département (« espace de travail ») --}}
+        <div class="flex h-14 shrink-0 items-center justify-between gap-2 px-3">
+            <a href="{{ route('launcher') }}" wire:navigate class="sidebar-brand" title="Toutes les applications">
+                <x-brand-type class="sidebar-logo-full" />
+                <x-brand-type variant="mono" class="sidebar-logo-mark" />
             </a>
-            <button type="button" class="shell-icon-btn text-white/70 hover:bg-white/10 hover:text-white lg:hidden" x-on:click="$store.shell.drawer = false" aria-label="Fermer le menu">
-                <flux:icon.x-mark variant="micro" />
-            </button>
+            <button type="button" class="shell-icon-btn size-8 lg:hidden" x-on:click="$store.shell.drawer = false" aria-label="Fermer le menu"><flux:icon.x-mark variant="micro" /></button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto px-3 pb-4 scrollbar-none">
-            @foreach ($navigation as $group)
-                <p class="sidebar-group"><span class="sidebar-group-text">{{ $group['heading'] }}</span></p>
-                <ul class="space-y-0.5">
-                    @foreach ($group['items'] as $item)
-                        <li>
-                            <a href="{{ route($item['route']) }}" wire:navigate class="sidebar-link" @if ($isActive($item)) aria-current="page" @endif
-                               title="{{ $item['label'] }}" x-on:click="$store.shell.drawer = false">
-                                <flux:icon :icon="$item['icon']" variant="mini" class="size-[19px] shrink-0 opacity-90" />
-                                <span class="sidebar-label truncate">{{ $item['label'] }}</span>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            @endforeach
+        <div class="sidebar-extra relative px-3" x-on:click.outside="switcher = false" x-on:keydown.escape.window="switcher = false">
+            <button type="button" x-on:click="switcher = true" class="nav-switcher group" :aria-expanded="switcher">
+                <span class="size-8 shrink-0 rounded-lg bg-surface p-1 shadow-sm ring-1 ring-line dark:bg-white/8 dark:ring-white/10">{!! \App\Support\AppIcons::svg($current['department']['icon'] ?? 'launcher') !!}</span>
+                <span class="min-w-0 flex-1 text-left leading-none">
+                    <span class="block truncate text-[13px] font-semibold text-fg">{{ $current['department']['heading'] ?? 'Applications' }}</span>
+                    <span class="mt-1 block truncate text-[11px] text-fg-subtle">{{ $current['item']['label'] ?? count($departments).' départements' }}</span>
+                </span>
+                <flux:icon.chevron-up-down variant="micro" class="size-4 shrink-0 text-fg-subtle transition group-hover:text-fg" />
+            </button>
+            <div x-show="switcher" x-cloak x-transition.origin.top class="nav-switcher-menu">
+                @foreach ($departments as $department)
+                    <a href="{{ route($department['items'][0]['route']) }}" wire:navigate x-on:click="switcher = false; $store.shell.drawer = false"
+                        @class(['nav-switcher-option', 'is-current' => ($current['department']['key'] ?? null) === $department['key']])>
+                        <span class="size-6 shrink-0">{!! \App\Support\AppIcons::svg($department['icon']) !!}</span>
+                        <span class="flex-1 truncate">{{ $department['heading'] }}</span>
+                        <span class="text-[11px] text-fg-subtle">{{ count($department['items']) }}</span>
+                    </a>
+                @endforeach
+                <div class="my-1 h-px bg-line"></div>
+                <a href="{{ route('launcher') }}" wire:navigate class="nav-switcher-option"><flux:icon.squares-2x2 variant="micro" class="size-4" /> Toutes les applications</a>
+            </div>
+        </div>
+
+        <nav class="mt-2 flex flex-1 flex-col gap-4 overflow-y-auto px-3 pb-4 scrollbar-none">
+            <div class="flex flex-col gap-0.5">
+                <button type="button" x-on:click="$dispatch('open-palette')" class="sidebar-link group" title="Rechercher">
+                    <flux:icon.magnifying-glass variant="micro" class="sidebar-glyph" /><span class="sidebar-label flex-1 text-left">Rechercher</span><kbd class="nav-kbd sidebar-label">⌘K</kbd>
+                </button>
+                <a href="{{ route('launcher') }}" wire:navigate class="sidebar-link group" @if (request()->routeIs('launcher')) aria-current="page" @endif title="Applications">
+                    <flux:icon.squares-2x2 variant="micro" class="sidebar-glyph" /><span class="sidebar-label flex-1">Applications</span>
+                </a>
+                @foreach ([['dashboard', 'Tableau de bord', 'presentation-chart-line', 'dashboard.view'], ['approvals.index', 'Mes validations', 'check-badge', 'approvals.view'], ['tasks.index', 'Tâches', 'clipboard-document-check', 'tasks.view']] as [$route, $label, $icon, $permission])
+                    @can($permission)
+                        <a href="{{ route($route) }}" wire:navigate class="sidebar-link group" @if (request()->routeIs($route)) aria-current="page" @endif title="{{ $label }}" x-on:click="$store.shell.drawer = false">
+                            <flux:icon :icon="$icon" variant="micro" class="sidebar-glyph" /><span class="sidebar-label flex-1">{{ $label }}</span>
+                            @if (($badges[$route] ?? 0) > 0)<span class="nav-badge">{{ $badges[$route] }}</span>@endif
+                        </a>
+                    @endcan
+                @endforeach
+            </div>
+
+            <div class="flex flex-col gap-0.5">
+                <p class="sidebar-group"><span class="sidebar-group-text">Départements</span></p>
+                @foreach ($departments as $department)
+                    @php($isCurrent = ($current['department']['key'] ?? null) === $department['key'])
+                    <div class="flex flex-col" wire:key="nav-{{ $department['key'] }}">
+                        <button type="button" x-on:click="$store.nav.toggle('{{ $department['key'] }}')" @class(['sidebar-link sidebar-dept group', 'is-current' => $isCurrent]) title="{{ $department['heading'] }}">
+                            <span class="size-[18px] shrink-0">{!! \App\Support\AppIcons::svg($department['icon']) !!}</span>
+                            <span class="sidebar-label flex-1 truncate text-left">{{ $department['heading'] }}</span>
+                            <flux:icon.chevron-right variant="micro" class="sidebar-label size-3.5 text-fg-subtle transition-transform duration-200" ::class="$store.nav.isOpen('{{ $department['key'] }}') && 'rotate-90'" />
+                        </button>
+                        <a href="{{ route($department['items'][0]['route']) }}" wire:navigate class="sidebar-rail-link" title="{{ $department['heading'] }}"><span class="size-5">{!! \App\Support\AppIcons::svg($department['icon']) !!}</span></a>
+                        <div class="nav-children" :class="$store.nav.isOpen('{{ $department['key'] }}') && 'is-open'">
+                            <div class="relative flex min-h-0 flex-col gap-0.5 overflow-hidden pt-0.5">
+                                <span class="absolute top-1 bottom-1 left-[18px] border-l border-line"></span>
+                                @foreach ($department['items'] as $item)
+                                    <a href="{{ route($item['route']) }}" wire:navigate class="sidebar-link sidebar-child" @if ($isActive($item)) aria-current="page" @endif title="{{ $item['label'] }}" x-on:click="$store.shell.drawer = false">
+                                        <span class="size-4 shrink-0">{!! \App\Support\AppIcons::svg($item['route']) !!}</span>
+                                        <span class="truncate">{{ $item['label'] }}</span>
+                                        @if (($badges[$item['route']] ?? 0) > 0)<span class="nav-badge ms-auto">{{ $badges[$item['route']] }}</span>@endif
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </nav>
 
-        <div class="sidebar-extra border-t border-white/10 p-3">
-            <flux:dropdown position="top" align="start" class="w-full">
-                <button type="button" class="flex w-full items-center gap-3 rounded-xl bg-white/6 p-2.5 text-left transition hover:bg-white/10">
-                    <span class="avatar size-9 shrink-0 bg-safran-400 text-[12px] text-brand-900">{{ $user->initials() }}</span>
-                    <span class="min-w-0 flex-1 text-[12px] leading-tight">
-                        <span class="block truncate font-semibold">{{ $user->name }}</span>
-                        <span class="block truncate text-white/55">{{ $roleLabel }}</span>
-                    </span>
-                    <flux:icon.chevron-up-down variant="micro" class="size-4 shrink-0 text-white/40" />
+        <div class="mt-auto flex flex-col gap-0.5 border-t border-line p-3">
+            @can('settings.view')
+                <a href="{{ route('settings.company') }}" wire:navigate class="sidebar-link group" @if (request()->routeIs('settings.*')) aria-current="page" @endif title="Paramètres">
+                    <flux:icon.cog-6-tooth variant="micro" class="sidebar-glyph" /><span class="sidebar-label flex-1">Paramètres</span><kbd class="nav-kbd sidebar-label">⌘,</kbd>
+                </a>
+            @endcan
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="sidebar-link group w-full" title="Déconnexion">
+                    <flux:icon.arrow-right-start-on-rectangle variant="micro" class="sidebar-glyph" /><span class="sidebar-label flex-1 text-left">Déconnexion</span>
                 </button>
-                <x-user-menu :user="$user" />
-            </flux:dropdown>
+            </form>
         </div>
     </aside>
 
     {{-- ═══ 2. COLONNE PRINCIPALE ══════════════════════════════════════════════ --}}
-    <div class="app-main">
+    <div class="app-main bg-illustrated">
         <header class="topbar">
             <button type="button" class="shell-icon-btn lg:hidden" x-on:click="$store.shell.drawer = true" aria-label="Ouvrir le menu">
                 <flux:icon.bars-3 variant="mini" />
             </button>
-            <button type="button" class="shell-icon-btn max-lg:hidden" x-on:click="$store.shell.toggleCollapsed()" :aria-label="$store.shell.collapsed ? 'Déplier le menu' : 'Replier le menu'" title="Replier / déplier le menu">
-                <flux:icon.bars-3-bottom-left variant="mini" />
+            <button type="button" class="shell-icon-btn size-9 max-lg:hidden" x-on:click="$store.shell.toggleCollapsed()" :aria-label="$store.shell.collapsed ? 'Déplier le menu' : 'Replier le menu'" title="Replier / déplier le menu (Ctrl/⌘ + B)">
+                <svg x-show="! $store.shell.collapsed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="size-[18px]"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M16 15l-3-3 3-3"/></svg>
+                <svg x-show="$store.shell.collapsed" x-cloak viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="size-[18px]"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M14 9l3 3-3 3"/></svg>
             </button>
+            <nav class="hidden min-w-0 items-center gap-1.5 text-[13px] text-fg-subtle xl:flex" aria-label="Fil d’Ariane">
+                <a href="{{ route('launcher') }}" wire:navigate class="truncate hover:text-fg">{{ \App\Models\Setting::get('company.name', 'Surnaturel Print') }}</a>
+                @if ($current['department'])<span>/</span><span class="truncate">{{ $current['department']['heading'] }}</span>@endif
+                <span>/</span><span class="truncate font-medium text-fg">{{ $current['item']['label'] ?? ($title ?? 'Applications') }}</span>
+            </nav>
 
-            <button type="button" x-on:click="$dispatch('open-palette')" class="flex h-10 w-full max-w-xs items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 text-left text-[13.5px] text-fg-subtle transition hover:border-line-strong sm:max-w-md">
+            <button type="button" x-on:click="$dispatch('open-palette')" class="ml-auto flex h-9 min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 text-left text-[13px] text-fg-subtle transition hover:border-line-strong sm:max-w-xs xl:max-w-64">
                 <flux:icon.magnifying-glass variant="mini" class="size-4 shrink-0" />
                 <span class="flex-1 truncate">Rechercher un écran, une action…</span>
                 <span class="kbd max-sm:hidden">Ctrl K</span>
             </button>
 
-            <div class="ml-auto flex items-center gap-0.5 sm:gap-1">
-                @if ($user->hasConsolidatedView())
-                    <flux:badge size="sm" color="indigo" icon="globe-alt" class="mr-1 max-sm:hidden">Vue consolidée</flux:badge>
-                @else
-                    <flux:badge size="sm" color="zinc" icon="map-pin" class="mr-1 max-sm:hidden">{{ $user->sites->pluck('name')->implode(' · ') ?: 'Aucun siège' }}</flux:badge>
-                @endif
-
-                <livewire:notifications-bell />
-
-                <flux:dropdown position="bottom" align="end" class="max-sm:hidden">
-                    <button type="button" class="shell-icon-btn" aria-label="Apparence">
-                        <flux:icon.swatch variant="mini" />
-                    </button>
-                    <flux:menu>
-                        <flux:menu.radio.group x-data variant="segmented" x-model="$flux.appearance">
-                            <flux:menu.radio value="light" icon="sun">Clair</flux:menu.radio>
-                            <flux:menu.radio value="dark" icon="moon">Sombre</flux:menu.radio>
-                            <flux:menu.radio value="system" icon="computer-desktop">Auto</flux:menu.radio>
-                        </flux:menu.radio.group>
-                    </flux:menu>
-                </flux:dropdown>
-
-                <flux:dropdown position="bottom" align="end">
-                    <button type="button" class="ml-1 rounded-full p-0.5 transition hover:ring-4 hover:ring-brand-100 dark:hover:ring-white/10" aria-label="Mon compte">
-                        <span class="avatar size-8 bg-brand-600 text-[11px] text-white">{{ $user->initials() }}</span>
-                    </button>
-                    <x-user-menu :user="$user" />
-                </flux:dropdown>
-            </div>
+            @include('partials.topbar-actions')
         </header>
 
         <main class="page space-y-6">
@@ -111,31 +144,7 @@
         </main>
     </div>
 
-    {{-- ═══ 3. PALETTE DE COMMANDES (Ctrl/⌘ + K) ══════════════════════════════ --}}
-    <div x-data="commandPalette(@js($palette))" x-on:open-palette.window="show()" x-on:keydown.window.ctrl.k.prevent="show()" x-on:keydown.window.meta.k.prevent="show()" x-on:keydown.escape.window="open = false">
-        <div x-show="open" x-cloak class="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]">
-            <div class="overlay" x-on:click="open = false"></div>
-            <div x-show="open" x-transition.scale.98 class="modal max-w-xl overflow-hidden">
-                <div class="flex items-center gap-3 border-b border-line px-4">
-                    <flux:icon.magnifying-glass variant="mini" class="text-fg-subtle" />
-                    <input x-ref="search" x-model="query" x-on:input="active = 0" x-on:keydown.arrow-down.prevent="move(1)" x-on:keydown.arrow-up.prevent="move(-1)" x-on:keydown.enter.prevent="go()"
-                           class="h-14 flex-1 border-0 bg-transparent text-[15px] outline-none placeholder:text-fg-subtle" placeholder="Aller à… (commandes, caisse, stock…)">
-                    <span class="kbd">Échap</span>
-                </div>
-                <ul class="max-h-[50vh] overflow-y-auto p-2">
-                    <template x-for="(item, index) in filtered" :key="item.url + item.label">
-                        <li>
-                            <button type="button" x-on:click="go(item)" x-on:mouseenter="active = index" :class="index === active ? 'bg-brand-50 text-brand-700 dark:bg-white/8 dark:text-white' : ''" class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-[14px]">
-                                <span x-text="item.label" class="font-medium"></span>
-                                <span x-text="item.group" class="text-[11.5px] text-fg-subtle"></span>
-                            </button>
-                        </li>
-                    </template>
-                    <li x-show="filtered.length === 0" class="px-3 py-8 text-center text-[13px] text-fg-subtle">Aucun résultat.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+    @include('partials.shell-overlays')
 
     @persist('toast')
         <flux:toast position="top end" />

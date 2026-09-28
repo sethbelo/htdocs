@@ -61,7 +61,7 @@ class LoginAndSpacesTest extends TestCase
     public function test_each_role_is_redirected_to_its_own_space(): void
     {
         $expectations = [
-            'directeur-general' => 'dashboard',
+            'directeur-general' => 'launcher',
             'graphiste' => 'design.board',
             'imprimeur' => 'production.board',
             'comptable' => 'accounting.index',
@@ -96,5 +96,25 @@ class LoginAndSpacesTest extends TestCase
         $admin = $this->userWithRole('super-admin');
         $this->actingAs($admin)->get(route('orders.index'))->assertForbidden();
         $this->actingAs($admin)->get(route('settings.users'))->assertOk();
+    }
+
+    public function test_the_full_screen_launcher_only_shows_the_applications_of_each_role(): void
+    {
+        $all = collect(Navigation::groups())->flatMap(fn (array $group) => $group['items']);
+
+        foreach (['caissier', 'magasinier', 'graphiste', 'comptable', 'agent-marketing', 'directeur-general'] as $role) {
+            $user = $this->userWithRole($role);
+            $response = $this->actingAs($user)->get(route('launcher'))->assertOk();
+
+            foreach ($all as $item) {
+                $link = 'href="'.route($item['route']).'"';
+                $user->can($item['permission'])
+                    ? $response->assertSee($link, false)
+                    : $response->assertDontSee($link, false);
+            }
+        }
+
+        $cashier = $this->userWithRole('caissier');
+        $this->actingAs($cashier)->get(route('launcher'))->assertSee('Point de vente')->assertDontSee('Comptabilité')->assertDontSee('Visa des paies');
     }
 }

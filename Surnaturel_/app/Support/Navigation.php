@@ -2,8 +2,11 @@
 
 namespace App\Support;
 
+use App\Models\Task;
 use App\Models\User;
+use App\Services\Approvals\ApprovalService;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 /**
  * Menu latéral : chaque entrée n'apparaît que si l'utilisateur possède la permission requise.
@@ -49,6 +52,7 @@ class Navigation
                 ['label' => 'Entrées & sorties', 'icon' => 'arrows-up-down', 'route' => 'inventory.operations', 'permission' => 'inventory.view'],
                 ['label' => 'Transferts', 'icon' => 'arrows-right-left', 'route' => 'inventory.transfers', 'permission' => 'inventory.view'],
                 ['label' => 'Rapport temps réel', 'icon' => 'signal', 'route' => 'inventory.report', 'permission' => 'inventory.view'],
+                ['label' => 'Rapports d’entrepôt', 'icon' => 'document-chart-bar', 'route' => 'inventory.reports', 'permission' => 'inventory.view'],
                 ['label' => 'Achats', 'icon' => 'shopping-bag', 'route' => 'purchases.index', 'permission' => 'purchases.view'],
                 ['label' => 'Fournisseurs', 'icon' => 'building-storefront', 'route' => 'suppliers.index', 'permission' => 'suppliers.view'],
             ]],
@@ -109,5 +113,66 @@ class Navigation
                 ->all())
             ->values()
             ->all();
+    }
+
+    /**
+     * Icône « application » de chaque département (lanceur, sélecteur d'espace).
+     *
+     * @var array<string, array{icon: string, color: string, description: string}>
+     */
+    public const DEPARTMENTS = [
+        'Pilotage' => ['icon' => 'dashboard', 'color' => '#134A63', 'description' => 'Tableau de bord, validations et tâches'],
+        'Commercial' => ['icon' => 'clients.index', 'color' => '#F2705E', 'description' => 'Clients, devis, commandes et fidélité'],
+        'Marketing' => ['icon' => 'followups.index', 'color' => '#53BDC5', 'description' => 'Relances, appels et WhatsApp'],
+        'Caisse & boutique' => ['icon' => 'pos', 'color' => '#FFCE34', 'description' => 'Point de vente et encaissements'],
+        'Production' => ['icon' => 'production.board', 'color' => '#134A63', 'description' => 'Graphisme, impression, machines, livraisons'],
+        'Logistique' => ['icon' => 'inventory.index', 'color' => '#F59A3B', 'description' => 'Articles, stocks, achats et fournisseurs'],
+        'Finance' => ['icon' => 'accounting.index', 'color' => '#FFCE34', 'description' => 'Factures, trésorerie, comptabilité'],
+        'Ressources humaines' => ['icon' => 'hr.employees', 'color' => '#53BDC5', 'description' => 'Personnel, présence, paie, santé'],
+        'Administration' => ['icon' => 'settings.company', 'color' => '#8B5A83', 'description' => 'Documents, rapports, audit, paramètres'],
+    ];
+
+    /**
+     * Départements accessibles (sans « Mon espace ») avec leurs rubriques.
+     *
+     * @return list<array{heading: string, key: string, icon: string, color: string, description: string, items: list<array<string, string>>}>
+     */
+    public static function departments(User $user): array
+    {
+        return collect(self::for($user))
+            ->reject(fn (array $group) => $group['heading'] === 'Mon espace')
+            ->map(fn (array $group) => $group + ['key' => Str::slug($group['heading'])] + (self::DEPARTMENTS[$group['heading']] ?? ['icon' => 'launcher', 'color' => '#134A63', 'description' => '']))
+            ->values()->all();
+    }
+
+    /**
+     * Département et rubrique correspondant à la page affichée.
+     *
+     * @return array{department: array<string, mixed>|null, item: array<string, string>|null}
+     */
+    public static function current(User $user): array
+    {
+        foreach (self::departments($user) as $department) {
+            foreach ($department['items'] as $item) {
+                if (request()->routeIs($item['match'] ?? $item['route'])) {
+                    return ['department' => $department, 'item' => $item];
+                }
+            }
+        }
+
+        return ['department' => null, 'item' => null];
+    }
+
+    /**
+     * Pastilles de compteurs du menu (validations en attente, tâches ouvertes).
+     *
+     * @return array<string, int>
+     */
+    public static function badges(User $user): array
+    {
+        return once(fn () => [
+            'approvals.index' => $user->can('approvals.view') ? app(ApprovalService::class)->pendingFor($user)->count() : 0,
+            'tasks.index' => $user->can('tasks.view') ? Task::query()->where('assigned_to', $user->id)->where('status', '!=', 'done')->count() : 0,
+        ]);
     }
 }

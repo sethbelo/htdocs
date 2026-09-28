@@ -5,6 +5,12 @@
         </x-slot:actions>
     </x-page-header>
 
+    <div class="panel flex flex-wrap gap-2.5 p-3">
+        <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Nom, code, marque, modèle…" size="sm" class="max-w-sm" />
+        <flux:select wire:model.live="machineStatus" size="sm" class="max-w-48"><flux:select.option value="">Tous les états</flux:select.option>@foreach ($statuses as $v => $l)<flux:select.option :value="$v">{{ $l }}</flux:select.option>@endforeach</flux:select>
+        <flux:select wire:model.live="machineType" size="sm" class="max-w-52"><flux:select.option value="">Tous les types</flux:select.option>@foreach ($types as $v => $l)<flux:select.option :value="$v">{{ $l }}</flux:select.option>@endforeach</flux:select>
+    </div>
+
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         @foreach ($machines as $machine)
             <div class="panel p-4 space-y-3" wire:key="m-{{ $machine->id }}">
@@ -45,7 +51,7 @@
                 </details>
                 <div class="flex gap-2">
                     @can('machines.update')
-                        <flux:button size="sm" icon="pencil" wire:click="edit({{ $machine->id }})">Modifier</flux:button>
+                        <x-edit-button wire:click="edit({{ $machine->id }})" />
                         <flux:button size="sm" icon="wrench-screwdriver" wire:click="openMaintenance({{ $machine->id }})">Maintenance / panne</flux:button>
                     @endcan
                 </div>

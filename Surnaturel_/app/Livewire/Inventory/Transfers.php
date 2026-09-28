@@ -4,6 +4,7 @@ namespace App\Livewire\Inventory;
 
 use App\Enums\StockTransferStatus;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
 use App\Models\Product;
 use App\Models\StockTransfer;
 use App\Models\Warehouse;
@@ -19,7 +20,9 @@ use Livewire\WithPagination;
 #[Title('Transferts de stock')]
 class Transfers extends Component
 {
-    use InteractsWithToasts, WithPagination;
+    use InteractsWithToasts, WithListFilters, WithPagination;
+
+    public ?int $warehouseFilter = null;
 
     #[Url(as: 'statut')]
     public string $status = '';
@@ -142,6 +145,9 @@ class Transfers extends Component
         return view('livewire.inventory.transfers', [
             'transfers' => (clone $base)->with('from', 'to', 'requester', 'shipper', 'receiver', 'items')
                 ->when($this->status, fn (Builder $q) => $q->where('status', $this->status))
+                ->when($this->warehouseFilter, fn (Builder $q) => $q->where(fn (Builder $w) => $w->where('from_warehouse_id', $this->warehouseFilter)->orWhere('to_warehouse_id', $this->warehouseFilter)))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'notes', 'carrier_name', 'from.name', 'to.name']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'requested_at'))
                 ->latest('requested_at')->paginate(20),
             'counts' => (clone $base)->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status'),
             'allWarehouses' => Warehouse::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
@@ -149,5 +155,10 @@ class Transfers extends Component
             'current' => $this->transferId ? StockTransfer::query()->with('items.product', 'from', 'to', 'requester', 'shipper', 'receiver')->find($this->transferId) : null,
             'statuses' => StockTransferStatus::options(),
         ]);
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['status', 'warehouseFilter'];
     }
 }

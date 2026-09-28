@@ -20,6 +20,12 @@ class Machines extends Component
 {
     use InteractsWithToasts;
 
+    public string $search = '';
+
+    public string $machineStatus = '';
+
+    public string $machineType = '';
+
     public ?int $editingId = null;
 
     /** @var array<string, mixed> */
@@ -114,7 +120,11 @@ class Machines extends Component
     public function render()
     {
         return view('livewire.production.machines', [
-            'machines' => Machine::query()->visibleTo(auth()->user())->with('printRoom', 'site', 'maintenances')->withSum('maintenances', 'cost')->withSum('maintenances', 'downtime_hours')->orderBy('code')->get(),
+            'machines' => Machine::query()->visibleTo(auth()->user())->with('printRoom', 'site', 'maintenances')->withSum('maintenances', 'cost')->withSum('maintenances', 'downtime_hours')
+                ->when($this->search, fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$this->search}%")->orWhere('code', 'like', "%{$this->search}%")->orWhere('brand', 'like', "%{$this->search}%")->orWhere('model', 'like', "%{$this->search}%")))
+                ->when($this->machineStatus, fn ($q) => $q->where('status', $this->machineStatus))
+                ->when($this->machineType, fn ($q) => $q->where('type', $this->machineType))
+                ->orderBy('code')->get(),
             'types' => MachineType::options(),
             'statuses' => MachineStatus::options(),
             'maintenanceTypes' => MaintenanceType::options(),

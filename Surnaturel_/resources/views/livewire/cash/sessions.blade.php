@@ -8,6 +8,10 @@
                 <flux:select.option value="open">Ouvertes</flux:select.option>
                 <flux:select.option value="closed">Clôturées</flux:select.option>
             </flux:select>
+            <flux:select wire:model.live="registerFilter" class="max-w-48">
+                <flux:select.option value="">Toutes les caisses</flux:select.option>
+                @foreach ($registers as $register)<flux:select.option :value="$register->id">{{ $register->code }} — {{ $register->name }}</flux:select.option>@endforeach
+            </flux:select>
             <flux:select wire:model.live="siteId" class="max-w-xs">
                 <flux:select.option value="">Tous les sièges</flux:select.option>
                 @foreach ($this->accessibleSites() as $site)
@@ -15,6 +19,7 @@
                 @endforeach
             </flux:select>
         </div>
+        <x-filter-bar class="border-0 p-0 shadow-none" placeholder="N° de session, caissier, caisse…" period-label="Ouverture" />
         <flux:table :paginate="$sessions">
             <flux:table.columns>
                 <flux:table.column>Session</flux:table.column>
@@ -30,7 +35,7 @@
             <flux:table.rows>
                 @foreach ($sessions as $session)
                     <flux:table.row :key="$session->id">
-                        <flux:table.cell><button wire:click="show({{ $session->id }})" class="font-medium text-indigo-600">{{ $session->number }}</button></flux:table.cell>
+                        <flux:table.cell><button wire:click="show({{ $session->id }})" class="font-medium text-brand-600">{{ $session->number }}</button></flux:table.cell>
                         <flux:table.cell>{{ $session->register->code }} <span class="text-zinc-500">· {{ $session->register->site->name }}</span></flux:table.cell>
                         <flux:table.cell>{{ $session->cashier->name }}</flux:table.cell>
                         <flux:table.cell>{{ $session->opened_at->format('d/m/Y H:i') }}</flux:table.cell>

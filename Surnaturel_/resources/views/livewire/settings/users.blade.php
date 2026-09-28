@@ -8,6 +8,8 @@
         <div class="flex flex-wrap gap-3">
             <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Nom, identifiant, e-mail…" class="max-w-sm" />
             <flux:select wire:model.live="role" class="max-w-xs"><flux:select.option value="">Tous les rôles</flux:select.option>@foreach ($allRoles as $r)<flux:select.option :value="$r">{{ config("erp.roles.$r.label", $r) }}</flux:select.option>@endforeach</flux:select>
+            <flux:select wire:model.live="state" class="max-w-40"><flux:select.option value="">Tous les comptes</flux:select.option><flux:select.option value="active">Actifs</flux:select.option><flux:select.option value="inactive">Désactivés</flux:select.option></flux:select>
+            <flux:select wire:model.live="siteFilter" class="max-w-52"><flux:select.option value="">Tous les sièges</flux:select.option>@foreach ($sites as $s)<flux:select.option :value="$s->id">{{ $s->name }}</flux:select.option>@endforeach</flux:select>
         </div>
         <flux:table :paginate="$users">
             <flux:table.columns><flux:table.column>Utilisateur</flux:table.column><flux:table.column>Rôles</flux:table.column><flux:table.column>Sièges</flux:table.column><flux:table.column>Dernière connexion</flux:table.column><flux:table.column>Connexion & état</flux:table.column><flux:table.column></flux:table.column></flux:table.columns>

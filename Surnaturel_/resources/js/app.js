@@ -33,6 +33,112 @@ document.addEventListener('alpine:init', () => {
     });
 
     /**
+     * Menu latéral : départements dépliés, mémorisés entre les pages ; le département courant est toujours ouvert.
+     */
+    window.Alpine.store('nav', {
+        open: (() => {
+            try {
+                return JSON.parse(localStorage.getItem('erp-nav-open') || '[]');
+            } catch {
+                return [];
+            }
+        })(),
+        isOpen(key) {
+            return this.open.includes(key);
+        },
+        toggle(key) {
+            this.open = this.isOpen(key) ? this.open.filter((k) => k !== key) : [...this.open, key];
+            this.persist();
+        },
+        ensure(key) {
+            if (key && ! this.isOpen(key)) {
+                this.open = [...this.open, key];
+                this.persist();
+            }
+        },
+        persist() {
+            try {
+                localStorage.setItem('erp-nav-open', JSON.stringify(this.open));
+            } catch {
+                //
+            }
+        },
+    });
+
+    /**
+     * Synchronisation cloud : état de la connexion, requêtes en cours, dernière synchronisation réussie
+     * et contrôle du serveur toutes les 60 s (sans prolonger la session d'inactivité).
+     */
+    window.Alpine.store('sync', {
+        online: navigator.onLine,
+        reachable: true,
+        pending: 0,
+        lastSync: Date.now(),
+        now: Date.now(),
+        get state() {
+            if (! this.online || ! this.reachable) {
+                return 'offline';
+            }
+
+            return this.pending > 0 ? 'syncing' : 'synced';
+        },
+        get label() {
+            if (this.state === 'offline') {
+                return this.online ? 'Serveur injoignable' : 'Hors ligne';
+            }
+            if (this.state === 'syncing') {
+                return 'Synchronisation…';
+            }
+            const seconds = Math.max(0, Math.round((this.now - this.lastSync) / 1000));
+
+            return seconds < 10 ? 'Synchronisé' : seconds < 60 ? `Synchronisé · ${seconds} s` : `Synchronisé · ${Math.round(seconds / 60)} min`;
+        },
+        async ping() {
+            const url = document.querySelector('meta[name="sync-ping"]')?.content;
+            if (! url || ! this.online) {
+                return;
+            }
+            try {
+                const response = await fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-store' });
+                this.reachable = response.ok;
+                if (response.ok) {
+                    this.lastSync = Date.now();
+                }
+            } catch {
+                this.reachable = false;
+            }
+        },
+        init() {
+            window.addEventListener('online', () => { this.online = true; this.ping(); });
+            window.addEventListener('offline', () => { this.online = false; });
+            setInterval(() => { this.now = Date.now(); }, 5000);
+            setInterval(() => this.ping(), 60000);
+        },
+    });
+
+    /**
+     * Installation comme application de bureau (PWA : Chrome, Edge, Safari « Ajouter au Dock »).
+     */
+    window.Alpine.store('install', {
+        prompt: null,
+        installed: window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches,
+        get available() {
+            return this.prompt !== null && ! this.installed;
+        },
+        async run() {
+            if (! this.prompt) {
+                return;
+            }
+            this.prompt.prompt();
+            const { outcome } = await this.prompt.userChoice;
+            if (outcome === 'accepted') {
+                this.installed = true;
+            }
+            this.prompt = null;
+        },
+    });
+
+    /**
      * Palette de commandes (Ctrl/⌘ + K) : recherche instantanée dans les écrans accessibles.
      */
     window.Alpine.data('commandPalette', (items = []) => ({
@@ -68,8 +174,8 @@ document.addEventListener('alpine:init', () => {
         instance: null,
         init() {
             const dark = document.documentElement.classList.contains('dark');
-            Chart.defaults.color = dark ? '#b3b3d1' : '#56567d';
-            Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(30,27,75,0.06)';
+            Chart.defaults.color = dark ? '#a9c0ca' : '#525d63';
+            Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(19,74,99,0.07)';
             Chart.defaults.font.family = 'Instrument Sans, ui-sans-serif, system-ui';
             this.instance = new Chart(this.$refs.canvas, config);
         },
@@ -187,3 +293,70 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+
+/**
+ * Requêtes Livewire : alimentent l'indicateur de synchronisation.
+ */
+document.addEventListener('livewire:init', () => {
+    window.Livewire.hook('request', ({ succeed, fail }) => {
+        const sync = window.Alpine.store('sync');
+        sync.pending++;
+        succeed(() => {
+            sync.pending = Math.max(0, sync.pending - 1);
+            sync.reachable = true;
+            sync.lastSync = Date.now();
+        });
+        fail(() => {
+            sync.pending = Math.max(0, sync.pending - 1);
+            if (! navigator.onLine) {
+                sync.online = false;
+            }
+        });
+    });
+});
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    const assign = () => { window.Alpine.store('install').prompt = event; };
+    window.Alpine ? assign() : document.addEventListener('alpine:init', assign);
+});
+
+window.addEventListener('appinstalled', () => {
+    if (window.Alpine) {
+        window.Alpine.store('install').installed = true;
+    }
+});
+
+/**
+ * Raccourcis clavier « application de bureau » :
+ * Ctrl/⌘ + B replier le menu · Ctrl/⌘ + , paramètres · Ctrl/⌘ + Maj + F plein écran · Ctrl/⌘ + Maj + L changer de thème.
+ */
+document.addEventListener('keydown', (event) => {
+    const mod = event.ctrlKey || event.metaKey;
+    if (! mod || ! window.Alpine) {
+        return;
+    }
+    const key = event.key.toLowerCase();
+    if (key === 'b' && ! event.shiftKey) {
+        event.preventDefault();
+        window.Alpine.store('shell').toggleCollapsed();
+    } else if (key === 'f' && event.shiftKey) {
+        event.preventDefault();
+        document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+    } else if (key === ',' && ! event.shiftKey) {
+        const url = document.body.dataset.settingsUrl;
+        if (url) {
+            event.preventDefault();
+            window.Livewire.navigate(url);
+        }
+    } else if (key === 'l' && event.shiftKey) {
+        event.preventDefault();
+        const dark = document.documentElement.classList.contains('dark');
+        window.Alpine.evaluate(document.body, `$flux.appearance = '${dark ? 'light' : 'dark'}'`);
+    }
+});
+
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}

@@ -2,6 +2,7 @@
 <div class="space-y-6" @if ($live) wire:poll.10s @endif>
     <x-page-header title="Rapport d’entrepôt en temps réel" eyebrow="Logistique" subtitle="Toutes les entrées et sorties, qui les a enregistrées et qui les a effectuées. Export du rapport journalier signé.">
         <x-slot:actions>
+            <flux:button size="sm" icon="document-chart-bar" :href="route('inventory.reports')" wire:navigate>Rapports</flux:button>
             @can('inventory.export')
                 <flux:button size="sm" icon="document-arrow-down" wire:click="exportPdf">Rapport journalier PDF</flux:button>
                 <flux:button size="sm" icon="table-cells" wire:click="exportExcel">Excel</flux:button>

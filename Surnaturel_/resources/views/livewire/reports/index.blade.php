@@ -11,7 +11,7 @@
     <div class="grid gap-6 xl:grid-cols-4">
         <div class="panel p-2">
             @foreach ($reports as $key => $definition)
-                <button wire:click="$set('report', '{{ $key }}')" wire:key="r-{{ $key }}" @class(['block w-full rounded-lg px-3 py-2 text-left text-sm', 'bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300' => $report === $key, 'hover:bg-zinc-50 dark:hover:bg-zinc-800' => $report !== $key])>{{ $definition['label'] }}</button>
+                <button wire:click="$set('report', '{{ $key }}')" wire:key="r-{{ $key }}" @class(['block w-full rounded-lg px-3 py-2 text-left text-sm', 'bg-brand-50 font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300' => $report === $key, 'hover:bg-zinc-50 dark:hover:bg-zinc-800' => $report !== $key])>{{ $definition['label'] }}</button>
             @endforeach
         </div>
 

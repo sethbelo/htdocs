@@ -1,6 +1,7 @@
 <div class="space-y-6">
     <x-page-header title="Employés" subtitle="Permanents, journaliers, contractuels, prestataires et stagiaires.">
-        <x-slot:actions>@can('employees.create')<flux:button size="sm" variant="primary" icon="user-plus" wire:click="create">Nouvel employé</flux:button>@endcan</x-slot:actions>
+        <x-slot:actions>
+            <livewire:import-data type="employees" :key="'import-employees'" />@can('employees.create')<flux:button size="sm" variant="primary" icon="user-plus" wire:click="create">Nouvel employé</flux:button>@endcan</x-slot:actions>
     </x-page-header>
 
     <div class="panel p-4 space-y-4">
@@ -17,13 +18,13 @@
                 @forelse ($employees as $employee)
                     <flux:table.row :key="$employee->id">
                         <flux:table.cell class="text-zinc-500">{{ $employee->matricule }}</flux:table.cell>
-                        <flux:table.cell><button wire:click="show({{ $employee->id }})" class="font-medium hover:text-indigo-600">{{ $employee->fullName() }}</button><div class="text-xs text-zinc-500">{{ $employee->phone }}</div></flux:table.cell>
+                        <flux:table.cell><button wire:click="show({{ $employee->id }})" class="font-medium hover:text-brand-600">{{ $employee->fullName() }}</button><div class="text-xs text-zinc-500">{{ $employee->phone }}</div></flux:table.cell>
                         <flux:table.cell>{{ $employee->job_title }}</flux:table.cell>
                         <flux:table.cell>{{ $employee->department?->name }}</flux:table.cell>
                         <flux:table.cell>{{ $employee->site?->name }}</flux:table.cell>
                         <flux:table.cell><flux:badge size="sm">{{ $employee->employment_status->label() }}</flux:badge></flux:table.cell>
                         <flux:table.cell align="end">{{ round(($employee->minutes_month ?? 0) / 60, 1) }} h</flux:table.cell>
-                        <flux:table.cell>@can('update', $employee)<flux:button size="xs" variant="ghost" icon="pencil" wire:click="edit({{ $employee->id }})" />@endcan</flux:table.cell>
+                        <flux:table.cell>@can('update', $employee)<x-edit-button wire:click="edit({{ $employee->id }})" />@endcan</flux:table.cell>
                     </flux:table.row>
                 @empty
                     <flux:table.row><flux:table.cell colspan="8"><x-empty-state icon="identification" title="Aucun employé" /></flux:table.cell></flux:table.row>

@@ -4,6 +4,7 @@ namespace App\Livewire\Deliveries;
 
 use App\Enums\DeliveryStatus;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
 use App\Models\Delivery;
 use App\Services\Delivery\DeliveryService;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +17,7 @@ use Livewire\WithPagination;
 #[Title('Livraisons')]
 class Index extends Component
 {
-    use InteractsWithToasts, WithFileUploads, WithPagination;
+    use InteractsWithToasts, WithFileUploads, WithListFilters, WithPagination;
 
     #[Url(as: 'statut')]
     public string $status = 'active';
@@ -86,6 +87,8 @@ class Index extends Component
                 ->when($this->status === 'active', fn (Builder $q) => $q->whereIn('status', [DeliveryStatus::Pending, DeliveryStatus::InProgress, DeliveryStatus::Postponed]))
                 ->when($this->status && $this->status !== 'active', fn (Builder $q) => $q->where('status', $this->status))
                 ->when($this->mineOnly, fn (Builder $q) => $q->where('driver_id', auth()->id()))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'recipient_name', 'phone', 'city', 'order.number']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'scheduled_at'))
                 ->orderByRaw('scheduled_at IS NULL')->orderBy('scheduled_at')->latest()
                 ->paginate(20),
             'statuses' => DeliveryStatus::options(),

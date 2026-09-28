@@ -1,26 +1,50 @@
 <div class="space-y-6">
-    <x-page-header title="Comptabilité générale" subtitle="Toutes les ventes POS, encaissements, achats et paies alimentent automatiquement les journaux.">
+    <x-page-header title="Comptabilité générale" eyebrow="Finance" subtitle="Ventes, encaissements, achats et paies alimentent automatiquement les journaux. Analyse, états financiers et exports PDF / Excel.">
         <x-slot:actions>
-            @can('accounting.export')<flux:button size="sm" icon="arrow-down-tray" wire:click="export">Balance Excel</flux:button>@endcan
+            <livewire:import-data type="accounts" :key="'import-accounts'" />
+            @can('accounting.export')
+                <flux:button size="sm" icon="document-arrow-down" wire:click="exportPdf" wire:loading.attr="disabled" wire:target="exportPdf">PDF</flux:button>
+                <flux:button size="sm" icon="table-cells" wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel">Excel</flux:button>
+            @endcan
             @can('accounting.create')<flux:button size="sm" variant="primary" icon="plus" wire:click="newEntry">Écriture manuelle</flux:button>@endcan
         </x-slot:actions>
     </x-page-header>
 
-    <div class="flex flex-wrap items-center gap-2">
-        @foreach (['journal' => 'Journaux', 'ledger' => 'Grand livre', 'balance' => 'Balance', 'income' => 'Compte de résultat', 'sheet' => 'Bilan', 'reconcile' => 'Rapprochement', 'chart' => 'Plan comptable'] as $key => $label)
-            <flux:button size="sm" :variant="$tab === $key ? 'primary' : 'ghost'" wire:click="$set('tab', '{{ $key }}')">{{ $label }}</flux:button>
+    <div class="tabs">
+        @foreach (\App\Livewire\Finance\Accounting::TABS as $key => $label)
+            <button type="button" class="tab" wire:click="$set('tab', '{{ $key }}')" aria-selected="{{ $tab === $key ? 'true' : 'false' }}">
+                @if ($key === 'dashboard')<flux:icon.chart-pie variant="mini" class="size-4" />@endif{{ $label }}
+            </button>
         @endforeach
-        <flux:spacer />
-        <flux:input type="date" wire:model.live="from" size="sm" class="max-w-40" />
-        <flux:input type="date" wire:model.live="to" size="sm" class="max-w-40" />
     </div>
 
+    {{-- Barre de filtres (« slicers ») commune à tous les onglets --}}
+    <div class="panel flex flex-wrap items-end gap-3 p-3">
+        <div>
+            <span class="mb-1 block text-xs font-medium text-fg-subtle">Période</span>
+            <div class="segmented">
+                @foreach (\App\Livewire\Finance\Accounting::PRESETS as $key => $label)
+                    <button type="button" wire:click="applyPreset('{{ $key }}')" aria-pressed="{{ $preset === $key ? 'true' : 'false' }}">{{ $label }}</button>
+                @endforeach
+            </div>
+        </div>
+        <flux:input type="date" wire:model.live="from" size="sm" label="Du" class="max-w-40" />
+        <flux:input type="date" wire:model.live="to" size="sm" label="Au" class="max-w-40" />
+        <flux:select wire:model.live="siteId" size="sm" label="Siège" class="max-w-52">
+            <flux:select.option value="">Tous les sièges</flux:select.option>
+            @foreach ($sites as $site)<flux:select.option :value="$site->id">{{ $site->name }}</flux:select.option>@endforeach
+        </flux:select>
+        <flux:select wire:model.live="journalCode" size="sm" label="Journal" class="max-w-60">
+            <flux:select.option value="">Tous les journaux</flux:select.option>
+            @foreach ($journals as $journal)<flux:select.option :value="$journal->code">{{ $journal->code }} — {{ $journal->name }}</flux:select.option>@endforeach
+        </flux:select>
+    </div>
+
+    @if ($tab === 'dashboard')
+        @include('livewire.finance.partials.accounting-dashboard', ['a' => $this->analytics, 'charts' => $charts])
+    @else
     <div class="panel p-4">
         @if ($tab === 'journal')
-            <flux:select wire:model.live="journalCode" size="sm" class="mb-3 max-w-xs">
-                <flux:select.option value="">Tous les journaux</flux:select.option>
-                @foreach ($journals as $journal)<flux:select.option :value="$journal->code">{{ $journal->code }} — {{ $journal->name }}</flux:select.option>@endforeach
-            </flux:select>
             <div class="space-y-3">
                 @forelse ($entries as $entry)
                     <div class="rounded-lg border border-zinc-200 dark:border-zinc-700" wire:key="e-{{ $entry->id }}">
@@ -160,6 +184,7 @@
             </flux:table>
         @endif
     </div>
+    @endif
 
     <flux:modal name="entry" class="w-full max-w-3xl">
         <form wire:submit="saveEntry" class="space-y-4">

@@ -5,30 +5,36 @@
 --}}
 @php
     $slides = [
-        ['key' => 'printing', 'bg' => '#1e1b4b', 'accent' => 'bg-cyan-400', 'eyebrow' => 'Imprimerie', 'title' => 'Impression offset & numérique',
-            'text' => 'Cartes de visite, flyers, brochures, registres et affiches : vos commandes sont suivies machine par machine, du BAT validé au contrôle qualité.',
+        ['key' => 'printing', 'bg' => '#0d3141', 'accent' => 'bg-[#DB0D17]', 'eyebrow' => 'Imprimerie', 'title' => 'Impression & reprographie',
+            'text' => 'Documents, flyers, brochures et registres imprimés, copiés et reliés : chaque commande est suivie machine par machine, du BAT au contrôle qualité.',
             'chips' => ['Quadrichromie', 'Petits et grands tirages', 'Contrôle qualité']],
-        ['key' => 'large-format', 'bg' => '#1c1917', 'accent' => 'bg-orange-400', 'eyebrow' => 'Grand format', 'title' => 'Bâches, enseignes & affichage',
-            'text' => 'Bâches, roll-up, stickers et habillage de façades pour être vu partout dans la ville, avec pose par nos équipes.',
-            'chips' => ['Bâche 510 g', 'Roll-up', 'Pose sur site']],
-        ['key' => 'design', 'bg' => '#0f172a', 'accent' => 'bg-pink-500', 'eyebrow' => 'Studio graphique', 'title' => 'Création graphique & bon à tirer',
-            'text' => 'Logos, maquettes et identité visuelle : nos graphistes proposent, corrigent et verrouillent le BAT avant tout tirage.',
-            'chips' => ['Maquettes', 'Corrections illimitées', 'BAT verrouillé']],
-        ['key' => 'shop', 'bg' => '#422006', 'accent' => 'bg-yellow-400', 'eyebrow' => 'Boutique', 'title' => 'Fournitures scolaires & bureau',
-            'text' => 'Cahiers, stylos, classeurs, papier et consommables en boutique : paiement rapide, ticket, carte de fidélité et Mobile Money.',
-            'chips' => ['Rentrée scolaire', 'Mobile Money', 'Carte fidélité']],
-        ['key' => 'finishing', 'bg' => '#134e4a', 'accent' => 'bg-emerald-400', 'eyebrow' => 'Finition', 'title' => 'Découpe, reliure & plastification',
-            'text' => 'Massicot, reliure, pelliculage et plastification pour des documents prêts à être remis : rapports, menus, badges et cartes.',
-            'chips' => ['Reliure', 'Pelliculage', 'Découpe à façon']],
-        ['key' => 'delivery', 'bg' => '#172554', 'accent' => 'bg-indigo-400', 'eyebrow' => 'Livraison', 'title' => 'Livraison rapide dans toute la ville',
-            'text' => 'Retrait en boutique ou livraison à moto jusqu’à votre bureau, avec suivi de la commande et preuve de remise signée.',
-            'chips' => ['Suivi en temps réel', 'Preuve de livraison', 'Retrait au siège']],
+        ['key' => 'large-format', 'bg' => '#0d3141', 'accent' => 'bg-[#FFCE34]', 'eyebrow' => 'Grand format', 'title' => 'Bâches, textiles & affichage',
+            'text' => 'Impression grand format sur bâche, tissu, vinyle et stickers pour vos enseignes, stands et événements, avec pose par nos équipes.',
+            'chips' => ['Bâche & textile', 'Roll-up', 'Pose sur site']],
+        ['key' => 'design', 'bg' => '#0d3141', 'accent' => 'bg-[#53BDC5]', 'eyebrow' => 'Studio graphique', 'title' => 'Création graphique & bon à tirer',
+            'text' => 'Logos, maquettes et identité visuelle : nos graphistes rédigent le cahier de conception, proposent, corrigent et verrouillent le BAT.',
+            'chips' => ['Cahier de conception', 'Corrections', 'BAT verrouillé']],
+        ['key' => 'colors', 'bg' => '#0d3141', 'accent' => 'bg-[#DB0D17]', 'eyebrow' => 'Colorimétrie', 'title' => 'Des couleurs fidèles à votre marque',
+            'text' => 'Nuanciers, épreuves et profils CMJN : les couleurs de votre charte sont respectées de l’écran jusqu’au papier.',
+            'chips' => ['Nuancier', 'Profil CMJN', 'Épreuve couleur']],
+        ['key' => 'studio', 'bg' => '#0d3141', 'accent' => 'bg-[#53BDC5]', 'eyebrow' => 'Studio créatif', 'title' => 'Retouche, photo & contenus',
+            'text' => 'Retouche photo, montage et contenus pour vos réseaux : une équipe créative qui travaille main dans la main avec l’atelier.',
+            'chips' => ['Retouche photo', 'Réseaux sociaux', 'Vidéo']],
+        ['key' => 'layout', 'bg' => '#0d3141', 'accent' => 'bg-[#FFCE34]', 'eyebrow' => 'Mise en page', 'title' => 'PAO, documents & rapports',
+            'text' => 'Rapports annuels, catalogues, menus et documents administratifs mis en page, relus et prêts à imprimer.',
+            'chips' => ['PAO', 'Relecture', 'Fichiers prêts à imprimer']],
+        ['key' => 'reports', 'bg' => '#0d3141', 'accent' => 'bg-[#DB0D17]', 'eyebrow' => 'Pilotage', 'title' => 'Comptabilité & tableaux de bord',
+            'text' => 'Chiffre d’affaires, marges, trésorerie et stocks en temps réel, avec des rapports PDF et Excel prêts à partager.',
+            'chips' => ['Tableaux de bord', 'Export PDF & Excel', 'Temps réel']],
+        ['key' => 'tracking', 'bg' => '#0d3141', 'accent' => 'bg-[#53BDC5]', 'eyebrow' => 'Suivi client', 'title' => 'Chaque commande suivie jusqu’à la livraison',
+            'text' => 'Relances, messages WhatsApp, livraison et preuve de remise : vos clients sont informés à chaque étape.',
+            'chips' => ['WhatsApp', 'Livraison', 'Fidélité']],
     ];
 
     foreach ($slides as &$slide) {
-        $slide['photo'] = collect(['jpg', 'webp', 'png'])
-            ->map(fn (string $extension): string => "images/services/{$slide['key']}.{$extension}")
-            ->first(fn (string $path): bool => file_exists(public_path($path)));
+        $slide['photo'] = file_exists(public_path("images/services/{$slide['key']}.jpg")) ? "images/services/{$slide['key']}.jpg" : null;
+        $slide['webp'] = file_exists(public_path("images/services/{$slide['key']}.webp")) ? "images/services/{$slide['key']}.webp" : null;
+        $slide['scene'] = view()->exists('components.auth.scenes.'.$slide['key']);
     }
     unset($slide);
 @endphp
@@ -47,9 +53,12 @@
             role="group" aria-roledescription="diapositive" aria-label="{{ $index + 1 }} sur {{ count($slides) }} : {{ $slide['title'] }}"
             :aria-hidden="current !== {{ $index }}" wire:key="service-slide-{{ $slide['key'] }}">
             @if ($slide['photo'])
-                <img src="{{ asset($slide['photo']) }}" alt="{{ $slide['title'] }}" class="h-full w-full object-cover" :class="current === {{ $index }} && 'erp-kenburns'" loading="{{ $index ? 'lazy' : 'eager' }}">
+                <picture>
+                    @if ($slide['webp'])<source srcset="{{ asset($slide['webp']) }}" type="image/webp">@endif
+                    <img src="{{ asset($slide['photo']) }}" alt="{{ $slide['title'] }}" width="1920" height="1280" class="h-full w-full object-cover" :class="current === {{ $index }} && 'erp-kenburns'" loading="{{ $index ? 'lazy' : 'eager' }}" decoding="async">
+                </picture>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10"></div>
-            @else
+            @elseif ($slide['scene'])
                 <div class="erp-scene absolute inset-x-0 top-0 h-[78%] sm:h-[74%] md:h-[62%] lg:h-[64%]" :class="current === {{ $index }} && 'erp-kenburns'">
                     @include('components.auth.scenes.'.$slide['key'])
                 </div>

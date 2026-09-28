@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Enums\AffiliationStatus;
 use App\Enums\StockOperationReason;
 use App\Exceptions\BusinessRuleException;
+use App\Livewire\Finance\Accounting;
 use App\Livewire\Hr\Cards;
 use App\Livewire\Inventory\LiveReport;
+use App\Livewire\Inventory\Reports;
 use App\Livewire\Marketing\FollowUps;
 use App\Livewire\Settings\Documents;
 use App\Models\Affiliation;
@@ -19,6 +21,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Hr\AffiliationService;
 use App\Services\Hr\EmployeeCards;
+use App\Services\Inventory\InventoryReports;
 use App\Services\Inventory\StockOperationService;
 use App\Services\Marketing\FollowUpService;
 use App\Support\DocumentSignatures;
@@ -148,5 +151,36 @@ class NewModulesTest extends TestCase
         $this->get(route('print.design-brief', $job))->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->get(route('direction.payroll'))->assertOk();
         $this->get(route('hr.cards'))->assertOk();
+    }
+
+    public function test_accounting_dashboard_and_every_tab_export_to_pdf_and_excel(): void
+    {
+        $accountant = User::query()->where('username', 'comptable')->firstOrFail();
+        $this->actingAs($accountant)->get(route('accounting.index'))->assertOk()->assertSee('Matrice comptes de gestion');
+
+        $component = Livewire::actingAs($accountant)->test(Accounting::class)->call('applyPreset', 'year');
+        $this->assertGreaterThan(0, $component->instance()->analytics['kpis']['revenue']['value']);
+
+        foreach (['dashboard', 'journal', 'balance', 'income', 'sheet', 'chart'] as $tab) {
+            $component->set('tab', $tab)->call('exportPdf')->assertFileDownloaded()->call('exportExcel')->assertFileDownloaded();
+        }
+    }
+
+    public function test_warehouse_reports_render_and_export(): void
+    {
+        $manager = User::query()->where('username', 'responsable.entrepot')->firstOrFail();
+        $this->actingAs($manager)->get(route('inventory.reports'))->assertOk();
+
+        $component = Livewire::actingAs($manager)->test(Reports::class)->call('applyPreset', 'year');
+        foreach (array_keys(InventoryReports::REPORTS) as $report) {
+            $component->set('report', $report)->assertSee(InventoryReports::REPORTS[$report]['label'])
+                ->call('exportPdf')->assertFileDownloaded()
+                ->call('exportExcel')->assertFileDownloaded();
+        }
+
+        $movements = app(InventoryReports::class)->build('movements', $manager, null, today()->startOfYear()->toDateString(), today()->toDateString());
+        foreach (array_slice($movements['rows'], 0, -1) as $row) {
+            $this->assertEqualsWithDelta($row[3] + $row[4] - $row[5], $row[6], 0.001, "Stock incohérent pour {$row[1]}");
+        }
     }
 }

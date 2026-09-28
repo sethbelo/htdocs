@@ -131,7 +131,7 @@
                     <div class="flex justify-between"><dt class="text-zinc-500">Remises</dt><dd>− <x-money :amount="$this->totals['discount_total']" /></dd></div>
                     <div class="flex justify-between"><dt class="text-zinc-500">TVA</dt><dd><x-money :amount="$this->totals['tax_total']" /></dd></div>
                     <div class="flex justify-between border-t border-zinc-200 pt-2 text-base font-semibold dark:border-zinc-700"><dt>Total TTC</dt><dd><x-money :amount="$this->totals['total']" /></dd></div>
-                    <div class="flex justify-between text-indigo-600 dark:text-indigo-400"><dt>À encaisser (acompte)</dt><dd class="font-semibold"><x-money :amount="$this->totals['deposit']" /></dd></div>
+                    <div class="flex justify-between text-brand-600 dark:text-brand-400"><dt>À encaisser (acompte)</dt><dd class="font-semibold"><x-money :amount="$this->totals['deposit']" /></dd></div>
                 </dl>
                 <flux:error name="global_discount" />
                 <div class="flex flex-col gap-2 pt-2">

@@ -21,7 +21,7 @@
                     @foreach ($stage->opportunities as $opportunity)
                         <div wire:sort:item="{{ $opportunity->id }}" wire:key="opp-{{ $opportunity->id }}" class="panel cursor-grab p-3 text-sm active:cursor-grabbing">
                             <div class="flex items-start justify-between gap-2">
-                                <button wire:click="edit({{ $opportunity->id }})" class="text-left font-medium hover:text-indigo-600">{{ $opportunity->title }}</button>
+                                <button wire:click="edit({{ $opportunity->id }})" class="text-left font-medium hover:text-brand-600">{{ $opportunity->title }}</button>
                                 <x-money :amount="$opportunity->estimated_amount" class="text-xs font-semibold" />
                             </div>
                             <div class="mt-1 truncate text-zinc-500">{{ $opportunity->contactName() }}</div>

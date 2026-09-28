@@ -1,12 +1,13 @@
 <div class="space-y-6">
     <x-page-header title="Départements & mentors" subtitle="Responsables, mentors, effectifs, présence, contrats et activité opérationnelle.">
-        <x-slot:actions>@can('departments.create')<flux:button size="sm" variant="primary" icon="plus" wire:click="edit">Département</flux:button>@endcan</x-slot:actions>
+        <x-slot:actions>
+            <livewire:import-data type="departments" :key="'import-departments'" />@can('departments.create')<flux:button size="sm" variant="primary" icon="plus" wire:click="edit">Département</flux:button>@endcan</x-slot:actions>
     </x-page-header>
 
     <div class="grid gap-6 xl:grid-cols-4">
         <div class="space-y-2">
             @foreach ($departments as $department)
-                <button wire:click="$set('selectedId', {{ $department->id }})" wire:key="d-{{ $department->id }}" @class(['panel flex w-full items-center justify-between p-3 text-left text-sm', 'ring-2 ring-indigo-500' => $selectedId === $department->id])>
+                <button wire:click="$set('selectedId', {{ $department->id }})" wire:key="d-{{ $department->id }}" @class(['panel flex w-full items-center justify-between p-3 text-left text-sm', 'ring-2 ring-brand-500' => $selectedId === $department->id])>
                     <div><div class="font-medium">{{ $department->name }}</div><div class="text-xs text-zinc-500">{{ $department->manager?->fullName() ?? 'Sans responsable' }}</div></div>
                     <flux:badge size="sm">{{ $department->employees_count }}</flux:badge>
                 </button>
@@ -21,7 +22,7 @@
                             <flux:heading size="lg">{{ $selected->name }} <span class="text-sm text-zinc-500">({{ $selected->code }})</span></flux:heading>
                             <flux:text>Responsable : {{ $selected->manager?->fullName() ?? '—' }} · Mentor : {{ $selected->mentor?->fullName() ?? '—' }}</flux:text>
                         </div>
-                        @can('departments.update')<flux:button size="sm" icon="pencil" wire:click="edit({{ $selected->id }})">Modifier</flux:button>@endcan
+                        @can('departments.update')<x-edit-button wire:click="edit({{ $selected->id }})" />@endcan
                     </div>
                     <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
                         <x-kpi label="Effectif" :value="$stats['headcount']" icon="users" />

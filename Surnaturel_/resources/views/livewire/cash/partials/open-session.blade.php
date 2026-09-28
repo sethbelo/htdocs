@@ -1,6 +1,6 @@
 <div class="mx-auto max-w-lg panel p-6 space-y-4">
     <div class="flex items-center gap-3">
-        <div class="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-500/10"><flux:icon.lock-closed /></div>
+        <div class="rounded-lg bg-brand-50 p-2 text-brand-600 dark:bg-brand-500/10"><flux:icon.lock-closed /></div>
         <div>
             <flux:heading size="lg">Ouvrir une caisse</flux:heading>
             <flux:text>Aucune session ouverte à votre nom.</flux:text>

@@ -38,21 +38,21 @@ class Dashboard extends Component
                 'data' => [
                     'labels' => $series['labels'],
                     'datasets' => [
-                        ['label' => 'Encaissements', 'data' => $series['income'], 'borderColor' => '#4f46e5', 'backgroundColor' => 'rgba(79,70,229,.12)', 'fill' => true, 'tension' => .35],
-                        ['label' => 'Ventes boutique', 'data' => $series['shop'], 'borderColor' => '#059669', 'tension' => .35],
-                        ['label' => 'Dépenses', 'data' => $series['expenses'], 'borderColor' => '#dc2626', 'borderDash' => [4, 4], 'tension' => .35],
+                        ['label' => 'Encaissements', 'data' => $series['income'], 'borderColor' => '#134A63', 'backgroundColor' => 'rgba(19,74,99,.12)', 'fill' => true, 'tension' => .35],
+                        ['label' => 'Ventes boutique', 'data' => $series['shop'], 'borderColor' => '#53BDC5', 'tension' => .35],
+                        ['label' => 'Dépenses', 'data' => $series['expenses'], 'borderColor' => '#DB0D17', 'borderDash' => [4, 4], 'tension' => .35],
                     ],
                 ],
                 'options' => ['maintainAspectRatio' => false, 'interaction' => ['mode' => 'index', 'intersect' => false], 'plugins' => ['legend' => ['position' => 'bottom']]],
             ],
             'statusChart' => [
                 'type' => 'doughnut',
-                'data' => ['labels' => array_keys($byStatus), 'datasets' => [['data' => array_values($byStatus), 'backgroundColor' => ['#f59e0b', '#84cc16', '#a855f7', '#8b5cf6', '#6366f1', '#4f46e5', '#0ea5e9', '#10b981', '#14b8a6', '#ef4444', '#71717a']]]],
+                'data' => ['labels' => array_keys($byStatus), 'datasets' => [['data' => array_values($byStatus), 'backgroundColor' => ['#f59e0b', '#84cc16', '#a855f7', '#8b5cf6', '#53BDC5', '#134A63', '#0ea5e9', '#10b981', '#14b8a6', '#ef4444', '#71717a']]]],
                 'options' => ['maintainAspectRatio' => false, 'plugins' => ['legend' => ['position' => 'right']], 'cutout' => '65%'],
             ],
             'siteChart' => [
                 'type' => 'bar',
-                'data' => ['labels' => array_keys($bySite), 'datasets' => [['label' => 'CA du mois', 'data' => array_values($bySite), 'backgroundColor' => '#6366f1', 'borderRadius' => 6]]],
+                'data' => ['labels' => array_keys($bySite), 'datasets' => [['label' => 'CA du mois', 'data' => array_values($bySite), 'backgroundColor' => '#53BDC5', 'borderRadius' => 6]]],
                 'options' => ['maintainAspectRatio' => false, 'plugins' => ['legend' => ['display' => false]]],
             ],
             'mapConfig' => [

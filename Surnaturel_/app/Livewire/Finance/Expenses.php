@@ -4,11 +4,13 @@ namespace App\Livewire\Finance;
 
 use App\Enums\PaymentMethod;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
 use App\Models\ExpenseClaim;
 use App\Models\TreasuryAccount;
 use App\Services\Finance\ExpenseService;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -16,7 +18,10 @@ use Livewire\WithPagination;
 #[Title('Notes de frais')]
 class Expenses extends Component
 {
-    use InteractsWithToasts, WithFileUploads, WithPagination;
+    use InteractsWithToasts, WithFileUploads, WithListFilters, WithPagination;
+
+    #[Url(as: 'statut', except: '')]
+    public string $status = '';
 
     public bool $mineOnly = false;
 
@@ -80,6 +85,9 @@ class Expenses extends Component
             'claims' => ExpenseClaim::query()->with('user', 'approvalRequest.currentStep', 'receipts.latestVersion')
                 ->when($this->mineOnly, fn ($q) => $q->where('user_id', auth()->id()))
                 ->when(! $this->mineOnly, fn ($q) => $q->visibleTo(auth()->user()))
+                ->when($this->status, fn ($q) => $q->where('status', $this->status))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'title', 'description', 'user.name']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'expense_date'))
                 ->latest()->paginate(20),
             'treasuryAccounts' => TreasuryAccount::query()->where('is_active', true)->get(),
             'methods' => PaymentMethod::options(),

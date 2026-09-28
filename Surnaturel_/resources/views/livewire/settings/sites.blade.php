@@ -30,7 +30,7 @@
                                     {{ $item->site->name }} · {{ $item->manager?->name }}
                                 @endif
                             </flux:table.cell>
-                            <flux:table.cell class="w-10">@can('sites.update')<flux:button size="xs" variant="ghost" icon="pencil" wire:click="edit('{{ $entity }}', {{ $item->id }})" />@endcan</flux:table.cell>
+                            <flux:table.cell class="w-10">@can('sites.update')<x-edit-button wire:click="edit('{{ $entity }}', {{ $item->id }})" />@endcan</flux:table.cell>
                         </flux:table.row>
                     @endforeach
                 </flux:table.rows>

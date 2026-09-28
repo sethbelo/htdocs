@@ -102,7 +102,7 @@
                 <ul class="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
                     @forelse ($this->awaiting as $pending)
                         <li wire:key="aw-{{ $pending->id }}">
-                            <button type="button" wire:click="selectOrder({{ $pending->id }})" class="flex w-full items-center justify-between py-2 text-left text-sm hover:text-indigo-600">
+                            <button type="button" wire:click="selectOrder({{ $pending->id }})" class="flex w-full items-center justify-between py-2 text-left text-sm hover:text-brand-600">
                                 <div class="min-w-0"><div class="font-medium">{{ $pending->number }}</div><div class="truncate text-xs text-zinc-500">{{ $pending->client->displayName() }} · {{ $pending->ordered_at->diffForHumans() }}</div></div>
                                 <x-money :amount="$pending->balanceDue()" class="font-medium" />
                             </button>

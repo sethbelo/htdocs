@@ -20,10 +20,17 @@
         @endforeach
     </div>
 
+    <x-filter-bar placeholder="Transfert : n°, référence, libellé…">
+        <flux:select wire:model.live="accountFilter" size="sm" class="max-w-60">
+            <flux:select.option value="">Tous les comptes</flux:select.option>
+            @foreach ($accounts as $account)<flux:select.option :value="$account->id">{{ $account->name }}</flux:select.option>@endforeach
+        </flux:select>
+    </x-filter-bar>
+
     <div class="grid gap-6 xl:grid-cols-3">
         <div class="panel p-4 xl:col-span-2">
-            <flux:heading>Flux des 30 derniers jours</flux:heading>
-            <div class="mt-3 h-64" x-data="chart(@js($flowChart))"><canvas x-ref="canvas"></canvas></div>
+            <flux:heading>{{ $from || $to ? 'Flux de la période' : 'Flux des 30 derniers jours' }}</flux:heading>
+            <div class="mt-3 h-64" wire:key="flow-{{ md5($from.$to.$accountFilter) }}" x-data="chart(@js($flowChart))"><canvas x-ref="canvas"></canvas></div>
         </div>
         <div class="panel p-4 space-y-3">
             <div class="flex items-center justify-between">

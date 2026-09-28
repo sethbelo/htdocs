@@ -1,6 +1,7 @@
 <div class="space-y-6">
     <x-page-header title="Clients" subtitle="Particuliers, entreprises, administrations, ONG, revendeurs — B2B et B2C.">
         <x-slot:actions>
+            <livewire:import-data type="clients" :key="'import-clients'" />
             @can('clients.create')<flux:button size="sm" variant="primary" icon="user-plus" wire:click="create">Nouveau client</flux:button>@endcan
         </x-slot:actions>
     </x-page-header>
@@ -41,7 +42,7 @@
                         <flux:table.cell>@if ($client->loyaltyAccount)<flux:badge size="sm" :color="$client->loyaltyAccount->tier?->color ?? 'zinc'">{{ $client->loyaltyAccount->tier?->name }} · {{ $client->loyaltyAccount->points_balance }} pts</flux:badge>@endif</flux:table.cell>
                         <flux:table.cell align="end">{{ $client->orders_count }}</flux:table.cell>
                         <flux:table.cell align="end" @class(['text-amber-600 font-medium' => ($client->due - $client->paid_on_due) > 0])><x-money :amount="(float) $client->due - (float) $client->paid_on_due" /></flux:table.cell>
-                        <flux:table.cell>@can('update', $client)<flux:button size="xs" variant="ghost" icon="pencil" wire:click="edit({{ $client->id }})" />@endcan</flux:table.cell>
+                        <flux:table.cell>@can('update', $client)<x-edit-button wire:click="edit({{ $client->id }})" />@endcan</flux:table.cell>
                     </flux:table.row>
                 @empty
                     <flux:table.row><flux:table.cell colspan="9"><x-empty-state icon="users" title="Aucun client" /></flux:table.cell></flux:table.row>

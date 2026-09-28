@@ -6,6 +6,8 @@
         </x-slot:actions>
     </x-page-header>
 
+    <x-filter-bar placeholder="N°, objet, employé…" :statuses="\App\Enums\ExpenseClaimStatus::options()" />
+
     <div class="panel p-4">
         <flux:table :paginate="$claims">
             <flux:table.columns><flux:table.column>N°</flux:table.column><flux:table.column>Employé</flux:table.column><flux:table.column>Objet</flux:table.column><flux:table.column>Date</flux:table.column><flux:table.column>Statut</flux:table.column><flux:table.column>Justificatifs</flux:table.column><flux:table.column align="end">Montant</flux:table.column><flux:table.column></flux:table.column></flux:table.columns>

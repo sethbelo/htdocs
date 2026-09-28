@@ -1,12 +1,13 @@
 /* =============================================================================
-   SURNATUREL IMPRIMERIE — Système de design
+   SURNATUREL PRINT — Système de design (charte 2026)
    -----------------------------------------------------------------------------
-   Charte adaptée du métier de l'imprimerie (encre CMJN) :
-     • Encre     #4F46E5 (indigo)  → couleur d'autorité (navigation, titres, actions)
-     • Safran    #F5B50B (ambre)   → accent / action principale (≈ 10 %)
-     • Cyan      #16B8C4           → information, liens, états « en cours »
-     • Carmin    #E11D3D (rouge)   → alertes, rejets, suppression (usage rare)
-   Règle 60 / 30 / 10 : 60 % surfaces neutres, 30 % encre, 10 % safran.
+     • Pétrole     #134A63 (brand-700)  → autorité : navigation, titres, actions principales
+     • Turquoise   #53BDC5 (cyan2-400)  → information, liens, état actif, graphiques
+     • Jaune       #FFCE34 (safran-400) → accent chaleureux, mises en avant (≈ 10 %)
+     • Rouge       #DB0D17 (carmin-600) → alertes, rejets, suppression (usage rare)
+     • Anthracite  #333333 (zinc-800)   → textes et encre
+     • Blanc       #FFFFFF              → surfaces
+   Règle 60 / 30 / 10 : 60 % surfaces claires, 30 % pétrole, 10 % turquoise + jaune.
    Typographies : Sora (titres, chiffres clés — géométrique, imprimée)
                   Instrument Sans (interface, données, chiffres tabulaires).
 
@@ -41,72 +42,83 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Sora', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
-    /* Neutres — gris légèrement teintés d'encre (violet-indigo), remplace le zinc par défaut :
-       chaque classe zinc-* déjà posée dans l'application (500+ occurrences) hérite donc
-       automatiquement de la nouvelle identité, sans qu'aucune vue n'ait à être modifiée. */
-    --color-zinc-50: #f6f6fb;
-    --color-zinc-100: #ececf6;
-    --color-zinc-200: #dadaeb;
-    --color-zinc-300: #b9b9d6;
-    --color-zinc-400: #9191b5;
-    --color-zinc-500: #6f6f96;
-    --color-zinc-600: #56567d;
-    --color-zinc-700: #434364;
-    --color-zinc-800: #2d2d48;
-    --color-zinc-900: #1c1c30;
-    --color-zinc-950: #101019;
+    /* Neutres — anthracite légèrement teinté de pétrole (remplace le zinc : toutes les classes zinc-* en héritent) */
+    --color-zinc-50: #f5f7f8;
+    --color-zinc-100: #ebeff1;
+    --color-zinc-200: #dce2e5;
+    --color-zinc-300: #c2cbd0;
+    --color-zinc-400: #93a0a7;
+    --color-zinc-500: #6b787f;
+    --color-zinc-600: #525d63;
+    --color-zinc-700: #3f484d;
+    --color-zinc-800: #333333;
+    --color-zinc-900: #22272a;
+    --color-zinc-950: #14181a;
 
-    /* Encre — indigo, couleur d'autorité (navigation, titres, actions principales) */
-    --color-brand-50: #eef0fd;
-    --color-brand-100: #e0e3fc;
-    --color-brand-200: #c5c9f9;
-    --color-brand-300: #a1a4f3;
-    --color-brand-400: #8280ec;
-    --color-brand-500: #6a5de3;
-    --color-brand-600: #4f46e5;
-    --color-brand-700: #4338ca;
-    --color-brand-800: #362f9e;
-    --color-brand-900: #1e1b4b;
-    --color-brand-950: #14123a;
+    /* Pétrole #134A63 — couleur d'autorité */
+    --color-brand-50: #f1f6f8;
+    --color-brand-100: #e2ecf0;
+    --color-brand-200: #c5d8e0;
+    --color-brand-300: #9dbccb;
+    --color-brand-400: #6c98ad;
+    --color-brand-500: #3f7690;
+    --color-brand-600: #245d78;
+    --color-brand-700: #134a63;
+    --color-brand-800: #103d51;
+    --color-brand-900: #0d3141;
+    --color-brand-950: #0a2633;
 
-    /* Safran — accent chaud (≈ 10 %), boutons d'action, indicateur actif */
-    --color-safran-50: #fffbea;
-    --color-safran-100: #fff3c4;
-    --color-safran-200: #ffe587;
-    --color-safran-300: #ffd24a;
-    --color-safran-400: #fac015;
-    --color-safran-500: #f5b50b;
-    --color-safran-600: #d38f06;
-    --color-safran-700: #a8660a;
-    --color-safran-800: #89510f;
-    --color-safran-900: #734311;
+    /* Jaune #FFCE34 — accent chaleureux */
+    --color-safran-50: #fffbeb;
+    --color-safran-100: #fff4c9;
+    --color-safran-200: #ffe897;
+    --color-safran-300: #ffdc65;
+    --color-safran-400: #ffce34;
+    --color-safran-500: #e8b516;
+    --color-safran-600: #b98d0c;
+    --color-safran-700: #8a680c;
+    --color-safran-800: #66500f;
+    --color-safran-900: #4d3e10;
 
-    /* Cyan — information, liens, états « en cours » (encre cyan) */
-    --color-cyan2-50: #edfcfd;
-    --color-cyan2-100: #d1f6f9;
-    --color-cyan2-200: #a8ecf3;
-    --color-cyan2-300: #6ddbe7;
-    --color-cyan2-400: #2fc1d4;
-    --color-cyan2-500: #16a3b8;
-    --color-cyan2-600: #147f92;
-    --color-cyan2-700: #176677;
-    --color-cyan2-800: #1a5262;
-    --color-cyan2-900: #1a4453;
+    /* Turquoise #53BDC5 — information, état actif */
+    --color-cyan2-50: #effafa;
+    --color-cyan2-100: #d8f1f3;
+    --color-cyan2-200: #b5e3e7;
+    --color-cyan2-300: #85d1d7;
+    --color-cyan2-400: #53bdc5;
+    --color-cyan2-500: #3aa2aa;
+    --color-cyan2-600: #2f8389;
+    --color-cyan2-700: #2b6a6f;
+    --color-cyan2-800: #27565a;
+    --color-cyan2-900: #19393b;
 
-    /* Carmin — alertes, rejets, suppression (encre rouge) */
-    --color-carmin-50: #fef2f3;
-    --color-carmin-100: #fde3e6;
-    --color-carmin-200: #fbccd2;
-    --color-carmin-300: #f7a5ae;
-    --color-carmin-400: #f17182;
-    --color-carmin-500: #e6465e;
-    --color-carmin-600: #d1264a;
-    --color-carmin-700: #af1a3f;
-    --color-carmin-800: #92193b;
-    --color-carmin-900: #7c1938;
+    /* Rouge #DB0D17 — alertes, suppression */
+    --color-carmin-50: #fdf0f0;
+    --color-carmin-100: #fadddf;
+    --color-carmin-200: #f6c0c3;
+    --color-carmin-300: #ef9599;
+    --color-carmin-400: #e8646b;
+    --color-carmin-500: #e13941;
+    --color-carmin-600: #db0d17;
+    --color-carmin-700: #b40b13;
+    --color-carmin-800: #91090f;
+    --color-carmin-900: #72070c;
 
-    --color-accent: var(--color-brand-600);
-    --color-accent-content: var(--color-brand-600);
+    /* Indigo Tailwind (badges et statuts Flux « indigo ») aligné sur le pétrole de la charte */
+    --color-indigo-50: var(--color-brand-50);
+    --color-indigo-100: var(--color-brand-100);
+    --color-indigo-200: var(--color-brand-200);
+    --color-indigo-300: var(--color-brand-300);
+    --color-indigo-400: var(--color-brand-400);
+    --color-indigo-500: var(--color-brand-500);
+    --color-indigo-600: var(--color-brand-600);
+    --color-indigo-700: var(--color-brand-700);
+    --color-indigo-800: var(--color-brand-800);
+    --color-indigo-900: var(--color-brand-900);
+    --color-indigo-950: var(--color-brand-950);
+
+    --color-accent: var(--color-brand-700);
+    --color-accent-content: var(--color-brand-700);
     --color-accent-foreground: var(--color-white);
 
     /* Sémantique clair / sombre — pilotée par --ui-* défini plus bas (:root / .dark) */
@@ -120,8 +132,8 @@
     --color-fg-subtle: var(--ui-fg-subtle);
 
     --radius-card: 14px;
-    --shadow-card: 0 1px 2px rgb(30 27 75 / .04), 0 1px 1px rgb(30 27 75 / .03);
-    --shadow-pop: 0 18px 50px -12px rgb(16 16 25 / .28), 0 4px 12px -4px rgb(16 16 25 / .14);
+    --shadow-card: 0 1px 2px rgb(19 74 99 / .05), 0 1px 1px rgb(19 74 99 / .03);
+    --shadow-pop: 0 18px 50px -12px rgb(10 38 51 / .30), 0 4px 12px -4px rgb(10 38 51 / .14);
 
     --animate-fade-in: fade-in .18s ease-out;
     --animate-slide-in: slide-in .24s cubic-bezier(.2, .8, .2, 1);
@@ -131,34 +143,34 @@
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-brand-500);
-        --color-accent-content: var(--color-brand-400);
-        --color-accent-foreground: var(--color-white);
+        --color-accent: var(--color-cyan2-400);
+        --color-accent-content: var(--color-cyan2-300);
+        --color-accent-foreground: var(--color-brand-950);
     }
 }
 
 :root {
-    --ui-canvas: #f7f7fb;
+    --ui-canvas: #f3f6f7;
     --ui-surface: #ffffff;
-    --ui-surface-2: #fbfbfe;
-    --ui-line: #ececf3;
-    --ui-line-strong: #dadaeb;
-    --ui-fg: #16162a;
-    --ui-fg-muted: #56567d;
-    --ui-fg-subtle: #9191b5;
+    --ui-surface-2: #f8fafb;
+    --ui-line: #e4e9ec;
+    --ui-line-strong: #cfd8dd;
+    --ui-fg: #333333;
+    --ui-fg-muted: #525d63;
+    --ui-fg-subtle: #8a979e;
     --sidebar-w: 268px;
     color-scheme: light;
 }
 
 .dark {
-    --ui-canvas: #101019;
-    --ui-surface: #17172a;
-    --ui-surface-2: #1c1c30;
-    --ui-line: #2a2a44;
-    --ui-line-strong: #363656;
-    --ui-fg: #f1f1f8;
-    --ui-fg-muted: #b3b3d1;
-    --ui-fg-subtle: #7c7ca3;
+    --ui-canvas: #0a1b23;
+    --ui-surface: #0f2530;
+    --ui-surface-2: #132c38;
+    --ui-line: #1d3a48;
+    --ui-line-strong: #2a4b5b;
+    --ui-fg: #eef4f6;
+    --ui-fg-muted: #a9c0ca;
+    --ui-fg-subtle: #6f8c99;
     color-scheme: dark;
 }
 
@@ -179,59 +191,87 @@
 
 /* ─── 4. STRUCTURE ──────────────────────────────────────────────────────────── */
 @layer components {
-    .app-shell { @apply min-h-dvh; }
-    .app-main { @apply min-w-0 transition-[padding] duration-200; }
+    .app-shell { @apply min-h-dvh; --sidebar-w: 264px; }
+    .app-main { @apply relative isolate min-w-0 transition-[padding] duration-300; }
     @media (min-width: 1024px) {
         .app-main { padding-left: var(--sidebar-w); }
-        .sidebar-collapsed { --sidebar-w: 76px; }
+        .sidebar-collapsed { --sidebar-w: 68px; }
     }
 
-    /* 4.2 Barre latérale « encre » */
+    /* 4.2 Barre latérale (menu applicatif) : surface claire bordée, départements repliables, sous-rubriques reliées */
     .sidebar {
-        @apply fixed inset-y-0 left-0 z-40 flex flex-col text-white transition-[transform,width] duration-200;
+        @apply fixed inset-y-0 left-0 z-40 flex flex-col border-r border-line bg-surface/90 text-fg backdrop-blur-xl transition-[transform,width] duration-300 ease-in-out;
         width: var(--sidebar-w);
-        background: linear-gradient(180deg, var(--color-brand-800) 0%, var(--color-brand-900) 55%, var(--color-brand-950) 100%);
     }
+    .dark .sidebar { background: linear-gradient(180deg, #0f2a37 0%, #0b2130 100%); @apply border-white/8; }
     @media (max-width: 1023.98px) {
-        .sidebar { width: 288px; transform: translateX(-100%); box-shadow: var(--shadow-pop); }
+        .sidebar { width: 290px; transform: translateX(-105%); box-shadow: var(--shadow-pop); }
         .sidebar[data-open='true'] { transform: none; }
     }
     .sidebar-link {
-        @apply relative flex h-10 items-center gap-3 rounded-lg px-3 text-[13.5px] font-medium text-white/70 transition hover:bg-white/8 hover:text-white;
+        @apply relative flex min-h-[34px] cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13px] tracking-wide text-fg-muted transition-all duration-200 select-none hover:bg-black/5 hover:text-fg dark:hover:bg-white/5;
     }
-    .sidebar-link[aria-current='page'] { @apply bg-white/10 text-white; }
-    .sidebar-link[aria-current='page']::before {
-        content: ''; @apply absolute top-2 bottom-2 -left-3 w-[3px] rounded-r-full bg-safran-400;
-    }
-    .sidebar-group { @apply px-3 pt-5 pb-1.5 text-[10.5px] font-semibold tracking-[.14em] text-cyan2-300/70 uppercase; }
+    .sidebar-link[aria-current='page'] { @apply bg-brand-700/8 font-semibold text-brand-800 dark:bg-white/10 dark:text-white; }
+    .sidebar-link[aria-current='page']::before { content: ''; @apply absolute top-1.5 bottom-1.5 -left-3 w-[3px] rounded-r-full bg-cyan2-400; }
+    .sidebar-glyph { @apply size-4 shrink-0 text-fg-subtle transition-colors group-hover:text-fg; }
+    .sidebar-link[aria-current='page'] .sidebar-glyph { @apply text-brand-700 dark:text-cyan2-300; }
+    .sidebar-dept.is-current { @apply font-semibold text-fg; }
+    .sidebar-child { @apply ps-[30px] text-[12.5px]; }
+    .sidebar-rail-link { display: none; }
+    .nav-children { @apply grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out; }
+    .nav-children.is-open { @apply grid-rows-[1fr] opacity-100; }
+    .nav-kbd { @apply hidden h-5 items-center rounded border border-line bg-surface-2 px-1.5 font-mono text-[10px] font-medium text-fg-subtle group-hover:inline-flex; }
+    .nav-badge { @apply grid h-5 min-w-5 place-items-center rounded-full bg-cyan2-400/15 px-1.5 text-[10px] font-bold text-cyan2-700 dark:text-cyan2-300; }
+    .sidebar-group { @apply mb-1 px-2.5 text-[11px] font-semibold tracking-wider text-fg-subtle/70 uppercase; }
+    .nav-switcher { @apply flex w-full items-center gap-2.5 rounded-lg px-2 py-2 transition-colors select-none hover:bg-black/5 dark:hover:bg-white/5; }
+    .nav-switcher-menu { @apply absolute inset-x-3 top-[calc(100%+4px)] z-50 flex max-h-[70vh] flex-col gap-0.5 overflow-y-auto rounded-xl border border-line bg-surface p-1 shadow-[var(--shadow-pop)]; }
+    .nav-switcher-option { @apply flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] text-fg-muted transition-colors hover:bg-black/5 hover:text-fg dark:hover:bg-white/5; }
+    .nav-switcher-option.is-current { @apply bg-cyan2-400/12 font-semibold text-brand-800 dark:text-white; }
 
-    /* Logo : horizontal déplié, monogramme en rail (format rétractable) */
-    .sidebar-brand { @apply flex min-w-0 items-center rounded-xl transition hover:opacity-90; }
+    /* Marque typographique : « SÚRNATUREL » + « PRINT » (déplié) / monogramme « SP » (rail) */
+    .sidebar-brand { @apply flex min-w-0 items-center rounded-lg px-1 transition hover:opacity-80; }
+    .brand-type { @apply flex min-w-0 flex-col leading-none; }
+    .brand-type-main { @apply font-display text-[18px] font-extrabold tracking-[-.02em] text-brand-700 uppercase dark:text-white; }
+    .brand-type-main em { @apply not-italic text-cyan2-500 dark:text-cyan2-300; }
+    .brand-type-sub { @apply mt-1 flex items-center gap-1.5 text-[9px] font-bold tracking-[.46em] text-fg-subtle uppercase; }
+    .brand-type-sub i { @apply block size-1.5 rounded-full; }
+    .brand-mono { @apply relative inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-700 font-display text-[15px] font-extrabold tracking-[-.04em] text-white shadow-sm; }
+    .brand-mono em { @apply not-italic text-cyan2-300; }
+    .brand-mono::after { content: ''; @apply absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-safran-400 ring-2 ring-surface; }
     .sidebar-logo-mark { display: none; }
+
+    /* Rail (menu replié) : icônes seules, un clic sur un département ouvre sa première rubrique */
     @media (min-width: 1024px) {
-        .sidebar-collapsed .sidebar-logo-full { display: none; }
-        .sidebar-collapsed .sidebar-logo-mark { display: block; }
+        .sidebar-collapsed .sidebar-logo-full, .sidebar-collapsed .sidebar-label, .sidebar-collapsed .sidebar-group, .sidebar-collapsed .sidebar-extra, .sidebar-collapsed .nav-children, .sidebar-collapsed .sidebar-dept, .sidebar-collapsed .nav-badge { display: none; }
+        .sidebar-collapsed .sidebar-logo-mark { display: inline-flex; }
         .sidebar-collapsed .sidebar-brand { @apply mx-auto; }
-    }
-    @media (min-width: 1024px) and (max-width: 1279.98px) {
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-logo-full { display: none; }
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-logo-mark { display: block; }
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-brand { @apply mx-auto; }
-    }
-    @media (min-width: 1024px) {
-        .sidebar-collapsed .sidebar-label, .sidebar-collapsed .sidebar-group-text, .sidebar-collapsed .sidebar-extra { display: none; }
         .sidebar-collapsed .sidebar-link { @apply justify-center px-0; }
-        .sidebar-collapsed .sidebar-group { @apply mx-auto h-px w-6 bg-white/12 p-0 my-3; }
+        .sidebar-collapsed .sidebar-link[aria-current='page']::before { display: none; }
+        .sidebar-collapsed .sidebar-rail-link { @apply mx-auto grid size-9 place-items-center rounded-lg bg-no-repeat transition hover:bg-black/5 dark:hover:bg-white/5; }
     }
-    /* Tablette paysage (1024–1279 px) : rail d'icônes par défaut pour libérer l'espace de travail */
     @media (min-width: 1024px) and (max-width: 1279.98px) {
-        .app-shell:not(.sidebar-expanded-tablet) { --sidebar-w: 76px; }
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-label,
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-group-text,
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-extra { display: none; }
+        .app-shell:not(.sidebar-expanded-tablet) { --sidebar-w: 68px; }
+        .app-shell:not(.sidebar-expanded-tablet) :is(.sidebar-logo-full, .sidebar-label, .sidebar-group, .sidebar-extra, .nav-children, .sidebar-dept, .nav-badge) { display: none; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-logo-mark { display: inline-flex; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-brand { @apply mx-auto; }
         .app-shell:not(.sidebar-expanded-tablet) .sidebar-link { @apply justify-center px-0; }
-        .app-shell:not(.sidebar-expanded-tablet) .sidebar-group { @apply mx-auto my-3 h-px w-6 bg-white/12 p-0; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-link[aria-current='page']::before { display: none; }
+        .app-shell:not(.sidebar-expanded-tablet) .sidebar-rail-link { @apply mx-auto grid size-9 place-items-center rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5; }
     }
+
+    /* 4.2 bis Fond d'écran « encre & papier » : une image par thème, fondu au changement clair / sombre,
+       opacité réglable par l'utilisateur (menu Apparence : Aucun · Doux · Visible) */
+    .bg-illustrated::before, .bg-illustrated::after {
+        content: ''; @apply pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat transition-opacity duration-700;
+    }
+    .bg-illustrated::before { background-image: url('/images/backgrounds/ink-light.webp'); opacity: var(--bg-art-opacity, .55); }
+    .bg-illustrated::after { background-image: url('/images/backgrounds/ink-dark.webp'); opacity: 0; }
+    .dark .bg-illustrated::before { opacity: 0; }
+    .dark .bg-illustrated::after { opacity: var(--bg-art-opacity, .55); }
+    html[data-bg='off'] { --bg-art-opacity: 0; }
+    html[data-bg='soft'] { --bg-art-opacity: .55; }
+    html[data-bg='full'] { --bg-art-opacity: 1; }
+    @media print { .bg-illustrated::before, .bg-illustrated::after { display: none; } }
 
     /* 4.3 Barre supérieure */
     .topbar { @apply sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-line bg-surface/85 px-3 backdrop-blur-lg sm:gap-3 sm:px-6; }
@@ -239,6 +279,41 @@
     .shell-icon-btn {
         @apply grid size-10 shrink-0 place-items-center rounded-lg text-fg-muted transition hover:bg-zinc-100 hover:text-fg disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-white/8;
     }
+
+    /* 4.5 Boutons de modification des listes (gris) */
+    .btn-edit { @apply inline-flex h-7 items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 px-2.5 text-[12px] font-semibold whitespace-nowrap text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-200 hover:text-zinc-900 dark:border-white/10 dark:bg-white/8 dark:text-zinc-200 dark:hover:bg-white/14; }
+    .btn-edit-compact { @apply w-7 justify-center px-0; }
+
+    /* 4.6 Lanceur d'applications (icônes par département) */
+    .launcher-shell { @apply relative isolate flex flex-col bg-canvas; }
+    .launcher-topbar { @apply sticky top-0 z-30 flex h-16 items-center gap-3 px-4 backdrop-blur-md sm:px-8; background: linear-gradient(180deg, color-mix(in srgb, var(--ui-canvas) 78%, transparent), transparent); }
+    .launcher-main { @apply flex-1 px-4 pt-6 pb-16 sm:px-8 lg:pt-10; }
+    .launcher { @apply mx-auto max-w-[1600px] space-y-8; }
+    .launcher-sections { @apply columns-1 gap-5 lg:columns-2 2xl:columns-3; }
+    .launcher-sections > .launcher-section { @apply mb-5 break-inside-avoid; }
+    .launcher-head { @apply flex flex-wrap items-end justify-between gap-4; }
+    .launcher-search { @apply flex h-11 w-full max-w-sm items-center gap-2.5 rounded-2xl border border-line bg-surface/80 px-4 shadow-[var(--shadow-card)] backdrop-blur focus-within:border-cyan2-400 focus-within:ring-4 focus-within:ring-cyan2-400/15; }
+    .launcher-section { @apply rounded-3xl border border-white/70 bg-white/55 p-5 shadow-[0_18px_40px_-28px_rgb(19_74_99/.45)] backdrop-blur-xl dark:border-white/8 dark:bg-white/[.04]; }
+    .launcher-section-head { @apply mb-4 flex items-center gap-2.5 border-b border-fg/10 pb-2; }
+    .launcher-grid { @apply grid grid-cols-3 gap-x-1 gap-y-5 sm:grid-cols-4; }
+    .launcher-app { @apply flex flex-col items-center gap-2 rounded-2xl p-2 text-center outline-none transition focus-visible:ring-2 focus-visible:ring-cyan2-400; }
+    .launcher-app[hidden] { display: none; }
+    .launcher-tile {
+        @apply relative grid size-[68px] place-items-center rounded-[20px] border border-white bg-white p-3 shadow-[0_6px_18px_-8px_rgb(19_74_99/.35),0_1px_2px_rgb(19_74_99/.08)] transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-12px_rgb(19_74_99/.45)] group-active:scale-95 sm:size-[76px];
+    }
+    .dark .launcher-tile { @apply border-white/10 bg-white/[.06] shadow-[0_10px_24px_-14px_rgb(0_0_0/.8)] group-hover:bg-white/[.1]; }
+    .launcher-badge { @apply absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-carmin-600 px-1 text-[10px] font-bold text-white ring-2 ring-canvas; }
+    /* Icônes d'application : le pétrole s'éclaircit en thème sombre pour rester lisible */
+    .dark .app-icon [fill='#134A63'] { fill: #2f7ea3; }
+    .dark .app-icon [stroke='#134A63'] { stroke: #1f5f7d; }
+    .launcher-label { @apply line-clamp-2 max-w-[110px] text-[12.5px] leading-tight font-medium text-fg-muted group-hover:text-fg; }
+
+    /* 4.4 Indicateur de synchronisation cloud */
+    .sync-pill { @apply mr-1 inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 text-[12px] font-semibold text-fg-muted transition hover:border-line-strong; }
+    .sync-dot { @apply size-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgb(16_185_129/.18)]; }
+    .sync-pill[data-state='syncing'] .sync-dot { @apply bg-cyan2-400 shadow-[0_0_0_3px_rgb(83_189_197/.25)]; }
+    .sync-pill[data-state='offline'] { @apply border-carmin-200 bg-carmin-50 text-carmin-700 dark:border-carmin-800 dark:bg-carmin-900/30 dark:text-carmin-300; }
+    .sync-pill[data-state='offline'] .sync-dot { @apply bg-carmin-600 shadow-[0_0_0_3px_rgb(219_13_23/.2)]; }
 
     /* ─── 5. COMPOSANTS ─────────────────────────────────────────────────────── */
 
@@ -297,6 +372,8 @@
     .step[data-state='done'] .step-label, .step[data-state='current'] .step-label { @apply text-fg; }
 
     /* 6.2 Point de vente — grille tactile */
+    .pos-card { @apply relative flex flex-col rounded-xl border border-line bg-surface p-1.5 text-left shadow-[var(--shadow-card)] transition hover:-translate-y-px hover:border-cyan2-400 hover:shadow-md active:scale-[.97]; }
+    .pos-card-out { @apply border-carmin-200 opacity-60 dark:border-carmin-900; }
     .pos-tile { @apply rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)] flex flex-col overflow-hidden text-left transition hover:border-brand-300 hover:shadow-md active:scale-[.98]; }
 
     /* 6.3 Kanban glisser-déposer (pipeline, tâches) */

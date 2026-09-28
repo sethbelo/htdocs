@@ -45,7 +45,7 @@
                 @forelse ($operations as $operation)
                     <flux:table.row :key="$operation->id">
                         <flux:table.cell>
-                            <button wire:click="show({{ $operation->id }})" class="font-medium hover:text-indigo-600">{{ $operation->number }}</button>
+                            <button wire:click="show({{ $operation->id }})" class="font-medium hover:text-brand-600">{{ $operation->number }}</button>
                             <div><flux:badge size="sm" :color="$operation->isEntry() ? 'emerald' : 'red'">{{ $operation->isEntry() ? 'Entrée' : 'Sortie' }} · {{ $operation->movements_count }} art.</flux:badge></div>
                         </flux:table.cell>
                         <flux:table.cell class="whitespace-nowrap">{{ $operation->operated_at->format('d/m/Y H:i') }}</flux:table.cell>

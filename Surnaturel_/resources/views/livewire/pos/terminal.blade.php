@@ -64,25 +64,22 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="grid flex-1 auto-rows-min grid-cols-2 gap-3 overflow-y-auto px-4 pb-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                <div class="grid flex-1 auto-rows-min grid-cols-3 gap-2 overflow-y-auto px-4 pb-4 sm:grid-cols-4 lg:grid-cols-5">
                     @forelse ($this->products as $product)
-                        <button type="button" wire:click="addProduct({{ $product->id }})" wire:key="p-{{ $product->id }}"
-                            @class(['group relative flex flex-col overflow-hidden rounded-xl border bg-white text-left transition active:scale-[.98] dark:bg-zinc-900', 'border-zinc-200 hover:border-indigo-400 dark:border-zinc-700' => (float) $product->stock > 0, 'border-red-200 opacity-60 dark:border-red-900' => (float) $product->stock <= 0])>
-                            <div class="flex aspect-[4/3] items-center justify-center bg-zinc-100 dark:bg-zinc-800">
+                        @php($inStock = (float) $product->stock > 0)
+                        <button type="button" wire:click="addProduct({{ $product->id }})" wire:key="p-{{ $product->id }}" title="{{ $product->name }}"
+                            @class(['pos-card group', 'pos-card-out' => ! $inStock])>
+                            <div class="relative flex h-16 items-center justify-center overflow-hidden rounded-lg bg-brand-50 dark:bg-white/5">
                                 @if ($product->image_path)
                                     <img src="{{ Storage::disk('public')->url($product->image_path) }}" alt="" class="h-full w-full object-cover">
                                 @else
-                                    <flux:icon.cube class="size-10 text-zinc-300 dark:text-zinc-600" />
+                                    <span class="font-display text-lg font-extrabold tracking-tight text-brand-300 dark:text-brand-500">{{ mb_strtoupper(mb_substr($product->name, 0, 2)) }}</span>
                                 @endif
+                                @if ($product->is_favorite)<flux:icon.star variant="solid" class="absolute right-1 top-1 size-3.5 text-safran-400" />@endif
+                                <span @class(['absolute bottom-1 left-1 rounded-md px-1 text-[10px] font-semibold', 'bg-white/90 text-zinc-600 dark:bg-black/40 dark:text-zinc-200' => $inStock, 'bg-carmin-600 text-white' => ! $inStock])>{{ $inStock ? (float) $product->stock : 'Rupture' }}</span>
                             </div>
-                            <div class="p-2.5">
-                                <div class="line-clamp-2 text-sm font-medium leading-tight">{{ $product->name }}</div>
-                                <div class="mt-1 flex items-center justify-between">
-                                    <x-money :amount="$product->sale_price" class="font-semibold text-indigo-600 dark:text-indigo-400" />
-                                    <span class="text-xs text-zinc-500">Stock {{ (float) $product->stock }}</span>
-                                </div>
-                            </div>
-                            @if ($product->is_favorite)<flux:icon.star variant="solid" class="absolute right-2 top-2 size-4 text-amber-400" />@endif
+                            <div class="mt-1.5 line-clamp-2 min-h-[2rem] text-[12px] font-medium leading-tight">{{ $product->name }}</div>
+                            <x-money :amount="$product->sale_price" class="mt-0.5 text-[13px] font-bold text-brand-700 dark:text-cyan2-300" />
                         </button>
                     @empty
                         <div class="col-span-full"><x-empty-state icon="cube" title="Aucun article" /></div>
@@ -94,7 +91,7 @@
             <aside class="flex flex-col overflow-hidden border-s border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
                 <div class="space-y-2 border-b border-zinc-200 p-4 dark:border-zinc-800">
                     @if ($this->client)
-                        <div class="flex items-center justify-between rounded-lg bg-indigo-50 p-2.5 text-sm dark:bg-indigo-500/10">
+                        <div class="flex items-center justify-between rounded-lg bg-brand-50 p-2.5 text-sm dark:bg-brand-500/10">
                             <div>
                                 <div class="font-medium">{{ $this->client->displayName() }}</div>
                                 @if ($this->client->loyaltyAccount)
@@ -245,7 +242,7 @@
                             @php($busy = (bool) $register->openSession)
                             <label wire:key="reg-{{ $register->id }}" @class([
                                 'relative flex cursor-pointer flex-col gap-1 rounded-xl border p-3 text-sm transition',
-                                'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600 dark:bg-indigo-500/10' => $registerId === $register->id,
+                                'border-brand-600 bg-brand-50 ring-1 ring-brand-600 dark:bg-brand-500/10' => $registerId === $register->id,
                                 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' => $registerId !== $register->id && ! $busy,
                                 'cursor-not-allowed border-zinc-200 opacity-50 dark:border-zinc-700' => $busy,
                             ])>

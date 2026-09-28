@@ -7,12 +7,19 @@
 
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
         @foreach (\App\Enums\StockTransferStatus::cases() as $case)
-            <button wire:click="$set('status', '{{ $status === $case->value ? '' : $case->value }}')" @class(['kpi-card text-left', 'ring-2 ring-indigo-500' => $status === $case->value]) wire:key="st-{{ $case->value }}">
+            <button wire:click="$set('status', '{{ $status === $case->value ? '' : $case->value }}')" @class(['kpi-card text-left', 'ring-2 ring-brand-500' => $status === $case->value]) wire:key="st-{{ $case->value }}">
                 <flux:badge size="sm" :color="$case->color()">{{ $case->label() }}</flux:badge>
                 <div class="mt-2 text-2xl font-semibold">{{ $counts[$case->value] ?? 0 }}</div>
             </button>
         @endforeach
     </div>
+
+    <x-filter-bar placeholder="N° de transfert, entrepôt, convoyeur…">
+        <flux:select wire:model.live="warehouseFilter" size="sm" class="max-w-56">
+            <flux:select.option value="">Tous les entrepôts</flux:select.option>
+            @foreach ($allWarehouses as $w)<flux:select.option :value="$w->id">{{ $w->name }}</flux:select.option>@endforeach
+        </flux:select>
+    </x-filter-bar>
 
     <div class="panel p-4">
         <flux:table :paginate="$transfers">
@@ -29,7 +36,7 @@
             <flux:table.rows>
                 @forelse ($transfers as $transfer)
                     <flux:table.row :key="$transfer->id">
-                        <flux:table.cell><button wire:click="open({{ $transfer->id }})" class="font-medium hover:text-indigo-600">{{ $transfer->number }}</button><div class="text-xs text-zinc-500">{{ $transfer->requested_at->format('d/m/Y H:i') }}</div></flux:table.cell>
+                        <flux:table.cell><button wire:click="open({{ $transfer->id }})" class="font-medium hover:text-brand-600">{{ $transfer->number }}</button><div class="text-xs text-zinc-500">{{ $transfer->requested_at->format('d/m/Y H:i') }}</div></flux:table.cell>
                         <flux:table.cell class="text-sm">{{ $transfer->from->name }} <span class="text-zinc-400">→</span> {{ $transfer->to->name }}</flux:table.cell>
                         <flux:table.cell>{{ $transfer->items->count() }} · {{ (float) $transfer->items->sum('quantity_requested') }} u.</flux:table.cell>
                         <flux:table.cell class="text-sm">{{ $transfer->requester->name }}</flux:table.cell>

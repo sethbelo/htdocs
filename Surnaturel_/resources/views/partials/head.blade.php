@@ -10,6 +10,11 @@
 @endif
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
-<meta name="theme-color" content="#E6007E" />
+<meta name="theme-color" content="#134A63" />
+@auth<meta name="sync-ping" content="{{ route('sync.ping') }}" />@endauth
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Surnaturel" />
+<script>try { document.documentElement.dataset.bg = localStorage.getItem('erp-bg') || 'soft'; } catch (e) { document.documentElement.dataset.bg = 'soft'; }</script>
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance

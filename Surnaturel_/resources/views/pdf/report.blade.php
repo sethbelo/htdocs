@@ -25,7 +25,8 @@
     @foreach ($sections as $section)
         <div class="section-title">{{ $section['title'] }}</div>
         <table class="lines">
-            <thead><tr>@foreach ($section['headings'] as $heading)<th>{{ $heading }}</th>@endforeach</tr></thead>
+            @php($numericColumns = collect(array_keys($section['headings']))->filter(fn ($i) => collect($section['rows'])->contains(fn ($row) => is_int(array_values((array) $row)[$i] ?? null) || is_float(array_values((array) $row)[$i] ?? null)))->all())
+            <thead><tr>@foreach ($section['headings'] as $i => $heading)<th class="{{ in_array($i, $numericColumns, true) ? 'right' : '' }}">{{ $heading }}</th>@endforeach</tr></thead>
             <tbody>
                 @forelse ($section['rows'] as $row)
                     <tr class="{{ $loop->even ? 'even' : '' }}">@foreach ($row as $cell)<td class="{{ is_float($cell) || is_int($cell) ? 'right nowrap' : '' }}">{{ $fmt($cell) }}</td>@endforeach</tr>

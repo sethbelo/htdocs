@@ -75,7 +75,7 @@
                 <flux:heading>Aperçu</flux:heading>
                 @if ($employee = $this->preview)
                     <style>
-                        .card-preview { position: relative; overflow: hidden; background: #fff; color: #16161D; font-family: Helvetica, Arial, sans-serif; border-radius: 3mm; box-shadow: 0 10px 30px -12px rgb(0 0 0 / .35); }
+                        .card-preview { position: relative; overflow: hidden; background: #fff; color: #134A63; font-family: Helvetica, Arial, sans-serif; border-radius: 3mm; box-shadow: 0 10px 30px -12px rgb(0 0 0 / .35); }
                         .card-preview .abs { position: absolute; }
                         .card-preview .upper { text-transform: uppercase; letter-spacing: .3mm; }
                         .card-preview .stripe { position: absolute; left: 0; right: 0; height: 1mm; display: flex; }

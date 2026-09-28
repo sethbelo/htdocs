@@ -4,6 +4,7 @@ namespace App\Livewire\Hr;
 
 use App\Enums\LeaveStatus;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
@@ -17,7 +18,9 @@ use Livewire\WithFileUploads;
 #[Title('Congés')]
 class Leaves extends Component
 {
-    use InteractsWithToasts, WithFileUploads;
+    use InteractsWithToasts, WithFileUploads, WithListFilters;
+
+    public ?int $leaveTypeFilter = null;
 
     #[Url(as: 'statut')]
     public string $status = '';
@@ -101,12 +104,20 @@ class Leaves extends Component
                 ->when(! $canManage, fn ($q) => $q->where(fn ($w) => $w->where('employee_id', $myEmployee?->id)->orWhereHas('employee.manager', fn ($m) => $m->where('user_id', $user->id))))
                 ->when($canManage, fn ($q) => $q->whereHas('employee', fn ($e) => $e->visibleTo($user)))
                 ->when($this->status, fn ($q) => $q->where('status', $this->status))
-                ->latest()->limit(100)->get(),
+                ->when($this->leaveTypeFilter, fn ($q) => $q->where('leave_type_id', $this->leaveTypeFilter))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'reason', 'employee.first_name', 'employee.last_name', 'employee.matricule']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'starts_on'))
+                ->latest()->limit(200)->get(),
             'calendar' => LeaveRequest::query()->with('employee', 'leaveType')->where('status', LeaveStatus::Approved)->whereDate('ends_on', '>=', today())->orderBy('starts_on')->limit(30)->get(),
             'types' => LeaveType::query()->orderBy('name')->get(),
             'balances' => $myEmployee ? LeaveType::query()->where('annual_quota', '>', 0)->get()->map(fn (LeaveType $type): array => ['type' => $type, 'balance' => $leaves->balance($myEmployee, $type)]) : collect(),
             'employees' => $user->can('leaves.create') ? Employee::query()->visibleTo($user)->where('is_active', true)->orderBy('last_name')->get(['id', 'first_name', 'last_name']) : collect([$myEmployee])->filter(),
             'statuses' => LeaveStatus::options(),
         ]);
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['status', 'leaveTypeFilter'];
     }
 }

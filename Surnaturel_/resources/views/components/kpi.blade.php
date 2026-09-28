@@ -5,7 +5,7 @@
         'emerald' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-400/12 dark:text-emerald-300',
         'amber' => 'bg-safran-100 text-safran-800 dark:bg-safran-400/15 dark:text-safran-300',
         'red' => 'bg-carmin-50 text-carmin-600 dark:bg-carmin-400/12 dark:text-carmin-300',
-        'purple' => 'bg-violet-50 text-violet-700 dark:bg-violet-400/12 dark:text-violet-300',
+        'purple' => 'bg-brand-50 text-brand-700 dark:bg-brand-400/12 dark:text-brand-300',
         'sky' => 'bg-cyan2-50 text-cyan2-700 dark:bg-cyan2-400/12 dark:text-cyan2-300',
         'zinc' => 'bg-zinc-100 text-fg-muted dark:bg-white/8',
     ][$color] ?? 'bg-zinc-100 text-fg-muted dark:bg-white/8';

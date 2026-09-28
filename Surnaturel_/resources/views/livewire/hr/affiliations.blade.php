@@ -93,7 +93,7 @@
                         <ul class="divide-y divide-line">
                             @forelse ($employee->affiliations as $a)
                                 <li class="flex flex-wrap items-center gap-3 p-4" wire:key="aff-{{ $a->id }}">
-                                    <span @class(['grid size-10 shrink-0 place-items-center rounded-xl', 'bg-cyan2-50 text-cyan2-600 dark:bg-cyan2-400/10' => $a->policy->type->value === 'medical', 'bg-violet-50 text-violet-600 dark:bg-violet-400/10' => $a->policy->type->value === 'life'])><flux:icon :icon="$a->policy->type->icon()" variant="mini" /></span>
+                                    <span @class(['grid size-10 shrink-0 place-items-center rounded-xl', 'bg-cyan2-50 text-cyan2-600 dark:bg-cyan2-400/10' => $a->policy->type->value === 'medical', 'bg-brand-50 text-brand-600 dark:bg-brand-400/10' => $a->policy->type->value === 'life'])><flux:icon :icon="$a->policy->type->icon()" variant="mini" /></span>
                                     <div class="min-w-0 flex-1">
                                         <div class="flex flex-wrap items-center gap-2"><span class="font-semibold">{{ $a->policy->name }}</span><flux:badge size="sm" :color="$a->status->color()">{{ $a->status->label() }}</flux:badge></div>
                                         <div class="text-xs text-fg-subtle">{{ $a->memberName() }} ({{ $a->memberRelationship() }}) · n° {{ $a->member_number }} · depuis le {{ $a->starts_on->format('d/m/Y') }} · {{ $a->policy->provider }}</div>
@@ -147,7 +147,7 @@
                         <div><dt class="text-xs text-fg-subtle">Part employeur</dt><dd class="font-semibold">{{ (float) $p->employer_share }} %</dd></div>
                         <div><dt class="text-xs text-fg-subtle">Plafond</dt><dd class="font-semibold">{{ $p->coverage_limit ? $money($p->coverage_limit) : '—' }}</dd></div>
                     </dl>
-                    @can('affiliations.update')<flux:button size="sm" icon="pencil" wire:click="editPolicy({{ $p->id }})">Modifier</flux:button>@endcan
+                    @can('affiliations.update')<x-edit-button wire:click="editPolicy({{ $p->id }})" />@endcan
                 </div>
             @empty
                 <div class="panel md:col-span-2 xl:col-span-3"><x-empty-state icon="shield-check" title="Aucune police" text="Enregistrez vos contrats d’assurance maladie et d’assurance vie." /></div>

@@ -1,6 +1,7 @@
 <div class="space-y-6">
     <x-page-header title="Stocks & inventaire" subtitle="Niveaux par entrepôt, mouvements historisés, transferts, pertes, casse et inventaires physiques.">
         <x-slot:actions>
+            <livewire:import-data type="stock" :key="'import-stock'" />
             @can('inventory.export')<flux:button size="sm" icon="arrow-down-tray" wire:click="export">Excel</flux:button>@endcan
             @can('inventory.create')
                 <flux:dropdown align="end">

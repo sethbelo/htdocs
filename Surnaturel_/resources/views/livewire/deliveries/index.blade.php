@@ -10,6 +10,7 @@
             </flux:select>
             <flux:switch wire:model.live="mineOnly" label="Mes livraisons uniquement" />
         </div>
+        <x-filter-bar class="border-0 p-0 shadow-none" placeholder="N° de bon, commande, destinataire, ville…" period-label="Prévue" />
 
         <flux:table :paginate="$deliveries">
             <flux:table.columns>

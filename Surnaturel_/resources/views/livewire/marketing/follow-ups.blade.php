@@ -1,6 +1,7 @@
 <div class="space-y-6">
     <x-page-header title="Suivi clients" eyebrow="Marketing" subtitle="Relances du jour, appels, messages WhatsApp, comptes rendus et rapports d’activité de l’équipe.">
         <x-slot:actions>
+            <livewire:import-data type="clients" :key="'import-clients'" />
             <flux:switch wire:model.live="mineOnly" label="Mon portefeuille" />
         </x-slot:actions>
     </x-page-header>

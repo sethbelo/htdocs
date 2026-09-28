@@ -10,7 +10,7 @@
                 </div>
                 <div class="min-h-24 space-y-2 rounded-xl bg-zinc-100 p-2 dark:bg-zinc-800/50">
                     @foreach ($this->columns[$status->value] as $job)
-                        <button wire:click="open({{ $job->id }})" wire:key="pj-{{ $job->id }}" class="panel block w-full p-3 text-left text-sm transition hover:border-indigo-300">
+                        <button wire:click="open({{ $job->id }})" wire:key="pj-{{ $job->id }}" class="panel block w-full p-3 text-left text-sm transition hover:border-brand-300">
                             <div class="flex items-center justify-between">
                                 <span class="font-medium">{{ $job->order->number }}</span>
                                 @if (in_array($job->order->priority->value, ['urgent', 'high']))<flux:badge size="sm" :color="$job->order->priority->color()">{{ $job->order->priority->label() }}</flux:badge>@endif

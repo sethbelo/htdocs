@@ -18,6 +18,10 @@ class Users extends Component
 {
     use InteractsWithToasts, WithPagination;
 
+    public string $state = '';
+
+    public ?int $siteFilter = null;
+
     public string $search = '';
 
     public string $role = '';
@@ -155,6 +159,8 @@ class Users extends Component
             'users' => User::query()->with('roles', 'sites')
                 ->when($this->search, fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$this->search}%")->orWhere('username', 'like', "%{$this->search}%")->orWhere('email', 'like', "%{$this->search}%")))
                 ->when($this->role, fn ($q) => $q->role($this->role))
+                ->when($this->state !== '', fn ($q) => $q->where('is_active', $this->state === 'active'))
+                ->when($this->siteFilter, fn ($q) => $q->whereHas('sites', fn ($w) => $w->whereKey($this->siteFilter)))
                 ->orderBy('name')->paginate(25),
             'allRoles' => Role::query()->orderBy('name')->pluck('name'),
             'sites' => Site::query()->orderBy('name')->get(),

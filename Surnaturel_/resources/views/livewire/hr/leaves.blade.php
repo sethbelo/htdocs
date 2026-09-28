@@ -11,7 +11,9 @@
 
     <div class="grid gap-6 xl:grid-cols-3">
         <div class="panel p-4 xl:col-span-2 space-y-3">
-            <flux:select wire:model.live="status" class="max-w-xs"><flux:select.option value="">Toutes les demandes</flux:select.option>@foreach ($statuses as $v => $l)<flux:select.option :value="$v">{{ $l }}</flux:select.option>@endforeach</flux:select>
+            <x-filter-bar class="border-0 p-0 shadow-none" placeholder="Employé, matricule, n°…" :statuses="$statuses">
+                <flux:select wire:model.live="leaveTypeFilter" size="sm" class="max-w-48"><flux:select.option value="">Tous les types</flux:select.option>@foreach ($types as $t)<flux:select.option :value="$t->id">{{ $t->name }}</flux:select.option>@endforeach</flux:select>
+            </x-filter-bar>
             <flux:table>
                 <flux:table.columns><flux:table.column>N°</flux:table.column><flux:table.column>Employé</flux:table.column><flux:table.column>Type</flux:table.column><flux:table.column>Période</flux:table.column><flux:table.column align="end">Jours</flux:table.column><flux:table.column>Statut</flux:table.column><flux:table.column></flux:table.column></flux:table.columns>
                 <flux:table.rows>

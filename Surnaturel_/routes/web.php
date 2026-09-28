@@ -20,12 +20,18 @@ Route::post('/deconnexion', function (Request $request) {
     return redirect()->route('login');
 })->middleware('auth')->name('logout');
 
+// Contrôle de synchronisation cloud (hors expiration d'inactivité : ne prolonge pas la session).
+Route::get('/sync/ping', fn () => response()->json(['ok' => true, 'time' => now()->toIso8601String()]))
+    ->middleware(['auth', 'throttle:12,1'])
+    ->name('sync.ping');
+
 Route::middleware(['auth', 'session.timeout'])->group(function (): void {
     Route::livewire('/mot-de-passe', Livewire\Auth\ChangePassword::class)->name('password.change');
 
     Route::middleware('password.changed')->group(function (): void {
         Route::get('/', fn () => redirect()->to(HomeRoute::url(auth()->user())))->name('home');
         Route::livewire('/pin-caisse', Livewire\Auth\CashierPin::class)->name('profile.pin');
+        Route::livewire('/applications', Livewire\Launcher::class)->name('launcher');
         Route::livewire('/tableau-de-bord', Livewire\Dashboard::class)->middleware('can:dashboard.view')->name('dashboard');
         Route::livewire('/validations', Livewire\Approvals\Inbox::class)->middleware('can:approvals.view')->name('approvals.index');
         Route::livewire('/taches', Livewire\Tasks\Index::class)->middleware('can:tasks.view')->name('tasks.index');
@@ -60,6 +66,7 @@ Route::middleware(['auth', 'session.timeout'])->group(function (): void {
         Route::livewire('/stocks/entrees-sorties', Livewire\Inventory\Operations::class)->middleware('can:inventory.view')->name('inventory.operations');
         Route::livewire('/stocks/transferts', Livewire\Inventory\Transfers::class)->middleware('can:inventory.view')->name('inventory.transfers');
         Route::livewire('/stocks/rapport-temps-reel', Livewire\Inventory\LiveReport::class)->middleware('can:inventory.view')->name('inventory.report');
+        Route::livewire('/stocks/rapports', Livewire\Inventory\Reports::class)->middleware('can:inventory.view')->name('inventory.reports');
         Route::livewire('/achats', Livewire\Purchasing\Index::class)->middleware('can:purchases.view')->name('purchases.index');
         Route::livewire('/fournisseurs', Livewire\Purchasing\Suppliers::class)->middleware('can:suppliers.view')->name('suppliers.index');
 
@@ -89,6 +96,7 @@ Route::middleware(['auth', 'session.timeout'])->group(function (): void {
         Route::livewire('/parametres/roles', Livewire\Settings\Roles::class)->middleware('can:roles.view')->name('settings.roles');
         Route::livewire('/parametres/validations', Livewire\Settings\Workflows::class)->middleware('can:approvals.update')->name('settings.workflows');
         Route::livewire('/parametres/documents', Livewire\Settings\Documents::class)->middleware('can:settings.update')->name('settings.documents');
+        Route::livewire('/parametres/import', Livewire\Settings\Imports::class)->middleware('can:settings.view')->name('settings.imports');
 
         // Impressions (PDF : A4, A5, ticket thermique 80 mm)
         Route::controller(PrintController::class)->prefix('imprimer')->name('print.')->group(function (): void {

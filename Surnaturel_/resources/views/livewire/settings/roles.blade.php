@@ -5,7 +5,7 @@
     <div class="grid gap-6 xl:grid-cols-5">
         <div class="panel p-2 space-y-1">
             @foreach ($roles as $role)
-                <button wire:click="selectRole({{ $role->id }})" wire:key="role-{{ $role->id }}" @class(['flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm', 'bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300' => $roleId === $role->id, 'hover:bg-zinc-50 dark:hover:bg-zinc-800' => $roleId !== $role->id])>
+                <button wire:click="selectRole({{ $role->id }})" wire:key="role-{{ $role->id }}" @class(['flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm', 'bg-brand-50 font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300' => $roleId === $role->id, 'hover:bg-zinc-50 dark:hover:bg-zinc-800' => $roleId !== $role->id])>
                     <span>{{ config("erp.roles.{$role->name}.label", $role->name) }}</span><flux:badge size="sm">{{ $role->users_count }}</flux:badge>
                 </button>
             @endforeach
@@ -35,9 +35,9 @@
                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @foreach ($modules as $module => $moduleLabel)
                             <tr wire:key="m-{{ $module }}">
-                                <td class="sticky left-0 bg-white py-1.5 pe-3 dark:bg-zinc-900"><button type="button" wire:click="toggleModule('{{ $module }}')" class="font-medium hover:text-indigo-600">{{ $moduleLabel }}</button></td>
+                                <td class="sticky left-0 bg-white py-1.5 pe-3 dark:bg-zinc-900"><button type="button" wire:click="toggleModule('{{ $module }}')" class="font-medium hover:text-brand-600">{{ $moduleLabel }}</button></td>
                                 @foreach ($actions as $action => $label)
-                                    <td class="px-1 text-center"><input type="checkbox" wire:model="permissions" value="{{ $module }}.{{ $action }}" class="size-4 rounded border-zinc-300 text-indigo-600" title="{{ $label }} — {{ $moduleLabel }}"></td>
+                                    <td class="px-1 text-center"><input type="checkbox" wire:model="permissions" value="{{ $module }}.{{ $action }}" class="size-4 rounded border-zinc-300 text-brand-600" title="{{ $label }} — {{ $moduleLabel }}"></td>
                                 @endforeach
                             </tr>
                         @endforeach
@@ -46,7 +46,7 @@
                 <flux:heading size="sm" class="mt-6">Permissions spéciales</flux:heading>
                 <div class="mt-2 grid gap-2 md:grid-cols-2">
                     @foreach ($specials as $permission => $label)
-                        <label class="flex items-center gap-2 text-sm" wire:key="sp-{{ $permission }}"><input type="checkbox" wire:model="permissions" value="{{ $permission }}" class="size-4 rounded border-zinc-300 text-indigo-600"> {{ $label }}</label>
+                        <label class="flex items-center gap-2 text-sm" wire:key="sp-{{ $permission }}"><input type="checkbox" wire:model="permissions" value="{{ $permission }}" class="size-4 rounded border-zinc-300 text-brand-600"> {{ $label }}</label>
                     @endforeach
                 </div>
             @endif

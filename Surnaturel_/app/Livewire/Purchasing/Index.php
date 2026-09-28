@@ -3,8 +3,10 @@
 namespace App\Livewire\Purchasing;
 
 use App\Enums\PaymentMethod;
+use App\Enums\PurchaseOrderStatus;
 use App\Enums\PurchaseRequestStatus;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseRequest;
@@ -24,7 +26,11 @@ use Livewire\Component;
 #[Title('Achats')]
 class Index extends Component
 {
-    use InteractsWithToasts;
+    use InteractsWithToasts, WithListFilters;
+
+    public ?int $supplierFilter = null;
+
+    public string $status = '';
 
     #[Url(as: 'vue')]
     public string $tab = 'requests';
@@ -248,9 +254,28 @@ class Index extends Component
         $sites = auth()->user()->accessibleSiteIds();
 
         return view('livewire.purchasing.index', [
-            'requests' => PurchaseRequest::query()->with('requester', 'approvalRequest.currentStep', 'items')->whereIn('site_id', $sites)->latest()->limit(50)->get(),
-            'orders' => PurchaseOrder::query()->with('supplier', 'warehouse', 'receipts', 'supplierInvoices')->whereIn('site_id', $sites)->latest()->limit(50)->get(),
-            'invoices' => SupplierInvoice::query()->with('supplier', 'purchaseOrder')->whereIn('site_id', $sites)->latest('invoice_date')->limit(50)->get(),
+            'requests' => PurchaseRequest::query()->with('requester', 'approvalRequest.currentStep', 'items')->whereIn('site_id', $sites)
+                ->when($this->status, fn ($q) => $q->where('status', $this->status))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'justification', 'requester.name']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'created_at'))
+                ->latest()->limit(100)->get(),
+            'orders' => PurchaseOrder::query()->with('supplier', 'warehouse', 'receipts', 'supplierInvoices')->whereIn('site_id', $sites)
+                ->when($this->status, fn ($q) => $q->where('status', $this->status))
+                ->when($this->supplierFilter, fn ($q) => $q->where('supplier_id', $this->supplierFilter))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'supplier.name']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'ordered_on'))
+                ->latest()->limit(100)->get(),
+            'invoices' => SupplierInvoice::query()->with('supplier', 'purchaseOrder')->whereIn('site_id', $sites)
+                ->when($this->status, fn ($q) => $q->where('status', $this->status))
+                ->when($this->supplierFilter, fn ($q) => $q->where('supplier_id', $this->supplierFilter))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'supplier_reference', 'supplier.name']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'invoice_date'))
+                ->latest('invoice_date')->limit(100)->get(),
+            'statusOptions' => match ($this->tab) {
+                'orders' => PurchaseOrderStatus::options(),
+                'invoices' => ['pending' => 'À payer', 'partially_paid' => 'Partiellement payée', 'paid' => 'Payée', 'cancelled' => 'Annulée'],
+                default => PurchaseRequestStatus::options(),
+            },
             'products' => Product::query()->where('is_active', true)->where('type', '!=', 'service')->orderBy('name')->get(['id', 'name', 'cost_price']),
             'suppliers' => Supplier::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'warehouses' => Warehouse::query()->visibleTo(auth()->user())->get(['id', 'name']),
@@ -258,5 +283,15 @@ class Index extends Component
             'methods' => PaymentMethod::options(),
             'receivingOrder' => $this->receivingId ? PurchaseOrder::query()->with('items')->find($this->receivingId) : null,
         ]);
+    }
+
+    public function updatedTab(): void
+    {
+        $this->status = '';
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['status', 'supplierFilter'];
     }
 }

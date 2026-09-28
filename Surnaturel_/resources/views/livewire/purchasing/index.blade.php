@@ -14,6 +14,15 @@
         @endforeach
     </div>
 
+    <x-filter-bar placeholder="N°, fournisseur, justification…" :statuses="$statusOptions">
+        @if ($tab !== 'requests')
+            <flux:select wire:model.live="supplierFilter" size="sm" class="max-w-56">
+                <flux:select.option value="">Tous les fournisseurs</flux:select.option>
+                @foreach ($suppliers as $supplier)<flux:select.option :value="$supplier->id">{{ $supplier->name }}</flux:select.option>@endforeach
+            </flux:select>
+        @endif
+    </x-filter-bar>
+
     <div class="panel p-4">
         @if ($tab === 'requests')
             <flux:table>

@@ -5,7 +5,7 @@
         @foreach ($tabs as $key => $label)
             <button wire:click="$set('view', '{{ $key }}')" wire:key="tab-{{ $key }}" @class(['flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition', 'bg-white shadow-sm dark:bg-zinc-900' => $view === $key, 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200' => $view !== $key])>
                 {{ $label }}
-                <span @class(['rounded-full px-1.5 text-xs', 'bg-indigo-600 text-white' => $view === $key, 'bg-zinc-200 dark:bg-zinc-700' => $view !== $key])>{{ $this->counts[$key] }}</span>
+                <span @class(['rounded-full px-1.5 text-xs', 'bg-brand-600 text-white' => $view === $key, 'bg-zinc-200 dark:bg-zinc-700' => $view !== $key])>{{ $this->counts[$key] }}</span>
             </button>
         @endforeach
     </div>
@@ -13,7 +13,7 @@
     <div class="grid gap-6 xl:grid-cols-5">
         <div class="space-y-2 xl:col-span-2">
             @forelse ($this->jobs as $job)
-                <button wire:click="open({{ $job->id }})" wire:key="job-{{ $job->id }}" @class(['panel block w-full p-3 text-left transition hover:border-indigo-300', 'ring-2 ring-indigo-500' => $jobId === $job->id])>
+                <button wire:click="open({{ $job->id }})" wire:key="job-{{ $job->id }}" @class(['panel block w-full p-3 text-left transition hover:border-brand-300', 'ring-2 ring-brand-500' => $jobId === $job->id])>
                     <div class="flex items-center justify-between gap-2">
                         <span class="font-medium">{{ $job->order->number }}</span>
                         <x-status-badge :status="$job->status" />

@@ -44,7 +44,7 @@ class DemoAccountsAndPeriodsTest extends TestCase
     {
         $this->app->detectEnvironment(fn () => 'production');
 
-        $this->get(route('login'))->assertOk()->assertDontSee('Comptes de démonstration')->assertSee('Impression offset');
+        $this->get(route('login'))->assertOk()->assertDontSee('Comptes de démonstration')->assertSee('Impression & reprographie');
         Livewire::test(Login::class)->call('useDemoAccount', 'comptable')->assertNotFound();
     }
 

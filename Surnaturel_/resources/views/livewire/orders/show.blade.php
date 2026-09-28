@@ -47,7 +47,7 @@
                 <li class="flex items-center gap-1">
                     <span @class([
                         'rounded-full px-2.5 py-1 font-medium',
-                        'bg-indigo-600 text-white' => $step === $order->status,
+                        'bg-brand-600 text-white' => $step === $order->status,
                         'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' => $currentIndex !== false && $index < $currentIndex,
                         'bg-zinc-100 text-zinc-500 dark:bg-zinc-800' => $currentIndex === false || $index > $currentIndex,
                     ])>{{ $step->label() }}</span>
@@ -224,7 +224,7 @@
                             <flux:avatar size="sm" :initials="$comment->user->initials()" />
                             <div class="min-w-0 flex-1 rounded-lg bg-zinc-50 p-2.5 text-sm dark:bg-zinc-800">
                                 <div class="flex justify-between text-xs text-zinc-500"><span class="font-medium text-zinc-700 dark:text-zinc-200">{{ $comment->user->name }}</span>{{ $comment->created_at->diffForHumans() }}</div>
-                                <div class="mt-1 whitespace-pre-line">{!! preg_replace('/@([A-Za-z0-9._-]+)/', '<span class="font-medium text-indigo-600">@$1</span>', e($comment->body)) !!}</div>
+                                <div class="mt-1 whitespace-pre-line">{!! preg_replace('/@([A-Za-z0-9._-]+)/', '<span class="font-medium text-brand-600">@$1</span>', e($comment->body)) !!}</div>
                             </div>
                         </li>
                     @endforeach
@@ -297,7 +297,7 @@
                 <ol class="relative mt-3 space-y-4 border-s border-zinc-200 ps-4 dark:border-zinc-700">
                     @foreach ($order->statusHistories as $history)
                         <li class="text-sm" wire:key="h-{{ $history->id }}">
-                            <span class="absolute -start-1.5 mt-1.5 size-3 rounded-full border-2 border-white bg-indigo-500 dark:border-zinc-900"></span>
+                            <span class="absolute -start-1.5 mt-1.5 size-3 rounded-full border-2 border-white bg-brand-500 dark:border-zinc-900"></span>
                             <div class="flex items-center gap-2"><x-status-badge :status="$history->to_status" /></div>
                             <div class="mt-1 text-xs text-zinc-500">{{ $history->created_at->format('d/m/Y H:i') }} · {{ $history->user?->name ?? 'Système' }}</div>
                             @if ($history->comment)<div class="mt-0.5 text-zinc-600 dark:text-zinc-300">{{ $history->comment }}</div>@endif

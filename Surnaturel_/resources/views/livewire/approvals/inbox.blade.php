@@ -48,7 +48,7 @@
                 @endif
                 <ol class="flex flex-wrap gap-2 text-xs">
                     @foreach ($current->workflow->steps as $step)
-                        <li @class(['rounded-full px-2.5 py-1', 'bg-indigo-600 text-white' => $step->id === $current->current_step_id, 'bg-zinc-100 dark:bg-zinc-800' => $step->id !== $current->current_step_id, 'opacity-40' => (float) $current->amount < (float) $step->min_amount])>{{ $step->sequence }}. {{ $step->name }} @if ((float) $step->min_amount > 0)(≥ {{ (float) $step->min_amount }})@endif</li>
+                        <li @class(['rounded-full px-2.5 py-1', 'bg-brand-600 text-white' => $step->id === $current->current_step_id, 'bg-zinc-100 dark:bg-zinc-800' => $step->id !== $current->current_step_id, 'opacity-40' => (float) $current->amount < (float) $step->min_amount])>{{ $step->sequence }}. {{ $step->name }} @if ((float) $step->min_amount > 0)(≥ {{ (float) $step->min_amount }})@endif</li>
                     @endforeach
                 </ol>
                 <flux:textarea wire:model="comment" label="Commentaire" rows="2" />

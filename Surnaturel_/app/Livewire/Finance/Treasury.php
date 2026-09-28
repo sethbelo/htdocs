@@ -4,6 +4,7 @@ namespace App\Livewire\Finance;
 
 use App\Enums\TreasuryAccountType;
 use App\Livewire\Concerns\InteractsWithToasts;
+use App\Livewire\Concerns\WithListFilters;
 use App\Models\Account;
 use App\Models\Payment;
 use App\Models\TreasuryAccount;
@@ -20,7 +21,9 @@ use Livewire\Component;
 #[Title('Trésorerie')]
 class Treasury extends Component
 {
-    use InteractsWithToasts;
+    use InteractsWithToasts, WithListFilters;
+
+    public ?int $accountFilter = null;
 
     /** @var array<string, string> */
     public array $transfer = ['from' => '', 'to' => '', 'amount' => '', 'reference' => '', 'description' => ''];
@@ -88,7 +91,9 @@ class Treasury extends Component
         $sites = auth()->user()->accessibleSiteIds();
         $accounts = TreasuryAccount::query()->with('site')->where(fn (Builder $q) => $q->whereNull('site_id')->orWhereIn('site_id', $sites))->orderBy('type')->get();
 
-        $flows = Payment::query()->whereIn('treasury_account_id', $accounts->pluck('id'))->where('paid_at', '>=', today()->subDays(29))
+        $flowFrom = $this->from ?: today()->subDays(29)->toDateString();
+        $flows = Payment::query()->whereIn('treasury_account_id', $this->accountFilter ? [$this->accountFilter] : $accounts->pluck('id'))
+            ->whereDate('paid_at', '>=', $flowFrom)->when($this->to, fn ($q) => $q->whereDate('paid_at', '<=', $this->to))
             ->selectRaw("DATE(paid_at) as day, SUM(CASE WHEN direction = 'in' THEN amount ELSE 0 END) as inflow, SUM(CASE WHEN direction = 'out' THEN amount ELSE 0 END) as outflow")
             ->groupBy('day')->orderBy('day')->get();
 
@@ -97,7 +102,11 @@ class Treasury extends Component
 
         return view('livewire.finance.treasury', [
             'accounts' => $accounts,
-            'transfers' => TreasuryTransfer::query()->with('from', 'to', 'user')->latest('transferred_at')->limit(15)->get(),
+            'transfers' => TreasuryTransfer::query()->with('from', 'to', 'user')
+                ->when($this->accountFilter, fn ($q) => $q->where(fn ($w) => $w->where('from_treasury_account_id', $this->accountFilter)->orWhere('to_treasury_account_id', $this->accountFilter)))
+                ->tap(fn ($q) => $this->applySearch($q, ['number', 'reference', 'description']))
+                ->tap(fn ($q) => $this->applyPeriod($q, 'transferred_at'))
+                ->latest('transferred_at')->limit(50)->get(),
             'forecasts' => $forecasts,
             'projected' => $projected,
             'ledgerAccounts' => Account::query()->where('class', 5)->orderBy('code')->get(),
@@ -114,5 +123,10 @@ class Treasury extends Component
                 'options' => ['maintainAspectRatio' => false, 'scales' => ['x' => ['stacked' => true], 'y' => ['stacked' => true]]],
             ],
         ]);
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['accountFilter'];
     }
 }
