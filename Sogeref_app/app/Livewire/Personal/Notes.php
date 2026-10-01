@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Personal;
 
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\PersonalNote;
 use Livewire\Attributes\Title;
@@ -15,15 +16,24 @@ use Livewire\Component;
 #[Title('Mes notes')]
 class Notes extends Component
 {
-    use InteractsWithUi;
+    use EncryptsUrlIds, InteractsWithUi;
 
-    #[Url(as: 'note')]
     public ?int $noteId = null;
+
+    /** Jeton chiffré de l'identifiant, seul visible dans l'URL (?note=…). */
+    #[Url(as: 'note')]
+    public ?string $noteKey = null;
+
+    protected function encryptedUrlIds(): array
+    {
+        return ['noteId' => ['noteKey', PersonalNote::class]];
+    }
 
     public string $search = '';
 
     public function mount(): void
     {
+        $this->decodeUrlIds();
         if (request()->boolean('nouvelle')) {
             $this->create();
 

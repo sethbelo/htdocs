@@ -5,7 +5,6 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    @include('livewire.personal.partials.nav', ['current' => 'personal.notes'])
 
     <div class="grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
         {{-- ═══ LISTE ═══════════════════════════════════════════════════════ --}}

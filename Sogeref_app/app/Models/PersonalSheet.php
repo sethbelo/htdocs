@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Policies\PersonalItemPolicy;
 use App\Support\SheetFormula;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[UsePolicy(PersonalItemPolicy::class)]
 class PersonalSheet extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasEncryptedRouteKey;
 
     public const MAX_ROWS = 500;
 

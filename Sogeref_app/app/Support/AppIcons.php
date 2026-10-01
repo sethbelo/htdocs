@@ -16,11 +16,11 @@ class AppIcons
 
     private const R = '#F7313A'; // rouge
 
-    private const C = '#F2705E'; // corail
+    private const C = '#FD666C'; // rouge clair (flamme 400)
 
-    private const O = '#F59A3B'; // orange
+    private const O = '#F5B50B'; // jaune soutenu (soleil 500)
 
-    private const V = '#8B5A83'; // prune
+    private const V = '#3E88A6'; // bleu clair (bleu 400)
 
     /**
      * @return array<string, string>
@@ -87,7 +87,7 @@ class AppIcons
             'messages' => "<path d='M4 10a6 6 0 0 1 6-6h20a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6H16l-8 7v-7a6 6 0 0 1-4-6z' fill='$T'/><path d='M18 22a5 5 0 0 1 5-5h16a5 5 0 0 1 5 5v11a5 5 0 0 1-4 5v6l-7-6H23a5 5 0 0 1-5-5z' fill='$P'/><circle cx='26' cy='28' r='2' fill='$Y'/><circle cx='32' cy='28' r='2' fill='$Y'/><circle cx='38' cy='28' r='2' fill='$Y'/>",
             'personal' => "<circle cx='24' cy='24' r='20' fill='$T'/><circle cx='24' cy='19' r='8' fill='$P'/><path d='M10 37a16 16 0 0 1 28 0 20 20 0 0 1-28 0z' fill='$P'/><circle cx='38' cy='10' r='6' fill='$Y'/>",
             'personal.notes' => "<rect x='7' y='4' width='34' height='40' rx='6' fill='#fff' stroke='$P' stroke-width='3'/><rect x='13' y='12' width='22' height='4' rx='2' fill='$P'/><rect x='13' y='20' width='16' height='3' rx='1.5' fill='$T'/><rect x='13' y='26' width='20' height='3' rx='1.5' fill='$T'/><rect x='13' y='32' width='12' height='3' rx='1.5' fill='$T'/><path d='m32 30 9-9 4 4-9 9h-4z' fill='$Y'/>",
-            'personal.sheets' => "<rect x='4' y='6' width='40' height='36' rx='6' fill='#1E9E61'/><rect x='9' y='12' width='30' height='25' rx='2' fill='#fff'/><path d='M9 20h30M9 28h30M19 12v25M29 12v25' stroke='#1E9E61' stroke-width='2'/><rect x='9' y='12' width='10' height='8' fill='$Y'/>",
+            'personal.sheets' => "<rect x='4' y='6' width='40' height='36' rx='6' fill='#1A8D91'/><rect x='9' y='12' width='30' height='25' rx='2' fill='#fff'/><path d='M9 20h30M9 28h30M19 12v25M29 12v25' stroke='#1A8D91' stroke-width='2'/><rect x='9' y='12' width='10' height='8' fill='$Y'/>",
             'personal.vouchers' => "<path d='M8 4h24l8 8v32H8z' fill='$V'/><path d='M32 4v8h8' fill='$Y'/><rect x='13' y='16' width='18' height='4' rx='2' fill='#fff'/><path d='M13 33c3-5 5 3 8-2s4 2 7 0 4-2 6 0' fill='none' stroke='$Y' stroke-width='2.5' stroke-linecap='round'/>",
             'personal.tasks' => "<rect x='6' y='5' width='36' height='38' rx='7' fill='$Y'/><path d='m12 17 3 3 6-6' fill='none' stroke='$P' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/><rect x='24' y='15' width='12' height='4' rx='2' fill='$P'/><path d='m12 30 3 3 6-6' fill='none' stroke='$P' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/><rect x='24' y='28' width='12' height='4' rx='2' fill='$P' opacity='.6'/>",
         ];

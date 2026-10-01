@@ -82,6 +82,7 @@ export function evaluateSheet(cells) {
         };
         const call = (fn) => {
             const numbers = [];
+            let error = null;
             if (peek() !== ')') {
                 do {
                     if (peek() === ',' || peek() === ';') pos++;
@@ -92,17 +93,18 @@ export function evaluateSheet(cells) {
                         pos += 3;
                         for (const ref of range(t, end)) {
                             const v = value(ref);
-                            if (isError(v)) return v;
-                            if (typeof v === 'number') numbers.push(v);
+                            if (isError(v)) error ??= v;
+                            else if (typeof v === 'number') numbers.push(v);
                         }
                     } else {
                         const v = expr();
-                        if (isError(v)) return v;
-                        if (typeof v === 'number') numbers.push(v);
+                        if (isError(v)) error ??= v;
+                        else if (typeof v === 'number') numbers.push(v);
                     }
                 } while (peek() === ',' || peek() === ';');
             }
             expect(')');
+            if (error) return error;
             const sum = numbers.reduce((s, n) => s + n, 0);
             switch (fn) {
                 case 'SUM': return sum;
@@ -170,7 +172,7 @@ document.addEventListener('alpine:init', () => {
             const editor = this.$refs.editor;
             document.execCommand('defaultParagraphSeparator', false, 'p');
             if (!editor.innerHTML.trim()) editor.innerHTML = '<p><br></p>';
-            editor.addEventListener('input', () => this.changed());
+            editor.addEventListener('input', (e) => { this.markdown(e); this.changed(); });
             editor.addEventListener('keydown', (e) => this.shortcuts(e));
             editor.addEventListener('click', (e) => this.toggleCheck(e));
             editor.addEventListener('paste', (e) => {
@@ -268,19 +270,39 @@ document.addEventListener('alpine:init', () => {
         shortcuts(e) {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); this.save(); return; }
             // Nouvelle ligne d'une checklist : la case repart décochée.
+            // Entrée dans une citation : on en sort (nouveau paragraphe dessous).
+            if (e.key === 'Enter' && !e.shiftKey && this.closest('blockquote') && !this.closest('li')) {
+                e.preventDefault();
+                const quote = this.closest('blockquote');
+                const p = document.createElement('p');
+                p.appendChild(document.createElement('br'));
+                quote.after(p);
+                const r = document.createRange();
+                r.setStart(p, 0);
+                r.collapse(true);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(r);
+                this.changed();
+                this.refreshActive();
+                return;
+            }
             if (e.key === 'Enter' && !e.shiftKey) {
                 const li = this.closest('li');
                 if (li && li.parentNode?.dataset?.type === 'checklist') {
                     setTimeout(() => { const next = this.closest('li'); if (next && next !== li) next.dataset.checked = 'false'; }, 0);
                 }
             }
-            if (e.key !== ' ') return;
-            // Raccourcis Markdown en début de bloc : #, ##, ###, -, *, 1., [], >, ---
+        },
+        /** Raccourcis Markdown en début de bloc : #, ##, ###, -, *, 1., [], >, --- suivis d'une espace. */
+        markdown(e) {
+            if (e.inputType !== 'insertText' || e.data !== ' ') return;
             const sel = window.getSelection();
             if (!sel.rangeCount || !sel.isCollapsed) return;
             const node = sel.anchorNode;
             if (!node || node.nodeType !== 3) return;
-            const before = node.textContent.slice(0, sel.anchorOffset);
+            const typed = node.textContent.slice(0, sel.anchorOffset);
+            const marker = typed.replace(/[\s\u00A0]$/, '');
             const actions = {
                 '#': () => document.execCommand('formatBlock', false, 'h1'),
                 '##': () => document.execCommand('formatBlock', false, 'h2'),
@@ -290,18 +312,24 @@ document.addEventListener('alpine:init', () => {
                 '1.': () => document.execCommand('insertOrderedList'),
                 '[]': () => this.checklist(),
                 '>': () => document.execCommand('formatBlock', false, 'blockquote'),
-                '---': () => { document.execCommand('insertHorizontalRule'); },
+                '---': () => document.execCommand('insertHorizontalRule'),
             };
-            const block = node.parentNode?.closest?.('p, h1, h2, h3, li, blockquote, div');
-            const isStart = block && block.textContent.trim() === before.trim() && node === this.firstText(block);
-            if (!isStart || !(before in actions)) return;
-            e.preventDefault();
+            if (!(marker in actions) || node !== this.firstText(node.parentNode.closest('p, h1, h2, h3, li, blockquote, div') || node.parentNode)) return;
             const range = document.createRange();
             range.setStart(node, 0);
             range.setEnd(node, sel.anchorOffset);
             range.deleteContents();
-            actions[before]();
-            this.changed();
+            if (!node.textContent) {
+                // Bloc vide : on garde un <br> pour que le curseur reste en place.
+                const br = document.createElement('br');
+                node.parentNode.replaceChild(br, node);
+                const r = document.createRange();
+                r.setStartBefore(br);
+                r.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(r);
+            }
+            actions[marker]();
             this.refreshActive();
         },
         firstText(el) {
@@ -369,13 +397,33 @@ document.addEventListener('alpine:init', () => {
             this.$nextTick(() => this.$refs.grid?.querySelector(`[data-ref="${this.selectedRef}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
             this.$refs.grid?.focus({ preventScroll: true });
         },
+        /** Clic : sélectionne ; second clic sur la cellule active → édition (utile au tactile). */
+        clickCell(r, c) {
+            if (!this.editing && this.sel.r === r && this.sel.c === c) { this.startEdit(); return; }
+            this.select(r, c);
+        },
         startEdit(initialText = null) {
             this.editing = true;
             this.draft = initialText ?? (this.cells[this.selectedRef] ?? '');
-            this.$nextTick(() => {
-                const input = this.$refs.grid.querySelector(`[data-ref="${this.selectedRef}"] input`);
-                if (input) { input.focus(); const l = input.value.length; input.setSelectionRange(l, l); }
+            // Champ d'édition unique superposé à la cellule : affiché et focalisé immédiatement.
+            const input = this.$refs.cellInput;
+            const td = this.$refs.grid.querySelector(`[data-ref="${this.selectedRef}"]`);
+            if (!input || !td) return;
+            const wrap = this.$refs.grid.getBoundingClientRect();
+            const cell = td.getBoundingClientRect();
+            Object.assign(input.style, {
+                display: 'block',
+                left: `${cell.left - wrap.left + this.$refs.grid.scrollLeft}px`,
+                top: `${cell.top - wrap.top + this.$refs.grid.scrollTop}px`,
+                width: `${Math.max(cell.width, 140)}px`,
+                height: `${cell.height}px`,
             });
+            input.value = this.draft;
+            input.focus({ preventScroll: true });
+            input.setSelectionRange(input.value.length, input.value.length);
+        },
+        hideInput() {
+            if (this.$refs.cellInput) this.$refs.cellInput.style.display = 'none';
         },
         commit() {
             if (!this.editing) return;
@@ -383,10 +431,11 @@ document.addEventListener('alpine:init', () => {
             const value = String(this.draft ?? '');
             if (value === '') delete this.cells[ref]; else this.cells[ref] = value;
             this.editing = false;
+            this.hideInput();
             this.recalc();
             this.changed();
         },
-        cancel() { this.editing = false; this.draft = ''; this.$refs.grid.focus(); },
+        cancel() { this.editing = false; this.draft = ''; this.hideInput(); this.$refs.grid.focus(); },
         clearCell() { delete this.cells[this.selectedRef]; this.recalc(); this.changed(); },
         onGridKey(e) {
             if (this.editing) return;
@@ -405,14 +454,22 @@ document.addEventListener('alpine:init', () => {
             else if (e.key === 'Escape') { e.preventDefault(); this.cancel(); }
         },
         shift(axis, at, delta) {
-            // Décale les cellules d'une ligne/colonne (insertion +1, suppression -1).
+            // Décale les cellules d'une ligne/colonne (insertion +1, suppression -1)
+            // et réécrit les références des formules, comme un tableur classique.
+            const move = (idx) => (delta > 0 ? (idx >= at ? idx + 1 : idx) : (idx > at ? idx - 1 : idx));
+            const rewrite = (formula) => formula.replace(/(\$?)([A-Za-z]{1,2})(\$?)(\d{1,4})(?![A-Za-z0-9(])/g, (m, d1, letters, d2, digits) => {
+                let [c, r] = parseRef(letters + digits);
+                if (axis === 'row') r = move(r); else c = move(c);
+                return `${d1}${columnName(c)}${d2}${r + 1}`;
+            });
             const next = {};
             for (const [ref, v] of Object.entries(this.cells)) {
                 const [c, r] = parseRef(ref);
                 const idx = axis === 'row' ? r : c;
                 if (delta < 0 && idx === at) continue;
-                const moved = idx >= at + (delta < 0 ? 1 : 0) ? idx + delta : idx;
-                next[axis === 'row' ? columnName(c) + (moved + 1) : columnName(moved) + (r + 1)] = v;
+                const moved = move(idx);
+                const value = typeof v === 'string' && v.startsWith('=') ? rewrite(v) : v;
+                next[axis === 'row' ? columnName(c) + (moved + 1) : columnName(moved) + (r + 1)] = value;
             }
             this.cells = next;
         },
@@ -469,7 +526,7 @@ document.addEventListener('alpine:init', () => {
             if (this.editing) this.commit();
             this.state = 'saving';
             try {
-                await this.$wire.saveSheet(initial.id, this.title, this.rows, this.cols, this.cells);
+                await this.$wire.saveSheet(initial.id, this.title, this.rows, this.cols, JSON.parse(JSON.stringify(this.cells)));
                 this.state = 'saved';
             } catch {
                 this.state = 'dirty';

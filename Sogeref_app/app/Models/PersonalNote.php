@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use App\Policies\PersonalItemPolicy;
 use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[UsePolicy(PersonalItemPolicy::class)]
 class PersonalNote extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasEncryptedRouteKey;
 
     protected $guarded = ['id'];
 
@@ -45,7 +46,8 @@ class PersonalNote extends Model
     /** Extrait texte brut pour les listes. */
     public function excerpt(int $length = 110): string
     {
-        $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace(['</p>', '</li>', '</h1>', '</h2>', '</h3>', '<br>'], ' ', (string) $this->content)), ENT_QUOTES | ENT_HTML5)));
+        $spaced = preg_replace('#<(/?(p|li|h[1-3]|blockquote|ul|ol)|br|hr)\b[^>]*>#i', ' ', (string) $this->content);
+        $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($spaced), ENT_QUOTES | ENT_HTML5)));
 
         return str($text)->limit($length)->toString();
     }

@@ -24,6 +24,9 @@ use App\Models\ManufacturingOrder;
 use App\Models\Message;
 use App\Models\Opportunity;
 use App\Models\PayrollPeriod;
+use App\Models\PersonalNote;
+use App\Models\PersonalSheet;
+use App\Models\PersonalTask;
 use App\Models\Pipeline;
 use App\Models\PlanningSlot;
 use App\Models\Product;
@@ -82,6 +85,52 @@ class DemoSeeder extends Seeder
         $this->commerce($clients, $products, $equipment);
         $this->services($clients, $hr, $sites);
         $this->finance($hr, $sites);
+        $this->personalSpace();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // ESPACE PERSONNEL (notes, tableur, tâches du jour — compte Master)
+    // ═════════════════════════════════════════════════════════════════════
+    private function personalSpace(): void
+    {
+        $owner = ['company_id' => $this->cid, 'user_id' => $this->users['master']->id];
+
+        PersonalNote::create($owner + [
+            'title' => 'Réunion de direction — points clés',
+            'is_pinned' => true,
+            'content' => '<h2>Ordre du jour</h2><ol><li>Avancement du chantier villa Ngaliema</li><li>Commande de chaises pour l’hôtel Fleuve Congo</li><li>Trésorerie du mois</li></ol>'
+                .'<h3>Décisions</h3><ul data-type="checklist"><li data-checked="true">Valider le bon de sortie ciment / fer</li><li data-checked="false">Relancer le fournisseur de tissu</li><li data-checked="false">Planifier la visite de chantier de vendredi</li></ul>'
+                .'<blockquote>Objectif : livrer la première série de chaises avant la fin du mois.</blockquote><hr><p>Prochaine réunion : <strong>lundi 9 h</strong>, salle de conférence du siège.</p>',
+        ]);
+        PersonalNote::create($owner + [
+            'title' => 'Idées d’amélioration atelier',
+            'content' => '<p>Pistes relevées lors de la visite de l’atelier de Limete :</p><ul><li>Étiqueter les racks de matières premières</li><li>Prévoir un poste de contrôle qualité dédié</li><li>Former deux menuisiers au vernis polyuréthane</li></ul>',
+        ]);
+
+        PersonalSheet::create($owner + [
+            'title' => 'Budget mission Lubumbashi',
+            'rows' => 12, 'cols' => 4,
+            'cells' => [
+                'A1' => 'Poste', 'B1' => 'Quantité', 'C1' => 'Prix unitaire ($)', 'D1' => 'Total ($)',
+                'A2' => 'Billet d’avion', 'B2' => '2', 'C2' => '420', 'D2' => '=B2*C2',
+                'A3' => 'Hôtel (nuits)', 'B3' => '4', 'C3' => '85', 'D3' => '=B3*C3',
+                'A4' => 'Per diem', 'B4' => '8', 'C4' => '35', 'D4' => '=B4*C4',
+                'A5' => 'Transport local', 'B5' => '1', 'C5' => '120', 'D5' => '=B5*C5',
+                'A7' => 'Total', 'D7' => '=SUM(D2:D5)',
+                'A8' => 'Moyenne par poste', 'D8' => '=AVERAGE(D2:D5)',
+                'A9' => 'Poste le plus cher', 'D9' => '=MAX(D2:D5)',
+            ],
+        ]);
+
+        foreach ([
+            ['Valider les bons en attente de signature', 'urgente', '08:30', '09:00', true],
+            ['Point téléphonique avec le chef de chantier', 'haute', '10:00', '10:30', false],
+            ['Relire le devis de l’hôtel Fleuve Congo', 'normale', '14:00', null, false],
+            ['Préparer la réunion de direction de lundi', 'normale', null, null, false],
+        ] as $i => [$title, $priority, $start, $end, $done]) {
+            PersonalTask::create($owner + ['task_date' => today(), 'title' => $title, 'priority' => $priority, 'start_time' => $start, 'end_time' => $end, 'is_done' => $done, 'done_at' => $done ? now() : null, 'position' => $i + 1]);
+        }
+        PersonalTask::create($owner + ['task_date' => today()->subDay(), 'title' => 'Appeler la banque pour le relevé mensuel', 'priority' => 'haute', 'position' => 1]);
     }
 
     // ═════════════════════════════════════════════════════════════════════

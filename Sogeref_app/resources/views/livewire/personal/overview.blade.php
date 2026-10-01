@@ -14,7 +14,6 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    @include('livewire.personal.partials.nav', ['current' => 'personal'])
 
     <div class="mb-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
         <x-ui.stat label="Tâches du jour" :value="$done.' / '.$tasks->count()" icon="check-circle" tone="brand" :href="route('personal.tasks')" :hint="$overdue ? $overdue.' en retard à reporter' : 'Aucun retard'" />
@@ -108,7 +107,7 @@
             <x-slot:actions><x-ui.button variant="ghost" size="sm" iconRight="arrow-right" :href="route('personal.notes')">Toutes les notes</x-ui.button></x-slot:actions>
             <div class="grid gap-3 sm:grid-cols-2">
                 @forelse ($notes as $note)
-                    <a href="{{ route('personal.notes', ['note' => $note->id]) }}" wire:navigate class="group rounded-xl border border-line bg-surface-2 p-4 transition hover:border-brand-200 hover:shadow-sm">
+                    <a href="{{ route('personal.notes', ['note' => $note->getRouteKey()]) }}" wire:navigate class="group rounded-xl border border-line bg-surface-2 p-4 transition hover:border-brand-200 hover:shadow-sm">
                         <p class="flex items-center gap-1.5 truncate font-semibold text-fg">@if ($note->is_pinned)<x-ui.icon name="bookmark" variant="s" class="size-4 text-sun-500" />@endif{{ $note->title }}</p>
                         <p class="mt-1 line-clamp-2 text-[13px] text-fg-muted">{{ $note->excerpt() ?: 'Note vide' }}</p>
                         <p class="mt-2 text-[11.5px] text-fg-subtle">Modifiée {{ $note->updated_at->diffForHumans() }}</p>
@@ -120,7 +119,7 @@
             @if ($sheets->count())
                 <div class="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
                     @foreach ($sheets as $sheet)
-                        <a href="{{ route('personal.sheets', ['classeur' => $sheet->id]) }}" wire:navigate class="btn btn-secondary btn-sm"><x-ui.icon name="table-cells" class="size-4 text-emerald-600" />{{ $sheet->title }}</a>
+                        <a href="{{ route('personal.sheets', ['classeur' => $sheet->getRouteKey()]) }}" wire:navigate class="btn btn-secondary btn-sm"><x-ui.icon name="table-cells" class="size-4 text-emerald-600" />{{ $sheet->title }}</a>
                     @endforeach
                 </div>
             @endif

@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Document;
+use App\Models\PersonalNote;
+use App\Models\PersonalSheet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,5 +85,31 @@ class AppLauncherTest extends TestCase
         $this->as('master');
         $this->get(route('invoices'))->assertOk()->assertSee('Menu · Ventes');
         $this->get(route('documents.show', Document::first()))->assertOk()->assertSee('Menu · Ventes');
+    }
+
+    public function test_only_sogeref_branding_is_shown(): void
+    {
+        $this->get(route('login'))->assertSee('SOGEREF');
+        $this->as('master');
+        foreach ([route('launcher'), route('accounting'), route('personal'), asset('site.webmanifest')] as $url) {
+            $html = $url === asset('site.webmanifest') ? file_get_contents(public_path('site.webmanifest')) : $this->get($url)->assertOk()->getContent();
+            $this->assertStringContainsString('SOGEREF', $html);
+            $this->assertDoesNotMatchRegularExpression('/yodoox|yeboox|yuki|surnaturel/i', $html, $url);
+        }
+    }
+
+    public function test_personal_notes_and_sheets_links_carry_no_raw_ids(): void
+    {
+        $user = $this->as('master');
+        $note = PersonalNote::where('user_id', $user->id)->firstOrFail();
+        $sheet = PersonalSheet::where('user_id', $user->id)->firstOrFail();
+
+        foreach ([route('personal.notes.pdf', $note), route('personal.sheets.xlsx', $sheet), route('personal.notes', ['note' => $note->getRouteKey()])] as $url) {
+            $this->assertDoesNotMatchRegularExpression('#/(notes|tableurs)/\d+(/|$)|[?&](note|classeur)=\d+(&|$)#', $url);
+        }
+        $this->get(route('personal.notes.print', $note))->assertOk();
+        $this->get('/espace-personnel/notes/'.$note->id.'/imprimer')->assertNotFound();
+        $this->get(route('personal.notes', ['note' => $note->getRouteKey()]))->assertOk()->assertSee($note->title);
+        $this->get(route('personal'))->assertOk()->assertDontSee('?note='.$note->id.'"', false);
     }
 }

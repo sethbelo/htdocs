@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 // ── Fichiers publics en mode Desktop (Electron) ─────────────────────────────
-if (env('SOGEREF_DESKTOP', env('YUKI_DESKTOP'))) {
+if (env('SOGEREF_DESKTOP')) {
     Route::get('/storage/{path}', function (string $path) {
         $root = realpath(storage_path('app/public'));
         $file = realpath(storage_path('app/public/'.$path));

@@ -110,5 +110,8 @@ class DatabaseSeeder extends Seeder
 
         // ── 6. Jeu de démonstration ─────────────────────────────────────────
         $this->callWith(DemoSeeder::class, ['users' => $users]);
+
+        // L'utilisateur « courant » ne sert qu'à horodater le jeu de démonstration : on l'oublie.
+        Auth::forgetUser();
     }
 }

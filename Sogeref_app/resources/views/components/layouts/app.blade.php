@@ -9,6 +9,7 @@
     <title>{{ isset($title) ? $title.' · ' : '' }}SOGEREF ERP</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('brand/icon.svg') }}">
     <link rel="apple-touch-icon" href="{{ asset('brand/icon-192.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     {{-- Thème appliqué avant le premier rendu : aucun flash blanc en mode sombre. --}}
     <script>
         (() => { try { const m = localStorage.getItem('sogeref-theme') || 'light'; if (m === 'dark' || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); } catch (e) {} })();

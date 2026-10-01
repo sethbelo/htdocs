@@ -249,6 +249,7 @@ final class SheetFormula
     private function call(string $function): float|string
     {
         $numbers = [];
+        $error = null;
         if ($this->peek() !== ')') {
             do {
                 if ($this->peek() === ',' || $this->peek() === ';') {
@@ -261,24 +262,25 @@ final class SheetFormula
                     foreach ($this->range($token, $end) as $ref) {
                         $value = $this->value($ref);
                         if (is_string($value) && str_starts_with($value, '#')) {
-                            return $value;
-                        }
-                        if (is_float($value)) {
+                            $error ??= $value;
+                        } elseif (is_float($value)) {
                             $numbers[] = $value;
                         }
                     }
                 } else {
                     $value = $this->expression();
                     if (is_string($value) && str_starts_with($value, '#')) {
-                        return $value;
-                    }
-                    if (is_float($value)) {
+                        $error ??= $value;
+                    } elseif (is_float($value)) {
                         $numbers[] = $value;
                     }
                 }
             } while ($this->peek() === ',' || $this->peek() === ';');
         }
         $this->expect(')');
+        if ($error !== null) {
+            return $error;
+        }
 
         return match ($function) {
             'SUM' => (float) array_sum($numbers),

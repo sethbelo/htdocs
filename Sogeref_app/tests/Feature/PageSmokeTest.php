@@ -46,6 +46,7 @@ class PageSmokeTest extends TestCase
             route('cash'), route('expense-claims'), route('accounting'), route('banking'), route('reports'),
             route('employees'), route('employees.show', Employee::first()), route('leaves'), route('payroll'), route('payroll.show', PayrollPeriod::first()),
             route('chat'), route('system'),
+            route('personal'), route('personal.notes'), route('personal.sheets'), route('personal.vouchers'), route('personal.leaves'), route('personal.tasks'),
         ];
 
         foreach ($urls as $url) {
