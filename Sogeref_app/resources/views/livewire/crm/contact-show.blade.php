@@ -11,8 +11,8 @@
         </x-slot:meta>
         <x-slot:actions>
             @if ($c->type->value === 'prospect' && auth()->user()->canManage('contacts'))<x-ui.button variant="secondary" icon="check-badge" wire:click="convertToClient">Convertir en client</x-ui.button>@endif
-            @if ($c->type->value !== 'supplier' && auth()->user()->canManage('quotes'))<x-ui.button variant="accent" icon="document-text" :href="route('quotes.create', ['contact' => $c->id])">Nouveau devis</x-ui.button>@endif
-            @if ($c->type->value === 'supplier' && auth()->user()->canManage('purchases'))<x-ui.button variant="accent" icon="truck" :href="route('purchases.create', ['contact' => $c->id])">Bon de commande</x-ui.button>@endif
+            @if ($c->type->value !== 'supplier' && auth()->user()->canManage('quotes'))<x-ui.button variant="accent" icon="document-text" :href="route('quotes.create', ['contact' => $c])">Nouveau devis</x-ui.button>@endif
+            @if ($c->type->value === 'supplier' && auth()->user()->canManage('purchases'))<x-ui.button variant="accent" icon="truck" :href="route('purchases.create', ['contact' => $c])">Bon de commande</x-ui.button>@endif
         </x-slot:actions>
     </x-ui.page-header>
 

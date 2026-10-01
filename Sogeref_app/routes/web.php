@@ -10,6 +10,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\PersonalExportController;
 use App\Livewire;
 use App\Models\MessageAttachment;
 use Illuminate\Support\Facades\Route;
@@ -35,8 +36,30 @@ Route::post('/deconnexion', [AuthController::class, 'logout'])->middleware('auth
 
 Route::middleware(['auth', 'active'])->group(function () {
 
+    // ── Espace personnel (tous les employés) ────────────────────────────────
+    Route::middleware('module:personal')->prefix('espace-personnel')->name('personal')->group(function () {
+        Route::get('/', Livewire\Personal\Overview::class)->name('');
+        Route::get('/notes', Livewire\Personal\Notes::class)->name('.notes');
+        Route::get('/tableurs', Livewire\Personal\Sheets::class)->name('.sheets');
+        Route::get('/bons', Livewire\Personal\Vouchers::class)->name('.vouchers');
+        Route::get('/conges', Livewire\Personal\Leaves::class)->name('.leaves');
+        Route::get('/taches', Livewire\Personal\Tasks::class)->name('.tasks');
+
+        Route::controller(PersonalExportController::class)->group(function () {
+            Route::get('/notes/{note}/imprimer', 'notePrint')->name('.notes.print');
+            Route::get('/notes/{note}/pdf', 'notePdf')->name('.notes.pdf');
+            Route::get('/tableurs/{sheet}/imprimer', 'sheetPrint')->name('.sheets.print');
+            Route::get('/tableurs/{sheet}/pdf', 'sheetPdf')->name('.sheets.pdf');
+            Route::get('/tableurs/{sheet}/excel', 'sheetExcel')->name('.sheets.xlsx');
+            Route::get('/bons/{voucher}/pdf', 'voucherPdf')->name('.vouchers.pdf');
+            Route::get('/taches/imprimer', 'tasksPrint')->name('.tasks.print');
+        });
+    });
+
     // ── Pilotage ────────────────────────────────────────────────────────────
-    Route::get('/', Livewire\Dashboard::class)->name('dashboard');
+    // Lanceur d'applications (page d'accueil) puis tableau de bord du Pilotage.
+    Route::get('/', Livewire\Launcher::class)->name('launcher');
+    Route::get('/tableau-de-bord', Livewire\Dashboard::class)->name('dashboard');
     Route::middleware('module:orders')->group(function () {
         Route::get('/commandes', Livewire\Orders\Index::class)->name('orders.index');
         Route::get('/commandes/{order}', Livewire\Orders\Show::class)->name('orders.show');

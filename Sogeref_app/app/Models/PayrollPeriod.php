@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PayrollPeriod extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasEncryptedRouteKey;
 
     protected $attributes = ['status' => 'draft'];
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Stock;
 
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\Contact;
 use App\Models\Employee;
@@ -24,7 +25,7 @@ use Livewire\WithPagination;
 #[Title('Bons')]
 class Vouchers extends Component
 {
-    use InteractsWithUi, WithPagination;
+    use EncryptsUrlIds, InteractsWithUi, WithPagination;
 
     #[Url(as: 'type')]
     public string $type = '';
@@ -33,6 +34,8 @@ class Vouchers extends Component
     public string $status = '';
 
     #[Url(as: 'chantier')]
+    public ?string $siteKey = null;
+
     public ?int $siteFilter = null;
 
     public string $search = '';
@@ -75,8 +78,14 @@ class Vouchers extends Component
 
     public ?int $executeAccountId = null;
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['siteFilter' => ['siteKey', Site::class]];
+    }
+
     public function mount(): void
     {
+        $this->decodeUrlIds();
         if (request()->boolean('nouveau')) {
             $this->create($this->type ?: 'sortie');
             $this->siteId = $this->siteFilter;

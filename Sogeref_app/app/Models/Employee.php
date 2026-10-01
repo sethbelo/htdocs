@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use BelongsToCompany, SoftDeletes;
+    use BelongsToCompany, HasEncryptedRouteKey, SoftDeletes;
 
     public const CATEGORIES = ['permanent' => 'Permanent', 'contractuel' => 'Contractuel', 'journalier' => 'Journalier', 'stagiaire' => 'Stagiaire'];
 

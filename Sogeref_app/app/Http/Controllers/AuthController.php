@@ -22,7 +22,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $request->user()->forceFill(['last_login_at' => now()])->save();
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('launcher'));
     }
 
     public function logout(Request $request): RedirectResponse

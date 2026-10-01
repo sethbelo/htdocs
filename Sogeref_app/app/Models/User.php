@@ -71,12 +71,18 @@ class User extends Authenticatable
     /** Le module est-il activé pour la société ET autorisé pour cet utilisateur ? */
     public function canAccessModule(string $key): bool
     {
-        return Modules::enabled($key) && ($this->isMaster() || $this->can("{$key}.view"));
+        return Modules::enabled($key) && ($this->isMaster() || self::openToEveryone($key) || $this->can("{$key}.view"));
     }
 
     public function canManage(string $key): bool
     {
-        return Modules::enabled($key) && ($this->isMaster() || $this->can("{$key}.manage"));
+        return Modules::enabled($key) && ($this->isMaster() || self::openToEveryone($key) || $this->can("{$key}.manage"));
+    }
+
+    /** Modules ouverts à tous les employés (ex. Espace personnel : 'everyone' => true). */
+    private static function openToEveryone(string $key): bool
+    {
+        return (bool) (Modules::get($key)['everyone'] ?? false);
     }
 
     public function roleLabel(): string

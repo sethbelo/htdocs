@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Operations;
 
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\Project;
 use App\Models\Timesheet;
@@ -17,20 +18,28 @@ use Livewire\Component;
 #[Title('Feuilles de temps')]
 class Timesheets extends Component
 {
-    use InteractsWithUi;
+    use EncryptsUrlIds, InteractsWithUi;
 
     #[Url(as: 'semaine')]
     public string $week = '';
 
     #[Url(as: 'collaborateur')]
+    public ?string $userKey = null;
+
     public ?int $userId = null;
 
     public array $grid = [];
 
     public ?int $addProjectId = null;
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['userId' => ['userKey', User::class]];
+    }
+
     public function mount(): void
     {
+        $this->decodeUrlIds();
         $this->week = $this->week ?: now()->startOfWeek()->toDateString();
         $this->userId ??= auth()->id();
         $this->loadGrid();

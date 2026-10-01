@@ -56,7 +56,7 @@ class Cash extends Component
     public function mount(): void
     {
         $this->accountId = FinancialAccount::where('company_id', company_id())->where('type', 'cash')->where('is_active', true)->value('id');
-        if ($invoice = request()->integer('facture')) {
+        if ($invoice = Document::decodeRouteKey(request()->query('facture'))) {
             $this->startCollect($invoice);
         }
     }

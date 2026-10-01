@@ -78,12 +78,6 @@
                 <button type="submit" class="btn btn-primary btn-lg w-full">Se connecter <x-ui.icon name="arrow-right" class="size-[18px]" /></button>
             </form>
 
-            @if (app()->environment('local'))
-                <div class="mt-8 rounded-xl border border-dashed border-line-strong p-4 text-[12.5px] text-fg-muted">
-                    <p class="font-semibold text-fg">Comptes de démonstration</p>
-                    <p class="mt-1">master@sogeref.cd · direction@sogeref.cd · caisse@sogeref.cd · atelier@sogeref.cd · rh@sogeref.cd — mot de passe <span class="kbd">Sogeref@2026</span></p>
-                </div>
-            @endif
             <div class="brand-rule mt-10 rounded-full"></div>
         </div>
     </section>

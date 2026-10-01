@@ -37,7 +37,7 @@
                                     @if ($o->expected_close_at)<p @class(['mt-1.5 flex items-center gap-1 text-[11.5px]', 'text-flame-600' => $o->expected_close_at->lt(today()) && ! $stage->is_won, 'text-fg-subtle' => ! $o->expected_close_at->lt(today()) || $stage->is_won])><x-ui.icon name="calendar" class="size-3.5" />{{ $o->expected_close_at->format('d/m/Y') }}</p>@endif
                                 </button>
                                 @if ($stage->is_won && auth()->user()->canManage('quotes'))
-                                    <a href="{{ route('quotes.create', ['contact' => $o->contact_id]) }}" wire:navigate class="btn btn-soft btn-sm mt-2 w-full"><x-ui.icon name="document-text" class="size-4" /> Créer le devis</a>
+                                    <a href="{{ route('quotes.create', ['contact' => \App\Support\RouteKey::encodeOrEmpty(\App\Models\Contact::class, $o->contact_id)]) }}" wire:navigate class="btn btn-soft btn-sm mt-2 w-full"><x-ui.icon name="document-text" class="size-4" /> Créer le devis</a>
                                 @endif
                             </article>
                         @endforeach

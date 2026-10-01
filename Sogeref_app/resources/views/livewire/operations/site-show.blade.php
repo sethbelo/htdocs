@@ -12,7 +12,7 @@
         </x-slot:meta>
         <x-slot:actions>
             <x-ui.button variant="secondary" icon="printer" :href="route('pdf.site', $site)" :navigate="false" target="_blank">Rapport PDF</x-ui.button>
-            <x-ui.button variant="primary" icon="clipboard-document-check" :href="route('attendance', ['chantier' => $site->id])">Faire l’appel</x-ui.button>
+            <x-ui.button variant="primary" icon="clipboard-document-check" :href="route('attendance', ['chantier' => $site])">Faire l’appel</x-ui.button>
         </x-slot:actions>
     </x-ui.page-header>
 
@@ -131,7 +131,7 @@
                                     <td class="num font-semibold">{{ money($sheet->entries->sum(fn ($e) => $e->dayFraction() * (float) $e->daily_rate)) }}</td>
                                     <td>@if ($sheet->status === 'validated')<x-ui.badge tone="success" dot>Validée</x-ui.badge>@else<x-ui.badge tone="warning" dot>À valider</x-ui.badge>@endif</td>
                                     <td class="text-right whitespace-nowrap">
-                                        <x-ui.button variant="ghost" size="sm" icon="pencil-square" :href="route('attendance', ['chantier' => $site->id, 'date' => $sheet->work_date->toDateString()])">Ouvrir</x-ui.button>
+                                        <x-ui.button variant="ghost" size="sm" icon="pencil-square" :href="route('attendance', ['chantier' => $site, 'date' => $sheet->work_date->toDateString()])">Ouvrir</x-ui.button>
                                         <a href="{{ route('pdf.attendance', $sheet) }}" target="_blank" class="btn btn-ghost btn-sm btn-icon"><x-ui.icon name="printer" class="size-4" /></a>
                                     </td>
                                 </tr>
@@ -197,7 +197,7 @@
 
             {{-- ─── BONS ───────────────────────────────────────────────────── --}}
             @elseif ($tab === 'bons')
-                @if (auth()->user()->canManage('vouchers'))<div class="mb-4 flex justify-end"><x-ui.button variant="accent" icon="plus" :href="route('vouchers', ['chantier' => $site->id, 'nouveau' => 1])">Nouveau bon</x-ui.button></div>@endif
+                @if (auth()->user()->canManage('vouchers'))<div class="mb-4 flex justify-end"><x-ui.button variant="accent" icon="plus" :href="route('vouchers', ['chantier' => $site, 'nouveau' => 1])">Nouveau bon</x-ui.button></div>@endif
                 <div class="table-wrap">
                     <table class="table">
                         <thead><tr><th>N°</th><th>Type</th><th>Date</th><th>Objet</th><th>Demandeur</th><th>Statut</th><th class="num">Montant</th><th></th></tr></thead>

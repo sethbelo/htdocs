@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
-    use BelongsToCompany, SoftDeletes;
+    use BelongsToCompany, HasEncryptedRouteKey, SoftDeletes;
 
     protected $guarded = [];
 

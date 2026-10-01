@@ -183,9 +183,10 @@ class WorkflowTest extends TestCase
         $this->as('master');
         Livewire::test(Screens\System\Master::class)->call('toggleModule', 'rentals');
         $this->get(route('rentals'))->assertForbidden();
-        $this->get(route('dashboard'))->assertOk()->assertDontSee('Location</span>', false);
+        $this->get(route('launcher'))->assertOk()->assertDontSee('Location</span>', false);
         Livewire::test(Screens\System\Master::class)->call('toggleModule', 'rentals');
         $this->get(route('rentals'))->assertOk();
+        $this->get(route('launcher'))->assertOk()->assertSee('Location</span>', false);
     }
 
     public function test_cash_session_close_computes_gap(): void

@@ -10,7 +10,7 @@
             </div>
         </x-slot:meta>
         <x-slot:actions>
-            @if (auth()->user()->canManage('employees'))<x-ui.button variant="secondary" icon="pencil-square" :href="route('employees', ['modifier' => $e->id])">Modifier la fiche</x-ui.button>@endif
+            @if (auth()->user()->canManage('employees'))<x-ui.button variant="secondary" icon="pencil-square" :href="route('employees', ['modifier' => $e])">Modifier la fiche</x-ui.button>@endif
         </x-slot:actions>
     </x-ui.page-header>
 

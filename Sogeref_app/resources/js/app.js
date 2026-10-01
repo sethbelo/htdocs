@@ -11,6 +11,7 @@
    ============================================================================= */
 import Chart from 'chart.js/auto';
 import Sortable from 'sortablejs';
+import './personal';
 
 window.Chart = Chart;
 

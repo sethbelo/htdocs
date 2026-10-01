@@ -28,25 +28,25 @@ final class Approvals
             $can = fn (string $permission) => $user->isMaster() || $user->can($permission);
 
             if ($can('vouchers.approve')) {
-                $items[] = ['label' => 'Bons à approuver', 'icon' => 'ticket', 'count' => Voucher::where('company_id', $cid)->where('status', 'submitted')->count(), 'url' => route('vouchers', ['status' => 'submitted'])];
+                $items[] = ['module' => 'vouchers', 'label' => 'Bons à approuver', 'icon' => 'ticket', 'count' => Voucher::where('company_id', $cid)->where('status', 'submitted')->count(), 'url' => route('vouchers', ['status' => 'submitted'])];
             }
             if ($can('vouchers.execute')) {
-                $items[] = ['label' => 'Bons approuvés à exécuter', 'icon' => 'check-badge', 'count' => Voucher::where('company_id', $cid)->where('status', 'approved')->count(), 'url' => route('vouchers', ['status' => 'approved'])];
+                $items[] = ['module' => 'vouchers', 'label' => 'Bons approuvés à exécuter', 'icon' => 'check-badge', 'count' => Voucher::where('company_id', $cid)->where('status', 'approved')->count(), 'url' => route('vouchers', ['status' => 'approved'])];
             }
             if ($can('leaves.approve')) {
-                $items[] = ['label' => 'Demandes de congé', 'icon' => 'sun', 'count' => LeaveRequest::where('company_id', $cid)->where('status', 'pending')->count(), 'url' => route('leaves')];
+                $items[] = ['module' => 'leaves', 'label' => 'Demandes de congé', 'icon' => 'sun', 'count' => LeaveRequest::where('company_id', $cid)->where('status', 'pending')->count(), 'url' => route('leaves')];
             }
             if ($can('expense-claims.approve')) {
-                $items[] = ['label' => 'Notes de frais soumises', 'icon' => 'receipt-percent', 'count' => ExpenseClaim::where('company_id', $cid)->where('status', 'submitted')->count(), 'url' => route('expense-claims')];
+                $items[] = ['module' => 'expense-claims', 'label' => 'Notes de frais soumises', 'icon' => 'receipt-percent', 'count' => ExpenseClaim::where('company_id', $cid)->where('status', 'submitted')->count(), 'url' => route('expense-claims')];
             }
             if ($can('attendance.manage')) {
-                $items[] = ['label' => 'Présences à valider', 'icon' => 'clipboard-document-check', 'count' => AttendanceSheet::where('company_id', $cid)->where('status', 'draft')->whereDate('work_date', '<', today())->count(), 'url' => route('attendance')];
+                $items[] = ['module' => 'attendance', 'label' => 'Présences à valider', 'icon' => 'clipboard-document-check', 'count' => AttendanceSheet::where('company_id', $cid)->where('status', 'draft')->whereDate('work_date', '<', today())->count(), 'url' => route('attendance')];
             }
             if ($can('orders.validate')) {
-                $items[] = ['label' => 'Devis en attente de validation', 'icon' => 'document-check', 'count' => SalesOrder::where('company_id', $cid)->where('stage', 'devis')->count(), 'url' => route('orders.index', ['stage' => 'devis'])];
+                $items[] = ['module' => 'orders', 'label' => 'Devis en attente de validation', 'icon' => 'document-check', 'count' => SalesOrder::where('company_id', $cid)->where('stage', 'devis')->count(), 'url' => route('orders.index', ['stage' => 'devis'])];
             }
             if ($can('cash.view')) {
-                $items[] = ['label' => 'Commandes facturées à encaisser', 'icon' => 'banknotes', 'count' => SalesOrder::where('company_id', $cid)->where('stage', 'facture')->count(), 'url' => route('cash')];
+                $items[] = ['module' => 'cash', 'label' => 'Commandes facturées à encaisser', 'icon' => 'banknotes', 'count' => SalesOrder::where('company_id', $cid)->where('stage', 'facture')->count(), 'url' => route('cash')];
             }
 
             return array_values(array_filter($items, fn ($i) => $i['count'] > 0));

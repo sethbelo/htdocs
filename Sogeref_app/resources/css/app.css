@@ -26,6 +26,7 @@
 @import '@fontsource/saira/500.css';
 @import '@fontsource/saira/600.css';
 @import '@fontsource/saira/700.css';
+@import './personal.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -201,6 +202,47 @@
         .sidebar-link { @apply justify-center px-0; }
         .sidebar-group { @apply mx-auto my-3 h-px w-6 bg-white/12 p-0; }
     }
+
+    /* 4.2 bis En-tête d'application (bouton lanceur + sélecteur d'application) */
+    .sidebar-home { @apply grid size-10 shrink-0 place-items-center rounded-xl bg-white/8 text-white/85 ring-1 ring-white/10 transition hover:bg-white/15 hover:text-white; }
+    .sidebar-app { @apply flex w-full items-center gap-2.5 rounded-xl px-1.5 py-1.5 text-white transition hover:bg-white/8; }
+    .sidebar-app-icon { @apply grid size-9 shrink-0 place-items-center rounded-[11px] bg-white p-1.5 shadow-sm; }
+    .app-switcher { @apply absolute top-full left-0 z-50 mt-2 w-72 rounded-2xl border border-line bg-surface p-1.5 text-fg shadow-[var(--shadow-pop)]; }
+    .app-switcher-item { @apply flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition hover:bg-surface-2; }
+    .app-switcher-item[aria-current='true'] { @apply bg-brand-50 dark:bg-white/8; }
+    @media (min-width: 1024px) {
+        .sidebar-collapsed .sidebar-home { @apply mx-auto; }
+    }
+    @media (min-width: 1024px) and (max-width: 1279.98px) {
+        .sidebar-home { @apply mx-auto; }
+    }
+
+    /* 4.2 ter Lanceur d'applications plein écran (inspiré d'Odoo) */
+    .launcher-shell .app-main { padding-left: 0 !important; }
+    .launcher-shell { background:
+        radial-gradient(1200px 600px at 0% 0%, color-mix(in srgb, var(--color-lagoon-400) 14%, transparent), transparent 60%),
+        radial-gradient(900px 500px at 100% 10%, color-mix(in srgb, var(--color-sun-400) 12%, transparent), transparent 60%),
+        var(--ui-canvas); background-attachment: fixed; }
+    .launcher-shell .topbar { @apply border-transparent bg-transparent backdrop-blur-md; }
+    .launcher { @apply mx-auto max-w-[1600px] space-y-8; }
+    .launcher-head { @apply flex flex-wrap items-end justify-between gap-4; }
+    .launcher-search { @apply flex h-12 w-full max-w-md items-center gap-2.5 rounded-2xl border border-line bg-surface/85 px-4 shadow-[var(--shadow-card)] backdrop-blur focus-within:border-lagoon-400 focus-within:ring-4 focus-within:ring-lagoon-400/15; }
+    .launcher-sections { @apply columns-1 gap-5 lg:columns-2 2xl:columns-3; }
+    .launcher-sections > .launcher-section { @apply mb-5 break-inside-avoid; }
+    .launcher-section { @apply rounded-3xl border border-white/70 bg-white/60 p-5 shadow-[0_18px_40px_-28px_rgb(16_74_99/.45)] backdrop-blur-xl dark:border-white/8 dark:bg-white/[.04]; }
+    .launcher-section-head { @apply mb-4 flex min-w-0 items-center gap-2.5 border-b border-fg/10 pb-2.5; }
+    .launcher-grid { @apply grid grid-cols-3 gap-x-1 gap-y-5 sm:grid-cols-4; }
+    .launcher-app { @apply flex flex-col items-center gap-2 rounded-2xl p-2 text-center outline-none transition focus-visible:ring-2 focus-visible:ring-lagoon-400; }
+    .launcher-app[hidden] { display: none; }
+    .launcher-tile {
+        @apply relative grid size-[68px] place-items-center rounded-[20px] border border-white bg-white p-3 shadow-[0_6px_18px_-8px_rgb(16_74_99/.35),0_1px_2px_rgb(16_74_99/.08)] transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_-12px_rgb(16_74_99/.45)] group-active:scale-95 sm:size-[76px];
+    }
+    .dark .launcher-tile { @apply border-white/10 bg-white/[.06] shadow-[0_10px_24px_-14px_rgb(0_0_0/.8)] group-hover:bg-white/[.1]; }
+    .launcher-badge { @apply absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-flame-500 px-1 text-[10px] font-bold text-white ring-2 ring-canvas; }
+    .launcher-label { @apply line-clamp-2 max-w-[110px] text-[12.5px] leading-tight font-medium text-fg-muted group-hover:text-fg; }
+    /* Icônes d'application : le bleu SOGEREF s'éclaircit en thème sombre pour rester lisible */
+    .dark .app-icon [fill='#104A63'] { fill: #2f7ea3; }
+    .dark .app-icon [stroke='#104A63'] { stroke: #3e88a6; }
 
     /* 4.3 Barre supérieure */
     .topbar { @apply sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur-lg sm:px-6; }

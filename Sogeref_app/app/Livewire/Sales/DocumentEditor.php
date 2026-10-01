@@ -83,7 +83,7 @@ class DocumentEditor extends Component
         $this->due_date = now()->addDays($this->type === 'purchase_order' ? 15 : 30)->toDateString();
         $this->template = erp_setting("templates.{$this->type}", $this->type === 'purchase_order' ? 'classique' : 'moderne');
         $this->terms = (string) erp_setting($this->type === 'quote' ? 'quote_terms' : ($this->type === 'invoice' ? 'invoice_terms' : ''), '');
-        $this->contact_id = request()->integer('contact') ?: null;
+        $this->contact_id = Contact::decodeRouteKey(request()->query('contact'));
         $this->items = [$this->blankLine()];
     }
 

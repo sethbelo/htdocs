@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ContactType;
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contact extends Model
 {
-    use BelongsToCompany, SoftDeletes;
+    use BelongsToCompany, HasEncryptedRouteKey, SoftDeletes;
 
     protected $guarded = [];
 

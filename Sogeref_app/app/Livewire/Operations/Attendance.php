@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Operations;
 
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\AttendanceEntry;
 use App\Models\AttendanceSheet;
@@ -19,9 +20,11 @@ use Livewire\Component;
 #[Title('Listes de présence')]
 class Attendance extends Component
 {
-    use InteractsWithUi;
+    use EncryptsUrlIds, InteractsWithUi;
 
     #[Url(as: 'chantier')]
+    public ?string $siteKey = null;
+
     public ?int $siteId = null;
 
     #[Url]
@@ -29,8 +32,14 @@ class Attendance extends Component
 
     public string $notes = '';
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['siteId' => ['siteKey', Site::class]];
+    }
+
     public function mount(): void
     {
+        $this->decodeUrlIds();
         $this->date = $this->date ?: now()->toDateString();
         $this->siteId ??= Site::where('company_id', company_id())->where('status', 'in_progress')->value('id');
     }

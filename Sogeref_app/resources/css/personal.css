@@ -1,0 +1,63 @@
+/* =============================================================================
+   SOGEREF ERP — Espace personnel : éditeur de notes & tableur
+   (importé par app.css ; jetons de couleur et mode sombre partagés)
+   ============================================================================= */
+@layer components {
+    /* ── Contenu riche des notes (éditeur, aperçu, impression) ─────────────── */
+    .note-prose { @apply text-[15px] leading-7 text-fg; overflow-wrap: anywhere; }
+    .note-prose:focus { outline: none; }
+    .note-prose > * + * { margin-top: .55em; }
+    .note-prose h1 { @apply font-display text-[28px] leading-tight font-semibold text-fg; margin-top: .9em; }
+    .note-prose h2 { @apply font-display text-[22px] leading-tight font-semibold text-fg; margin-top: .85em; }
+    .note-prose h3 { @apply font-display text-[18px] leading-snug font-semibold text-brand-600 dark:text-lagoon-300; margin-top: .8em; }
+    .note-prose > :first-child { margin-top: 0; }
+    .note-prose ul { @apply list-disc pl-6; }
+    .note-prose ol { @apply list-decimal pl-6; }
+    .note-prose li + li { margin-top: .2em; }
+    .note-prose li::marker { @apply text-fg-subtle; }
+    .note-prose blockquote { @apply border-l-4 border-sun-400 bg-sun-50/60 py-1.5 pr-3 pl-4 text-fg-muted italic dark:bg-sun-400/8; border-radius: 0 8px 8px 0; }
+    .note-prose hr { @apply my-5 border-0 border-t-2 border-line; }
+    .note-prose a { @apply font-medium text-brand-600 underline decoration-lagoon-400 underline-offset-2 dark:text-lagoon-300; }
+    .note-prose code { @apply rounded bg-ink-100 px-1.5 py-0.5 font-mono text-[13px] dark:bg-white/8; }
+    .note-prose strong { @apply font-semibold text-fg; }
+    .note-prose mark { @apply rounded bg-sun-200 px-0.5 text-brand-900; }
+    .note-prose ul[data-type='checklist'] { @apply list-none pl-0; }
+    .note-prose ul[data-type='checklist'] > li { @apply relative pl-8; }
+    .note-prose ul[data-type='checklist'] > li::before {
+        content: ''; @apply absolute top-[.3em] left-1 size-[18px] cursor-pointer rounded-[5px] border-2 border-line-strong bg-surface transition;
+    }
+    .note-prose ul[data-type='checklist'] > li[data-checked='true'] { @apply text-fg-subtle line-through decoration-ink-300; }
+    .note-prose ul[data-type='checklist'] > li[data-checked='true']::before {
+        @apply border-brand-600 bg-brand-600;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z'/%3E%3C/svg%3E");
+        background-size: 14px; background-position: center; background-repeat: no-repeat;
+    }
+    .note-prose[contenteditable]:empty::before, .note-prose[contenteditable] > p:only-child:has(> br:only-child)::before {
+        content: attr(data-placeholder); @apply pointer-events-none absolute text-fg-subtle;
+    }
+
+    /* Barre d'outils de l'éditeur */
+    .rt-toolbar { @apply flex flex-wrap items-center gap-0.5 rounded-xl border border-line bg-surface-2 p-1; }
+    .rt-btn { @apply grid h-8 min-w-8 place-items-center rounded-lg px-1.5 text-[12.5px] font-bold text-fg-muted transition hover:bg-ink-100 hover:text-fg dark:hover:bg-white/8; }
+    .rt-btn[aria-pressed='true'] { @apply bg-brand-50 text-brand-700 dark:bg-white/12 dark:text-lagoon-200; }
+    .rt-sep { @apply mx-1 h-5 w-px bg-line-strong; }
+
+    /* ── Tableur ──────────────────────────────────────────────────────────── */
+    .sheet-wrap { @apply relative max-h-[68vh] overflow-auto rounded-b-[var(--radius-card)]; }
+    .sheet-wrap:focus { outline: none; }
+    .sheet { @apply border-separate border-spacing-0 text-[13px] tabular-nums; }
+    .sheet th { @apply sticky z-10 h-7 border-r border-b border-line bg-surface-2 px-2 text-center text-[11.5px] font-semibold text-fg-subtle select-none; }
+    .sheet thead th { @apply top-0; }
+    .sheet thead th:first-child { @apply left-0 z-20; }
+    .sheet tbody th { @apply left-0 w-11 min-w-11; }
+    .sheet th.is-active { @apply bg-brand-50 text-brand-700 dark:bg-white/10 dark:text-lagoon-200; }
+    .sheet td { @apply relative h-8 max-w-[260px] min-w-[112px] cursor-cell truncate border-r border-b border-line bg-surface px-2 text-fg; }
+    .sheet td.is-number { @apply text-right; }
+    .sheet td.is-error { @apply text-flame-600 dark:text-flame-300; }
+    .sheet td.is-selected { @apply z-[5]; box-shadow: inset 0 0 0 2px var(--color-lagoon-500); }
+    .sheet td input { @apply absolute inset-0 size-full border-0 bg-surface px-2 text-[13px] text-fg outline-none; box-shadow: inset 0 0 0 2px var(--color-brand-600); }
+}
+
+@media print {
+    .note-prose ul[data-type='checklist'] > li::before { border-color: #8a9dac; }
+}

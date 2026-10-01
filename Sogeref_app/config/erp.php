@@ -17,6 +17,7 @@ return [
     // 1. MODULES (ordre = ordre d'affichage dans la barre latérale)
     // ─────────────────────────────────────────────────────────────────────
     'groups' => [
+        'personnel' => 'Espace personnel',
         'pilotage' => 'Pilotage',
         'relation' => 'Réception & CRM',
         'ventes' => 'Ventes',
@@ -28,6 +29,20 @@ return [
     ],
 
     'modules' => [
+        // Espace personnel : ouvert à tous les employés quel que soit leur rôle
+        // (« everyone »). « menu » liste les sous-écrans pour le lanceur / la barre latérale.
+        'personal' => [
+            'group' => 'personnel', 'label' => 'Espace personnel', 'icon' => 'user-circle', 'route' => 'personal', 'core' => true, 'everyone' => true,
+            'menu' => [
+                ['label' => 'Ma journée', 'icon' => 'home', 'route' => 'personal'],
+                ['label' => 'Mes tâches du jour', 'icon' => 'check-circle', 'route' => 'personal.tasks'],
+                ['label' => 'Notes', 'icon' => 'pencil-square', 'route' => 'personal.notes'],
+                ['label' => 'Tableurs', 'icon' => 'table-cells', 'route' => 'personal.sheets'],
+                ['label' => 'Mes bons', 'icon' => 'ticket', 'route' => 'personal.vouchers'],
+                ['label' => 'Mes congés', 'icon' => 'sun', 'route' => 'personal.leaves'],
+            ],
+        ],
+
         'dashboard' => ['group' => 'pilotage', 'label' => 'Tableau de bord', 'icon' => 'squares-2x2', 'route' => 'dashboard', 'core' => true],
         'orders' => ['group' => 'pilotage', 'label' => 'Suivi des commandes', 'icon' => 'arrow-path-rounded-square', 'route' => 'orders.index', 'actions' => ['validate']],
 

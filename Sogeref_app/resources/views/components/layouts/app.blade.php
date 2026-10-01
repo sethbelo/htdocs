@@ -18,15 +18,14 @@
 @php
     $user = auth()->user();
     $navigation = \App\Support\Modules::navigation($user);
+    $apps = \App\Support\Modules::apps($user);
+    $isLauncher = request()->routeIs('launcher');
+    $currentApp = $isLauncher ? null : \App\Support\Modules::currentApp($user);
     $approvals = \App\Support\Approvals::for($user);
     $pendingTotal = array_sum(array_column($approvals, 'count'));
     $groups = config('erp.groups');
-    $isActive = function (array $module) {
-        $route = $module['route'];
-        $prefix = \Illuminate\Support\Str::beforeLast($route, '.');
-        return request()->routeIs($route) || request()->routeIs($route.'.*') || ($prefix !== $route && request()->routeIs($prefix.'.*'));
-    };
-    $palette = $navigation->flatten(1)->map(fn ($m) => ['label' => $m['label'], 'group' => $groups[$m['group']] ?? '', 'url' => route($m['route'])])
+    $palette = collect($apps)->flatMap(fn ($app) => collect($app['items'])->map(fn ($i) => ['label' => $i['label'], 'group' => $app['label'], 'url' => $i['url']]))
+        ->prepend(['label' => 'Toutes les applications', 'group' => 'Accueil', 'url' => route('launcher')])
         ->merge(collect([
             ['label' => 'Nouveau devis', 'group' => 'Action rapide', 'route' => 'quotes.create', 'module' => 'quotes'],
             ['label' => 'Nouveau bon (achat, décaissement, sortie)', 'group' => 'Action rapide', 'route' => 'vouchers', 'module' => 'vouchers'],
@@ -36,39 +35,65 @@
         ])->filter(fn ($a) => $user?->canAccessModule($a['module']))->map(fn ($a) => ['label' => $a['label'], 'group' => $a['group'], 'url' => route($a['route'])]))
         ->values();
 @endphp
-<body class="app-shell h-full" x-data :class="{ 'sidebar-collapsed': $store.shell.collapsed, 'overflow-hidden lg:overflow-auto': $store.shell.drawer }">
+<body class="app-shell h-full {{ $isLauncher ? 'launcher-shell' : '' }}" x-data :class="{ 'sidebar-collapsed': $store.shell.collapsed, 'overflow-hidden lg:overflow-auto': $store.shell.drawer }">
 
     {{-- ═══ 2. BARRE LATÉRALE ═════════════════════════════════════════════════
          Bureau : fixe, rétractable (icônes seules). Tablette : tiroir. --}}
     <div x-show="$store.shell.drawer" x-transition.opacity x-on:click="$store.shell.drawer = false" class="overlay z-30 lg:hidden" x-cloak></div>
 
-    <aside class="sidebar" :data-open="$store.shell.drawer" aria-label="Navigation principale">
-        <div class="flex h-16 shrink-0 items-center justify-between gap-2 px-4">
-            <a href="{{ route('dashboard') }}" wire:navigate class="flex min-w-0 items-center gap-2.5">
-                <x-ui.mark class="size-9 shrink-0 rounded-[11px] ring-1 ring-white/15" />
-                <span class="sidebar-label min-w-0 leading-none">
-                    <span class="block font-display text-[19px] font-bold tracking-wide">SOGEREF</span>
-                    <span class="mt-1 block text-[10px] font-semibold tracking-[.2em] text-sun-300 uppercase">ERP · Sarl</span>
-                </span>
+    @unless ($isLauncher)
+    <aside class="sidebar" :data-open="$store.shell.drawer" aria-label="Menu de l'application {{ $currentApp['label'] ?? '' }}">
+        {{-- En-tête : retour au lanceur + application active (comme Odoo) --}}
+        <div class="flex h-16 shrink-0 items-center gap-2 px-3">
+            <a href="{{ route('launcher') }}" wire:navigate class="sidebar-home" title="Toutes les applications" aria-label="Toutes les applications">
+                <x-ui.icon name="squares-2x2" class="size-5" />
             </a>
+            <div x-data="{ open: false }" class="relative min-w-0 flex-1 sidebar-label" x-on:click.outside="open = false" x-on:keydown.escape="open = false">
+                <button type="button" class="sidebar-app" x-on:click="open = !open" :aria-expanded="open" aria-haspopup="true" title="Changer d'application">
+                    @if ($currentApp)
+                        <span class="sidebar-app-icon">{!! \App\Support\AppIcons::svg($currentApp['key']) !!}</span>
+                        <span class="min-w-0 flex-1 text-left leading-tight">
+                            <span class="block truncate font-display text-[15px] font-bold">{{ $currentApp['label'] }}</span>
+                            <span class="block text-[10px] font-semibold tracking-[.18em] text-sun-300 uppercase">SOGEREF · ERP</span>
+                        </span>
+                        <x-ui.icon name="chevron-up-down" class="size-4 shrink-0 text-white/50" />
+                    @endif
+                </button>
+                <div x-show="open" x-transition.origin.top.left x-cloak class="app-switcher">
+                    <p class="px-3 pt-2 pb-1 text-[10.5px] font-semibold tracking-[.14em] text-fg-subtle uppercase">Changer d'application</p>
+                    @foreach ($apps as $app)
+                        <a href="{{ $app['items'][0]['url'] }}" wire:navigate class="app-switcher-item" @if (($currentApp['key'] ?? null) === $app['key']) aria-current="true" @endif>
+                            <span class="size-7 shrink-0">{!! \App\Support\AppIcons::svg($app['key']) !!}</span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate font-semibold text-fg">{{ $app['label'] }}</span>
+                                <span class="block truncate text-[11.5px] text-fg-subtle">{{ $app['description'] }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                    <a href="{{ route('launcher') }}" wire:navigate class="app-switcher-item mt-1 border-t border-line pt-2.5 text-[13px] font-semibold text-brand-600 dark:text-lagoon-300">
+                        <x-ui.icon name="squares-2x2" class="size-5" /> Toutes les applications
+                    </a>
+                </div>
+            </div>
             <button type="button" class="btn btn-sm btn-icon text-white/70 hover:bg-white/10 lg:hidden" x-on:click="$store.shell.drawer = false" aria-label="Fermer le menu"><x-ui.icon name="x-mark" /></button>
         </div>
 
+        {{-- Rubriques de l'application active uniquement --}}
         <nav class="flex-1 overflow-y-auto px-3 pb-4 scrollbar-none">
-            @foreach ($navigation as $group => $modules)
-                <p class="sidebar-group"><span class="sidebar-group-text">{{ $groups[$group] ?? $group }}</span></p>
+            @if ($currentApp)
+                <p class="sidebar-group"><span class="sidebar-group-text">Menu · {{ $currentApp['label'] }}</span></p>
                 <ul class="space-y-0.5">
-                    @foreach ($modules as $module)
+                    @foreach ($currentApp['items'] as $item)
                         <li>
-                            <a href="{{ route($module['route']) }}" wire:navigate class="sidebar-link" @if ($isActive($module)) aria-current="page" @endif
-                               title="{{ $module['label'] }}" x-on:click="$store.shell.drawer = false">
-                                <x-ui.icon :name="$module['icon']" class="size-[19px] opacity-90" />
-                                <span class="sidebar-label truncate">{{ $module['label'] }}</span>
+                            <a href="{{ $item['url'] }}" wire:navigate class="sidebar-link" @if (\App\Support\Modules::isActive($item)) aria-current="page" @endif
+                               title="{{ $item['label'] }}" x-on:click="$store.shell.drawer = false">
+                                <x-ui.icon :name="$item['icon']" class="size-[19px] opacity-90" />
+                                <span class="sidebar-label truncate">{{ $item['label'] }}</span>
                             </a>
                         </li>
                     @endforeach
                 </ul>
-            @endforeach
+            @endif
         </nav>
 
         <div class="sidebar-extra border-t border-white/10 p-3">
@@ -81,17 +106,29 @@
             </div>
         </div>
     </aside>
+    @endunless
 
     {{-- ═══ 3. COLONNE PRINCIPALE ═════════════════════════════════════════════ --}}
     <div class="app-main">
         {{-- 3.1 Barre supérieure --}}
         <header class="topbar">
-            <button type="button" class="btn btn-ghost btn-icon lg:hidden" x-on:click="$store.shell.drawer = true" aria-label="Ouvrir le menu"><x-ui.icon name="bars-3" /></button>
-            <button type="button" class="btn btn-ghost btn-icon max-xl:hidden" x-on:click="$store.shell.toggleCollapsed()" :aria-label="$store.shell.collapsed ? 'Déplier le menu' : 'Replier le menu'" title="Replier / déplier le menu">
-                <x-ui.icon name="bars-3-bottom-left" />
-            </button>
+            @if ($isLauncher)
+                <a href="{{ route('launcher') }}" wire:navigate class="flex shrink-0 items-center gap-2.5" aria-label="Accueil SOGEREF">
+                    <x-ui.mark class="size-9 shrink-0 rounded-[11px]" />
+                    <span class="leading-none max-sm:hidden">
+                        <span class="block font-display text-[19px] font-bold tracking-wide text-brand-600 dark:text-white">SOGEREF</span>
+                        <span class="mt-1 block text-[10px] font-semibold tracking-[.2em] text-sun-600 uppercase dark:text-sun-300">ERP · Sarl</span>
+                    </span>
+                </a>
+            @else
+                <button type="button" class="btn btn-ghost btn-icon lg:hidden" x-on:click="$store.shell.drawer = true" aria-label="Ouvrir le menu"><x-ui.icon name="bars-3" /></button>
+                <button type="button" class="btn btn-ghost btn-icon max-xl:hidden" x-on:click="$store.shell.toggleCollapsed()" :aria-label="$store.shell.collapsed ? 'Déplier le menu' : 'Replier le menu'" title="Replier / déplier le menu">
+                    <x-ui.icon name="bars-3-bottom-left" />
+                </button>
+                <a href="{{ route('launcher') }}" wire:navigate class="btn btn-ghost btn-icon lg:hidden" aria-label="Toutes les applications" title="Toutes les applications"><x-ui.icon name="squares-2x2" /></a>
+            @endif
 
-            <button type="button" x-on:click="$dispatch('open-palette')" class="flex h-10 w-full max-w-md items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 text-left text-[13.5px] text-fg-subtle transition hover:border-line-strong">
+            <button type="button" x-on:click="$dispatch('open-palette')" class="flex h-10 w-full max-w-md items-center gap-2.5 rounded-lg {{ $isLauncher ? 'ml-auto' : '' }} border border-line bg-surface-2 px-3 text-left text-[13.5px] text-fg-subtle transition hover:border-line-strong">
                 <x-ui.icon name="magnifying-glass" class="size-4" />
                 <span class="flex-1 truncate">Rechercher un module, une action…</span>
                 <span class="kbd max-sm:hidden">Ctrl K</span>

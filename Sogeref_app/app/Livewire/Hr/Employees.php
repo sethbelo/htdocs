@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Hr;
 
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\Department;
 use App\Models\Employee;
@@ -20,7 +21,7 @@ use Livewire\WithPagination;
 #[Title('Employés')]
 class Employees extends Component
 {
-    use InteractsWithUi, WithFileUploads, WithPagination;
+    use EncryptsUrlIds, InteractsWithUi, WithFileUploads, WithPagination;
 
     #[Url(as: 'q')]
     public string $search = '';
@@ -29,6 +30,8 @@ class Employees extends Component
     public string $category = '';
 
     #[Url(as: 'departement')]
+    public ?string $departmentKey = null;
+
     public ?int $departmentId = null;
 
     public string $status = 'active';
@@ -52,9 +55,15 @@ class Employees extends Component
 
     public string $newPosition = '';
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['departmentId' => ['departmentKey', Department::class]];
+    }
+
     public function mount(): void
     {
-        if ($id = request()->integer('modifier')) {
+        $this->decodeUrlIds();
+        if ($id = Employee::decodeRouteKey(request()->query('modifier'))) {
             $this->edit($id);
         }
     }

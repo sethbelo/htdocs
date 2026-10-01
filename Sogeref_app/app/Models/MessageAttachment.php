@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MessageAttachment extends Model
 {
+    use HasEncryptedRouteKey;
+
     protected $guarded = [];
 
     public function message(): BelongsTo

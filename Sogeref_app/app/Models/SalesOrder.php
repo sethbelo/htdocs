@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasEncryptedRouteKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class SalesOrder extends Model
 {
-    use BelongsToCompany, SoftDeletes;
+    use BelongsToCompany, HasEncryptedRouteKey, SoftDeletes;
 
     /** Étapes ordonnées du parcours (hors « annule »). */
     public const PIPELINE = ['devis', 'valide', 'facture', 'paye', 'fabrication', 'execution', 'livre', 'cloture'];

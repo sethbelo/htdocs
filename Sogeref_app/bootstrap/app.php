@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureModuleAccess;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,7 @@ $application = Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureUserIsActive::class,
             'permission' => PermissionMiddleware::class,
         ]);
+        $middleware->web(append: [SecurityHeaders::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

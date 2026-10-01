@@ -3,6 +3,7 @@
 namespace App\Livewire\Finance;
 
 use App\Actions\Accounting\PostJournalEntry;
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\ChartOfAccount;
 use App\Models\Journal;
@@ -24,12 +25,14 @@ use Livewire\WithPagination;
 #[Title('Comptabilité')]
 class Accounting extends Component
 {
-    use InteractsWithUi, WithPagination;
+    use EncryptsUrlIds, InteractsWithUi, WithPagination;
 
     #[Url(as: 'onglet')]
     public string $tab = 'journal';
 
     #[Url(as: 'journal')]
+    public ?string $journalKey = null;
+
     public ?int $journalId = null;
 
     public string $from = '';
@@ -52,8 +55,14 @@ class Accounting extends Component
 
     public ?int $expanded = null;
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['journalId' => ['journalKey', Journal::class]];
+    }
+
     public function mount(): void
     {
+        $this->decodeUrlIds();
         $this->from = now()->startOfYear()->toDateString();
         $this->to = now()->toDateString();
     }

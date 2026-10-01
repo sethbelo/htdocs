@@ -3,6 +3,7 @@
 namespace App\Livewire\Finance;
 
 use App\Actions\Accounting\SynchronizeAccounting;
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\BankTransaction;
 use App\Models\Contact;
@@ -21,12 +22,14 @@ use Livewire\WithPagination;
 #[Title('Trésorerie')]
 class Banking extends Component
 {
-    use InteractsWithUi, WithPagination;
+    use EncryptsUrlIds, InteractsWithUi, WithPagination;
 
     #[Url(as: 'onglet')]
     public string $tab = 'mouvements';
 
     #[Url(as: 'compte')]
+    public ?string $accountKey = null;
+
     public ?int $accountId = null;
 
     // Dépense générale
@@ -44,8 +47,14 @@ class Banking extends Component
 
     public array $move = [];
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['accountId' => ['accountKey', FinancialAccount::class]];
+    }
+
     public function mount(): void
     {
+        $this->decodeUrlIds();
         $this->accountId ??= FinancialAccount::where('company_id', company_id())->where('type', 'bank')->value('id');
     }
 

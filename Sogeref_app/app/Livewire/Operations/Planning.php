@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Operations;
 
+use App\Livewire\Concerns\EncryptsUrlIds;
 use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\Department;
 use App\Models\Employee;
@@ -20,12 +21,14 @@ use Livewire\Component;
 #[Title('Planification')]
 class Planning extends Component
 {
-    use InteractsWithUi;
+    use EncryptsUrlIds, InteractsWithUi;
 
     #[Url(as: 'semaine')]
     public string $week = '';
 
     #[Url(as: 'departement')]
+    public ?string $departmentKey = null;
+
     public ?int $departmentId = null;
 
     public bool $showSlot = false;
@@ -34,8 +37,14 @@ class Planning extends Component
 
     public array $assignment = [];
 
+    protected function encryptedUrlIds(): array
+    {
+        return ['departmentId' => ['departmentKey', Department::class]];
+    }
+
     public function mount(): void
     {
+        $this->decodeUrlIds();
         $this->week = $this->week ?: now()->startOfWeek()->toDateString();
     }
 

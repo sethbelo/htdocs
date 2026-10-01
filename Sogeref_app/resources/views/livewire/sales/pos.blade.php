@@ -110,7 +110,7 @@
                         <x-ui.button variant="accent" size="lg" icon="banknotes" wire:click="checkout" :disabled="! $cart">Encaisser</x-ui.button>
                     </div>
                     @if ($lastOrderId)
-                        <a href="{{ route('pdf.ticket', $lastOrderId) }}" target="_blank" class="btn btn-soft btn-sm mt-1 w-full"><x-ui.icon name="printer" class="size-4" /> Imprimer le dernier ticket</a>
+                        <a href="{{ route('pdf.ticket', \App\Support\RouteKey::encode(\App\Models\PosOrder::class, $lastOrderId)) }}" target="_blank" class="btn btn-soft btn-sm mt-1 w-full"><x-ui.icon name="printer" class="size-4" /> Imprimer le dernier ticket</a>
                     @endif
                 </div>
             </aside>

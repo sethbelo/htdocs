@@ -72,7 +72,7 @@
                             <x-ui.textarea label="Conditions par défaut des factures" wire:model="invoiceTerms" rows="4" />
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-2 p-4">
-                            <p class="text-[13px] text-fg-muted">Aperçus : <a href="{{ route('pdf.letterhead') }}" target="_blank" class="link">papier à en-tête</a> · @foreach (config('erp.document_templates') as $key => $tpl)<a href="{{ route('pdf.document', ['document' => \App\Models\Document::where('company_id', company_id())->where('type', 'invoice')->value('id') ?? 0, 'modele' => $key]) }}" target="_blank" class="link">{{ $tpl['label'] }}</a>{{ $loop->last ? '' : ' · ' }}@endforeach</p>
+                            <p class="text-[13px] text-fg-muted">Aperçus : <a href="{{ route('pdf.letterhead') }}" target="_blank" class="link">papier à en-tête</a> · @foreach (config('erp.document_templates') as $key => $tpl)<a href="{{ route('pdf.document', ['document' => \App\Support\RouteKey::encode(\App\Models\Document::class, (int) \App\Models\Document::where('company_id', company_id())->where('type', 'invoice')->value('id')), 'modele' => $key]) }}" target="_blank" class="link">{{ $tpl['label'] }}</a>{{ $loop->last ? '' : ' · ' }}@endforeach</p>
                             @if ($canEdit)<x-ui.button variant="primary" icon="check" wire:click="saveDocuments">Enregistrer</x-ui.button>@endif
                         </div>
                     </div>
