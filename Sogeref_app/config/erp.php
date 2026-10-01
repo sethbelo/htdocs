@@ -19,7 +19,9 @@ return [
     'groups' => [
         'personnel' => 'Espace personnel',
         'pilotage' => 'Pilotage',
-        'relation' => 'Réception & CRM',
+        'accueil' => 'Réception',
+        'relation' => 'Relations clients',
+        'communication' => 'Communication & marketing',
         'ventes' => 'Ventes',
         'operations' => 'Opérations',
         'stock' => 'Stock & achats',
@@ -46,12 +48,38 @@ return [
         'dashboard' => ['group' => 'pilotage', 'label' => 'Tableau de bord', 'icon' => 'squares-2x2', 'route' => 'dashboard', 'core' => true],
         'orders' => ['group' => 'pilotage', 'label' => 'Suivi des commandes', 'icon' => 'arrow-path-rounded-square', 'route' => 'orders.index', 'actions' => ['validate']],
 
-        'reception' => ['group' => 'relation', 'label' => 'Réception', 'icon' => 'building-office', 'route' => 'reception'],
-        'crm' => ['group' => 'relation', 'label' => 'Pipeline CRM', 'icon' => 'funnel', 'route' => 'crm'],
-        'contacts' => ['group' => 'relation', 'label' => 'Clients & fournisseurs', 'icon' => 'users', 'route' => 'contacts'],
+        // Réception : accueil, courrier, visites et rendez-vous.
+        'reception' => [
+            'group' => 'accueil', 'label' => 'Réception', 'icon' => 'building-office', 'route' => 'reception',
+            'menu' => [
+                ['label' => 'Accueil du jour', 'icon' => 'building-office', 'route' => 'reception'],
+                ['label' => 'Courrier', 'icon' => 'envelope', 'route' => 'reception.mail'],
+                ['label' => 'Visites', 'icon' => 'identification', 'route' => 'reception.visits'],
+            ],
+        ],
+        'appointments' => ['group' => 'accueil', 'label' => 'Rendez-vous', 'icon' => 'calendar', 'route' => 'appointments'],
+
+        // Relations clients : pipeline, contacts, annuaire, devis & pro forma, fidélité.
+        'crm' => ['group' => 'relation', 'label' => 'Pipeline', 'icon' => 'funnel', 'route' => 'crm'],
+        'contacts' => ['group' => 'relation', 'label' => 'Contacts', 'icon' => 'users', 'route' => 'contacts'],
+        'directory' => ['group' => 'relation', 'label' => 'Annuaire', 'icon' => 'book-open', 'route' => 'directory'],
+        'quotes' => ['group' => 'relation', 'label' => 'Devis & pro forma', 'icon' => 'document-text', 'route' => 'quotes'],
         'loyalty' => ['group' => 'relation', 'label' => 'Fidélité', 'icon' => 'gift', 'route' => 'loyalty'],
 
-        'quotes' => ['group' => 'ventes', 'label' => 'Devis', 'icon' => 'document-text', 'route' => 'quotes'],
+        // Communication & marketing : messagerie interne, WhatsApp, SMS, e-mails clients, campagnes.
+        'messages' => ['group' => 'communication', 'label' => 'Messagerie interne', 'icon' => 'chat-bubble-left-right', 'route' => 'chat', 'core' => true],
+        'communication' => [
+            'group' => 'communication', 'label' => 'Communication', 'icon' => 'megaphone', 'route' => 'communication', 'actions' => ['send', 'campaign'],
+            'menu' => [
+                ['label' => 'Vue d’ensemble', 'icon' => 'presentation-chart-line', 'route' => 'communication'],
+                ['label' => 'WhatsApp', 'icon' => 'chat-bubble-oval-left-ellipsis', 'route' => 'communication.whatsapp'],
+                ['label' => 'SMS', 'icon' => 'device-phone-mobile', 'route' => 'communication.sms'],
+                ['label' => 'E-mails clients', 'icon' => 'envelope-open', 'route' => 'communication.emails'],
+                ['label' => 'Campagnes', 'icon' => 'megaphone', 'route' => 'communication.campaigns'],
+                ['label' => 'Modèles', 'icon' => 'document-duplicate', 'route' => 'communication.templates'],
+            ],
+        ],
+
         'invoices' => ['group' => 'ventes', 'label' => 'Factures', 'icon' => 'document-currency-dollar', 'route' => 'invoices'],
         'pos' => ['group' => 'ventes', 'label' => 'Point de vente', 'icon' => 'shopping-cart', 'route' => 'pos'],
         'rentals' => ['group' => 'ventes', 'label' => 'Location', 'icon' => 'key', 'route' => 'rentals'],
@@ -61,7 +89,6 @@ return [
         'attendance' => ['group' => 'operations', 'label' => 'Listes de présence', 'icon' => 'clipboard-document-check', 'route' => 'attendance'],
         'projects' => ['group' => 'operations', 'label' => 'Projets', 'icon' => 'rectangle-stack', 'route' => 'projects'],
         'planning' => ['group' => 'operations', 'label' => 'Planification', 'icon' => 'calendar-days', 'route' => 'planning'],
-        'appointments' => ['group' => 'operations', 'label' => 'Rendez-vous', 'icon' => 'calendar', 'route' => 'appointments'],
         'timesheets' => ['group' => 'operations', 'label' => 'Feuilles de temps', 'icon' => 'clock', 'route' => 'timesheets'],
 
         'inventory' => ['group' => 'stock', 'label' => 'Stock & entrepôts', 'icon' => 'cube', 'route' => 'inventory'],
@@ -78,7 +105,6 @@ return [
         'leaves' => ['group' => 'rh', 'label' => 'Congés', 'icon' => 'sun', 'route' => 'leaves', 'actions' => ['approve']],
         'payroll' => ['group' => 'rh', 'label' => 'Paie', 'icon' => 'wallet', 'route' => 'payroll', 'actions' => ['validate']],
 
-        'messages' => ['group' => 'systeme', 'label' => 'Messagerie', 'icon' => 'chat-bubble-left-right', 'route' => 'chat', 'core' => true],
         'system' => ['group' => 'systeme', 'label' => 'Master système', 'icon' => 'cog-8-tooth', 'route' => 'system', 'core' => true],
     ],
 
@@ -91,8 +117,9 @@ return [
         'Administrateur' => ['view' => '*', 'manage' => '*', 'extra' => ['system.view', 'system.manage', 'orders.validate', 'vouchers.approve', 'vouchers.execute', 'leaves.approve', 'payroll.validate', 'expense-claims.approve', 'accounting.post']],
         'Comptable' => ['view' => ['dashboard', 'orders', 'contacts', 'quotes', 'invoices', 'vouchers', 'cash', 'expense-claims', 'accounting', 'banking', 'reports', 'payroll', 'purchases', 'messages'], 'manage' => ['invoices', 'accounting', 'banking', 'expense-claims', 'reports'], 'extra' => ['accounting.post', 'expense-claims.approve']],
         'Caissier' => ['view' => ['dashboard', 'orders', 'contacts', 'invoices', 'pos', 'cash', 'vouchers', 'loyalty', 'messages'], 'manage' => ['cash', 'pos'], 'extra' => ['vouchers.execute']],
-        'Commercial' => ['view' => ['dashboard', 'orders', 'reception', 'crm', 'contacts', 'loyalty', 'quotes', 'invoices', 'rentals', 'appointments', 'inventory', 'reports', 'messages'], 'manage' => ['orders', 'crm', 'contacts', 'loyalty', 'quotes', 'rentals', 'appointments']],
-        'Réceptionniste' => ['view' => ['dashboard', 'reception', 'crm', 'contacts', 'appointments', 'messages'], 'manage' => ['reception', 'appointments', 'contacts']],
+        'Commercial' => ['view' => ['dashboard', 'orders', 'crm', 'contacts', 'directory', 'loyalty', 'quotes', 'invoices', 'rentals', 'appointments', 'inventory', 'reports', 'messages', 'communication'], 'manage' => ['orders', 'crm', 'contacts', 'loyalty', 'quotes', 'rentals', 'appointments'], 'extra' => ['communication.send']],
+        'Réceptionniste' => ['view' => ['dashboard', 'reception', 'appointments', 'contacts', 'directory', 'messages'], 'manage' => ['reception', 'appointments']],
+        'Chargé de communication' => ['view' => ['dashboard', 'crm', 'contacts', 'directory', 'loyalty', 'quotes', 'communication', 'messages', 'reports'], 'manage' => ['communication', 'contacts'], 'extra' => ['communication.send', 'communication.campaign']],
         "Chef d'atelier" => ['view' => ['dashboard', 'orders', 'manufacturing', 'inventory', 'vouchers', 'planning', 'projects', 'timesheets', 'messages'], 'manage' => ['manufacturing', 'vouchers', 'planning', 'timesheets']],
         'Magasinier' => ['view' => ['dashboard', 'inventory', 'purchases', 'vouchers', 'manufacturing', 'sites', 'messages'], 'manage' => ['inventory', 'vouchers'], 'extra' => ['vouchers.execute']],
         'Acheteur' => ['view' => ['dashboard', 'inventory', 'purchases', 'vouchers', 'contacts', 'messages'], 'manage' => ['purchases', 'vouchers', 'contacts']],
@@ -206,10 +233,30 @@ return [
     ],
 
     'document_templates' => [
-        'moderne' => ['label' => 'Moderne', 'description' => 'Bandeau bleu SOGEREF, filet jaune, tableau aéré.'],
-        'classique' => ['label' => 'Classique', 'description' => 'Cadres émetteur / destinataire, format administratif.'],
-        'epure' => ['label' => 'Épuré', 'description' => 'Noir & blanc minimal, grande typographie.'],
-        'chantier' => ['label' => 'BTP / Chantier', 'description' => 'Bloc projet, lots de travaux, visas et signatures.'],
+        'moderne' => ['label' => 'Moderne', 'description' => 'Bandeau bleu SOGEREF, filet jaune, tableau aéré.', 'thumb' => 'band'],
+        'classique' => ['label' => 'Classique', 'description' => 'Cadres émetteur / destinataire, format administratif.', 'thumb' => 'frame'],
+        'epure' => ['label' => 'Épuré', 'description' => 'Noir & blanc minimal, grande typographie.', 'thumb' => 'minimal'],
+        'chantier' => ['label' => 'BTP / Chantier', 'description' => 'Bloc projet, lots de travaux, visas et signatures.', 'thumb' => 'site'],
+        'prestige' => ['label' => 'Prestige', 'description' => 'Bandeau jaune SOGEREF, cartouche client encadré, cachet et signature.', 'thumb' => 'gold'],
+    ],
+
+    // Modèles d'impression au choix du Master (Master système › Documents & impressions).
+    // « thumb » pilote la miniature d'aperçu affichée dans le sélecteur.
+    'print_templates' => [
+        'receipt' => [
+            'moderne' => ['label' => 'Moderne', 'description' => 'Bandeau bleu SOGEREF, montant mis en valeur.', 'thumb' => 'band'],
+            'classique' => ['label' => 'Classique', 'description' => 'Cadres administratifs, montant en toutes lettres.', 'thumb' => 'frame'],
+            'epure' => ['label' => 'Épuré', 'description' => 'Noir et blanc, économe en encre.', 'thumb' => 'minimal'],
+            'carnet' => ['label' => 'Carnet à souche', 'description' => 'Reçu client + souche d’archive sur une même page.', 'thumb' => 'split'],
+            'ticket' => ['label' => 'Ticket 80 mm', 'description' => 'Format imprimante thermique de caisse.', 'thumb' => 'ticket'],
+        ],
+        'exit_voucher' => [
+            'standard' => ['label' => 'Standard', 'description' => 'Détail chiffré et circuit complet de visas.', 'thumb' => 'band'],
+            'magasin' => ['label' => 'Magasin', 'description' => 'Liste de préparation : quantités demandées / sorties, cases à cocher.', 'thumb' => 'list'],
+            'chantier' => ['label' => 'Livraison chantier', 'description' => 'Chantier, transport, réception sur site et réserves.', 'thumb' => 'site'],
+            'epure' => ['label' => 'Épuré', 'description' => 'Noir et blanc, sans prix, signatures essentielles.', 'thumb' => 'minimal'],
+            'duplicata' => ['label' => 'Duplicata', 'description' => 'Deux exemplaires (magasin / demandeur) sur une page.', 'thumb' => 'split'],
+        ],
     ],
 
     // Comptes de charge proposés à la saisie des dépenses générales.

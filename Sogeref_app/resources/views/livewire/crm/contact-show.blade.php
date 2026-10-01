@@ -1,6 +1,6 @@
 <div>
     @php $c = $contact; @endphp
-    <x-ui.page-header :title="$c->display_name" :eyebrow="$c->reference.' · '.['client' => 'Client', 'supplier' => 'Fournisseur', 'prospect' => 'Prospect'][$c->type->value].' '.strtoupper($c->segment)" :back="route('contacts', ['type' => $c->type->value])">
+    <x-ui.page-header :title="$c->display_name" :eyebrow="$c->reference.' · '.$c->type->label().' '.strtoupper($c->segment)" :back="route('contacts', ['type' => $c->type->value])">
         <x-slot:meta>
             <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-fg-muted">
                 @if ($c->phone)<span class="flex items-center gap-1"><x-ui.icon name="phone" class="size-4" />{{ $c->phone }}</span>@endif
@@ -10,6 +10,7 @@
             </div>
         </x-slot:meta>
         <x-slot:actions>
+            @if (auth()->user()->canAccessModule('directory'))<x-ui.button variant="ghost" icon="identification" :href="route('directory.vcard', $c)" :navigate="false" title="Carte de visite (.vcf)">vCard</x-ui.button>@endif
             @if ($c->type->value === 'prospect' && auth()->user()->canManage('contacts'))<x-ui.button variant="secondary" icon="check-badge" wire:click="convertToClient">Convertir en client</x-ui.button>@endif
             @if ($c->type->value !== 'supplier' && auth()->user()->canManage('quotes'))<x-ui.button variant="accent" icon="document-text" :href="route('quotes.create', ['contact' => $c])">Nouveau devis</x-ui.button>@endif
             @if ($c->type->value === 'supplier' && auth()->user()->canManage('purchases'))<x-ui.button variant="accent" icon="truck" :href="route('purchases.create', ['contact' => $c])">Bon de commande</x-ui.button>@endif
@@ -55,6 +56,11 @@
             </x-ui.card>
         </div>
         <aside class="space-y-6">
+            @if (auth()->user()->canAccessModule('communication'))
+                <x-ui.card title="Écrire au contact" subtitle="WhatsApp, SMS ou e-mail" icon="chat-bubble-oval-left-ellipsis">
+                    <livewire:communication.quick-send :contact="$c" :key="'quick-send-'.$c->getRouteKey()" />
+                </x-ui.card>
+            @endif
             @if ($c->type->value !== 'supplier')
                 <x-ui.card title="Fidélité" icon="gift">
                     @if ($card = $c->loyaltyCard)

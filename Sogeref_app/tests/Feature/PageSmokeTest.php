@@ -36,7 +36,7 @@ class PageSmokeTest extends TestCase
 
         $urls = [
             route('dashboard'), route('orders.index'), route('orders.index', ['vue' => 'liste']), route('orders.show', SalesOrder::first()),
-            route('reception'), route('crm'), route('contacts'), route('contacts.show', Contact::first()), route('loyalty'),
+            route('reception'), route('reception.mail'), route('reception.visits'), route('crm'), route('contacts'), route('contacts.show', Contact::first()), route('directory'), route('directory', ['vue' => 'interne']), route('loyalty'),
             route('quotes'), route('quotes.create'), route('invoices'), route('invoices.create'), route('documents.show', Document::first()), route('documents.edit', Document::where('type', 'quote')->where('status', 'draft')->first()),
             route('pos'), route('rentals'),
             route('manufacturing'), route('manufacturing.boms'), route('manufacturing.show', ManufacturingOrder::first()),
@@ -66,6 +66,7 @@ class PageSmokeTest extends TestCase
             route('pdf.document', Document::first()), route('pdf.order', SalesOrder::first()), route('pdf.manufacturing', ManufacturingOrder::first()),
             route('pdf.site', $site), route('pdf.attendance', AttendanceSheet::first()), route('pdf.payroll', PayrollPeriod::first()),
             route('pdf.report', 'ventes'), route('pdf.letterhead'),
+            route('pdf.document', ['document' => Document::where('type', 'quote')->first(), 'format' => 'proforma']), route('reception.mail.print'), route('directory.print'),
         ] as $url) {
             $this->get($url)->assertOk()->assertHeader('content-type', 'application/pdf');
         }
@@ -80,13 +81,16 @@ class PageSmokeTest extends TestCase
             'accounting' => ['journal', 'grand-livre', 'balance', 'plan'],
             'cash' => ['encaisser', 'decaisser', 'mouvements'],
             'purchases' => ['reappro', 'commandes'],
-            'reception' => ['accueil', 'visiteurs', 'courrier'],
         ];
         foreach ($tabs as $route => $list) {
             foreach ($list as $tab) {
                 $this->get(route($route, ['onglet' => $tab]))->assertOk();
             }
         }
+        // Anciens onglets de la Réception : redirigés vers les écrans dédiés.
+        $this->get(route('reception', ['onglet' => 'accueil']))->assertOk();
+        $this->get(route('reception', ['onglet' => 'visiteurs']))->assertRedirect(route('reception.visits'));
+        $this->get(route('reception', ['onglet' => 'courrier']))->assertRedirect(route('reception.mail'));
         foreach (array_keys(ReportService::REPORTS) as $report) {
             $this->get(route('reports', ['rapport' => $report]))->assertOk();
         }

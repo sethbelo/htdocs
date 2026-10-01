@@ -9,6 +9,15 @@
         </x-slot:actions>
     </x-ui.page-header>
 
+    @if ($lastPayment)
+        <div class="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13.5px] text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200">
+            <x-ui.icon name="check-circle" class="size-5" />
+            <span class="flex-1">Encaissement {{ $lastPayment->reference }} de <strong>{{ money($lastPayment->amount, $lastPayment->currency_code) }}</strong> enregistré.</span>
+            <a href="{{ route('pdf.receipt', $lastPayment) }}" target="_blank" class="btn btn-primary btn-sm"><x-ui.icon name="printer" class="size-4" />Imprimer le reçu</a>
+            <button type="button" class="btn btn-ghost btn-sm btn-icon" wire:click="$set('lastPaymentId', null)" aria-label="Masquer"><x-ui.icon name="x-mark" class="size-4" /></button>
+        </div>
+    @endif
+
     @if (! $session)
         {{-- ═══ 2A. OUVERTURE DE SESSION ═════════════════════════════════════ --}}
         <div class="grid gap-6 lg:grid-cols-[420px_1fr]">

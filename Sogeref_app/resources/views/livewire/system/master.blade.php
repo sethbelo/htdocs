@@ -11,7 +11,7 @@
             @foreach ([
                 'societe' => ['Société', 'building-office-2'], 'documents' => ['Documents & impressions', 'document-text'], 'modules' => ['Modules', 'squares-plus'],
                 'numerotation' => ['Numérotation', 'hashtag'], 'regles' => ['Règles métier & paie', 'adjustments-horizontal'], 'utilisateurs' => ['Utilisateurs', 'users'],
-                'roles' => ['Rôles & droits', 'shield-check'], 'audit' => ['Journal d’audit', 'finger-print'], 'systeme' => ['Système', 'server-stack'],
+                'roles' => ['Rôles & droits', 'shield-check'], 'integrations' => ['Intégrations & API', 'link'], 'audit' => ['Journal d’audit', 'finger-print'], 'systeme' => ['Système', 'server-stack'],
             ] as $key => [$label, $icon])
                 <button type="button" wire:click="$set('tab', '{{ $key }}')" @class(['flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13.5px] font-medium transition', 'bg-brand-50 text-brand-700 dark:bg-white/8 dark:text-white' => $tab === $key, 'text-fg-muted hover:bg-surface-2 hover:text-fg' => $tab !== $key])>
                     <x-ui.icon :name="$icon" class="size-[18px]" />{{ $label }}
@@ -20,8 +20,12 @@
         </nav>
 
         <div class="min-w-0">
+            {{-- ─── INTÉGRATIONS & API (composant dédié) ───────────────────── --}}
+            @if ($tab === 'integrations')
+                <livewire:system.integrations />
+
             {{-- ─── SOCIÉTÉ ────────────────────────────────────────────────── --}}
-            @if ($tab === 'societe')
+            @elseif ($tab === 'societe')
                 <x-ui.card title="Identité de la société" subtitle="Reprise sur toutes les impressions (en-têtes, pieds de page, bulletins)" icon="building-office-2">
                     <div class="grid gap-4 md:grid-cols-2">
                         <x-ui.input label="Nom commercial" wire:model="company.name" required />
@@ -53,16 +57,25 @@
 
             {{-- ─── DOCUMENTS ──────────────────────────────────────────────── --}}
             @elseif ($tab === 'documents')
-                <x-ui.card title="Modèles par défaut" subtitle="Chaque document reste modifiable individuellement" icon="swatch">
-                    <div class="space-y-5">
-                        @foreach (['quote' => 'Devis', 'invoice' => 'Factures', 'purchase_order' => 'Bons de commande fournisseurs'] as $type => $label)
-                            <div>
-                                <p class="label">{{ $label }}</p>
-                                <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
-                                    @foreach (config('erp.document_templates') as $key => $tpl)
-                                        <button type="button" wire:click="$set('templates.{{ $type }}', '{{ $key }}')" @class(['rounded-xl border p-3 text-left transition', 'border-brand-600 ring-2 ring-sun-400' => ($templates[$type] ?? '') === $key, 'border-line hover:border-line-strong' => ($templates[$type] ?? '') !== $key])>
-                                            <span class="block text-[13.5px] font-semibold">{{ $tpl['label'] }}</span><span class="block text-[11.5px] text-fg-subtle">{{ $tpl['description'] }}</span>
-                                        </button>
+                <x-ui.card title="Modèles par défaut" subtitle="Choisissez le modèle utilisé pour chaque type d’impression — cliquez sur « Aperçu » pour voir le rendu réel en PDF" icon="swatch">
+                    <div class="space-y-6">
+                        @foreach (\App\Livewire\System\Master::templateCatalog() as $kind => $category)
+                            <div wire:key="tpl-cat-{{ $kind }}">
+                                <div class="mb-2 flex items-center justify-between gap-2">
+                                    <p class="flex items-center gap-2 font-semibold"><x-ui.icon :name="$category['icon']" class="size-4 text-brand-600 dark:text-lagoon-300" />{{ $category['label'] }}</p>
+                                    <span class="text-[12px] text-fg-subtle">{{ count($category['templates']) }} modèles · actuel : <strong class="text-fg">{{ $category['templates'][$templates[$kind] ?? '']['label'] ?? '—' }}</strong></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+                                    @foreach ($category['templates'] as $key => $tpl)
+                                        @php $selected = ($templates[$kind] ?? '') === $key; @endphp
+                                        <div wire:key="tpl-{{ $kind }}-{{ $key }}" @class(['flex flex-col rounded-xl border p-3 transition', 'border-brand-600 bg-brand-50/50 ring-2 ring-sun-400 dark:bg-white/6' => $selected, 'border-line hover:border-line-strong' => ! $selected])>
+                                            <button type="button" class="text-left" @if ($canEdit) wire:click="$set('templates.{{ $kind }}', '{{ $key }}')" @endif aria-pressed="{{ $selected ? 'true' : 'false' }}">
+                                                @include('livewire.system.partials.template-thumb', ['thumb' => $tpl['thumb'] ?? 'band'])
+                                                <span class="mt-2 flex items-center gap-1.5 text-[13px] font-semibold">@if ($selected)<x-ui.icon name="check-circle" variant="s" class="size-4 text-brand-600 dark:text-sun-300" />@endif{{ $tpl['label'] }}</span>
+                                                <span class="mt-0.5 block text-[11.5px] leading-snug text-fg-subtle">{{ $tpl['description'] }}</span>
+                                            </button>
+                                            <button type="button" class="btn btn-ghost btn-sm mt-auto w-full pt-2" wire:click="previewTemplate('{{ $kind }}', '{{ $key }}')"><x-ui.icon name="eye" class="size-4" />Aperçu</button>
+                                        </div>
                                     @endforeach
                                 </div>
                             </div>
@@ -72,7 +85,7 @@
                             <x-ui.textarea label="Conditions par défaut des factures" wire:model="invoiceTerms" rows="4" />
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-2 p-4">
-                            <p class="text-[13px] text-fg-muted">Aperçus : <a href="{{ route('pdf.letterhead') }}" target="_blank" class="link">papier à en-tête</a> · @foreach (config('erp.document_templates') as $key => $tpl)<a href="{{ route('pdf.document', ['document' => \App\Support\RouteKey::encode(\App\Models\Document::class, (int) \App\Models\Document::where('company_id', company_id())->where('type', 'invoice')->value('id')), 'modele' => $key]) }}" target="_blank" class="link">{{ $tpl['label'] }}</a>{{ $loop->last ? '' : ' · ' }}@endforeach</p>
+                            <p class="text-[13px] text-fg-muted">Modèle de courrier : <a href="{{ route('pdf.letterhead') }}" target="_blank" class="link">papier à en-tête</a></p>
                             @if ($canEdit)<x-ui.button variant="primary" icon="check" wire:click="saveDocuments">Enregistrer</x-ui.button>@endif
                         </div>
                     </div>
@@ -285,4 +298,21 @@
             <x-ui.button variant="primary" icon="check" wire:click="saveUser">Enregistrer</x-ui.button>
         </x-slot:footer>
     </x-ui.drawer>
+    {{-- ═══ APERÇU D'UN MODÈLE D'IMPRESSION ═══════════════════════════════ --}}
+    @if ($preview)
+        <div class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6" x-data x-on:keydown.escape.window="$wire.set('preview', null)">
+            <div class="overlay" wire:click="$set('preview', null)"></div>
+            <div class="modal flex h-[92dvh] w-full max-w-5xl flex-col overflow-hidden p-0">
+                <div class="flex items-center gap-3 border-b border-line px-4 py-3">
+                    <x-ui.icon name="eye" class="text-brand-600 dark:text-lagoon-300" />
+                    <p class="min-w-0 flex-1 truncate font-semibold">Aperçu · {{ $preview[2] }}</p>
+                    @if ($canEdit)<x-ui.button size="sm" icon="check" wire:click="$set('templates.{{ $preview[0] }}', '{{ $preview[1] }}'); $set('preview', null)">Choisir ce modèle</x-ui.button>@endif
+                    <a href="{{ route('pdf.preview', ['kind' => $preview[0], 'template' => $preview[1]]) }}" target="_blank" class="btn btn-ghost btn-sm" title="Ouvrir dans un onglet"><x-ui.icon name="arrow-top-right-on-square" class="size-4" /></a>
+                    <button type="button" class="btn btn-ghost btn-sm btn-icon" wire:click="$set('preview', null)" aria-label="Fermer l’aperçu"><x-ui.icon name="x-mark" /></button>
+                </div>
+                <iframe src="{{ route('pdf.preview', ['kind' => $preview[0], 'template' => $preview[1]]) }}#toolbar=0&view=FitH" class="min-h-0 w-full flex-1 bg-surface-2" title="Aperçu PDF"></iframe>
+                <p class="border-t border-line px-4 py-2 text-[12px] text-fg-subtle">Aperçu généré avec le dernier document réel de la société. Pensez à « Enregistrer » pour appliquer votre choix.</p>
+            </div>
+        </div>
+    @endif
 </div>

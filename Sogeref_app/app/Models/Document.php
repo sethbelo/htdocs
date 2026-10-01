@@ -18,6 +18,12 @@ class Document extends Model
 
     protected $guarded = [];
 
+    /** Devis présenté sous l'intitulé « Facture pro forma ». */
+    public function isProformaHeading(): bool
+    {
+        return $this->type === DocumentType::Quote && data_get($this->meta, 'heading') === 'proforma';
+    }
+
     protected function casts(): array
     {
         return ['type' => DocumentType::class, 'status' => DocumentStatus::class, 'issue_date' => 'date', 'due_date' => 'date', 'valid_until' => 'date', 'exchange_rate' => 'decimal:8', 'subtotal' => 'decimal:2', 'tax_total' => 'decimal:2', 'total' => 'decimal:2', 'amount_paid' => 'decimal:2', 'sent_at' => 'datetime', 'accepted_at' => 'datetime', 'meta' => 'array'];

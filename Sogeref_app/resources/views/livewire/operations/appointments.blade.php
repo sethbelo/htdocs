@@ -3,7 +3,7 @@
         $canManage = auth()->user()->canManage('appointments');
         $typeColors = ['reunion' => 'bg-brand-600', 'visite_chantier' => 'bg-sun-400', 'showroom' => 'bg-lagoon-400', 'mesure' => 'bg-violet-500', 'livraison' => 'bg-emerald-500'];
     @endphp
-    <x-ui.page-header title="Rendez-vous" eyebrow="Services" subtitle="Agenda partagé : visites showroom, visites de chantier, prises de mesures, livraisons et réunions.">
+    <x-ui.page-header title="Rendez-vous" eyebrow="Réception" subtitle="Agenda partagé : visites showroom, visites de chantier, prises de mesures, livraisons et réunions.">
         <x-slot:actions>
             <label class="flex items-center gap-2 text-[13px] text-fg-muted"><input type="checkbox" wire:model.live="mine" class="checkbox"> Mon agenda</label>
             <x-ui.button variant="secondary" square icon="chevron-left" wire:click="shift(-1)" />
@@ -81,6 +81,9 @@
         </div>
         <x-slot:footer>
             @if ($editing)<x-ui.button variant="ghost" icon="trash" class="mr-auto text-flame-600" wire:click="delete" wire:confirm="Supprimer ce rendez-vous ?">Supprimer</x-ui.button>@endif
+            @if ($editing && auth()->user()->canManage('reception') && in_array($form['status'] ?? '', ['scheduled', 'confirmed'], true) && ($form['date'] ?? '') === today()->toDateString())
+                <x-ui.button variant="secondary" icon="arrow-right-end-on-rectangle" wire:click="arrive">Visiteur arrivé</x-ui.button>
+            @endif
             <x-ui.button variant="ghost" x-on:click="open = false">Annuler</x-ui.button>
             <x-ui.button variant="primary" icon="check" wire:click="save">Enregistrer</x-ui.button>
         </x-slot:footer>

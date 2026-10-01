@@ -2,6 +2,7 @@
 
 use App\Enums\DocumentStatus;
 use App\Models\Document;
+use App\Services\Communication\CampaignService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
@@ -26,3 +27,9 @@ Artisan::command('sogeref:schedule-reminders', function () {
 
 Schedule::command('sogeref:mark-overdue')->dailyAt('00:10')->withoutOverlapping();
 Schedule::command('sogeref:schedule-reminders')->weekdays()->at('08:00')->withoutOverlapping();
+
+Artisan::command('sogeref:dispatch-campaigns', function (CampaignService $campaigns) {
+    $this->info($campaigns->dispatchDue().' campagne(s) programmée(s) lancée(s).');
+})->purpose('Lancer les campagnes de communication arrivées à échéance');
+
+Schedule::command('sogeref:dispatch-campaigns')->everyMinute()->withoutOverlapping();

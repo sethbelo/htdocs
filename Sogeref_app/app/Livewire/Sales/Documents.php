@@ -65,6 +65,6 @@ class Documents extends Component
                 ->when($this->search, fn ($q) => $q->where(fn ($q) => $q->where('number', 'like', "%{$this->search}%")
                     ->orWhereHas('contact', fn ($c) => $c->where('company_name', 'like', "%{$this->search}%")->orWhere('last_name', 'like', "%{$this->search}%")->orWhere('first_name', 'like', "%{$this->search}%"))))
                 ->latest('issue_date')->latest('id')->paginate(15),
-        ])->title($isQuote ? 'Devis' : 'Factures');
+        ])->title($isQuote ? 'Devis & pro forma' : 'Factures');
     }
 }

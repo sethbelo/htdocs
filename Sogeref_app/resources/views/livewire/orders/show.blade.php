@@ -166,7 +166,7 @@
                 @if ($order->invoice?->allocations->isNotEmpty())
                     <ul class="mt-4 space-y-2 border-t border-line pt-3">
                         @foreach ($order->invoice->allocations as $allocation)
-                            <li class="flex justify-between text-[12.5px]"><span class="text-fg-muted">{{ $allocation->payment?->paid_at?->format('d/m/Y') }} · {{ $allocation->payment?->method?->label() }}</span><span class="font-semibold tabular-nums">{{ money($allocation->amount) }}</span></li>
+                            <li class="flex justify-between text-[12.5px]"><span class="text-fg-muted">{{ $allocation->payment?->paid_at?->format('d/m/Y') }} · {{ $allocation->payment?->method?->label() }}</span><span class="flex items-center gap-2"><span class="font-semibold tabular-nums">{{ money($allocation->amount) }}</span>@if ($allocation->payment && auth()->user()->canAccessModule('cash'))<a href="{{ route('pdf.receipt', $allocation->payment) }}" target="_blank" class="link text-[12px]">Reçu</a>@endif</span></li>
                         @endforeach
                     </ul>
                 @endif

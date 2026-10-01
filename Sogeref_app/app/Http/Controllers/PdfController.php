@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceSheet;
 use App\Models\Document;
 use App\Models\ManufacturingOrder;
+use App\Models\Payment;
 use App\Models\PayrollPeriod;
 use App\Models\Payslip;
 use App\Models\PosOrder;
@@ -12,6 +13,7 @@ use App\Models\SalesOrder;
 use App\Models\Site;
 use App\Models\Voucher;
 use App\Services\ReportService;
+use App\Support\AmountInWords;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,10 +34,16 @@ class PdfController extends Controller
         abort_unless(auth()->user()?->canAccessModule($module), 403);
 
         $document->load('items.product', 'contact', 'creator');
-        $template = $request->query('modele', $document->template);
-        $template = array_key_exists($template, config('erp.document_templates')) ? $template : 'moderne';
         $type = $document->type->value;
-        $isProforma = $type === 'invoice' && $document->status->value === 'draft';
+        // Pro forma : facture brouillon, devis intitulé « Pro forma », ou devis imprimé au format pro forma (?format=proforma).
+        $headingProforma = $type === 'quote' && data_get($document->meta, 'heading') === 'proforma';
+        $isProforma = ($type === 'invoice' && $document->status->value === 'draft')
+            || $headingProforma
+            || ($type === 'quote' && $request->query('format') === 'proforma');
+        // Un devis imprimé ponctuellement en pro forma prend le modèle pro forma par défaut du Master.
+        $default = $type === 'quote' && $isProforma && ! $headingProforma ? erp_setting('templates.proforma', $document->template) : $document->template;
+        $template = $request->query('modele', $default);
+        $template = array_key_exists((string) $template, config('erp.document_templates')) ? $template : 'moderne';
         $contact = $document->contact;
 
         return $this->render("pdf.documents.{$template}", [
@@ -43,7 +51,7 @@ class PdfController extends Controller
             'type' => $type,
             'isProforma' => $isProforma,
             'docTitle' => match ($type) {
-                'quote' => 'DEVIS', 'invoice' => $isProforma ? 'FACTURE PROFORMA' : 'FACTURE', 'credit_note' => 'AVOIR', 'purchase_order' => 'BON DE COMMANDE', default => 'DOCUMENT'
+                'quote' => $isProforma ? 'FACTURE PRO FORMA' : 'DEVIS', 'invoice' => $isProforma ? 'FACTURE PRO FORMA' : 'FACTURE', 'credit_note' => 'AVOIR', 'purchase_order' => 'BON DE COMMANDE', default => 'DOCUMENT'
             },
             'docReference' => 'Réf. : '.$document->number,
             'contact' => $contact,
@@ -53,16 +61,90 @@ class PdfController extends Controller
             'terms' => $document->terms ?: erp_setting($type === 'quote' ? 'quote_terms' : 'invoice_terms'),
             'address' => collect(company()->address ?? [])->filter()->implode(', '),
             'contactAddress' => collect($contact->billing_address ?? [])->filter()->implode(', ') ?: $contact->city,
-        ], $document->number, $request);
+        ], ($isProforma && $type === 'quote' && ! $headingProforma ? 'proforma-' : '').$document->number, $request);
+    }
+
+    // ── Reçu de paiement (5 modèles au choix du Master) ─────────────────────
+    public function receipt(Request $request, Payment $payment): Response
+    {
+        $this->own($payment);
+        abort_unless(auth()->user()?->canAccessModule('cash') || auth()->user()?->canAccessModule('invoices'), 403);
+
+        return $this->renderReceipt($payment, (string) $request->query('modele', erp_setting('templates.receipt', 'moderne')), $request);
+    }
+
+    private function renderReceipt(Payment $payment, string $template, Request $request): Response
+    {
+        $template = array_key_exists($template, config('erp.print_templates.receipt')) ? $template : 'moderne';
+        $payment->loadMissing('allocations.document', 'contact', 'creator');
+        $company = company();
+        $seal = $company->seal_path ? storage_path('app/public/'.$company->seal_path) : null;
+        $data = [
+            'payment' => $payment,
+            'payerName' => $payment->contact?->display_name ?? 'Client comptant',
+            'amountWords' => AmountInWords::make((float) $payment->amount, $payment->currency_code),
+            'methodLabel' => $payment->method?->label() ?? '—',
+            'cashier' => $payment->creator?->name ?? '—',
+            'purpose' => $payment->allocations->isNotEmpty() ? 'Règlement '.$payment->allocations->map(fn ($a) => $a->document?->number)->filter()->implode(', ') : ($payment->notes ?: 'Acompte / règlement client'),
+            'sealPath' => $seal && file_exists($seal) ? $seal : null,
+            'company' => $company,
+        ];
+        $filename = 'recu-'.str($payment->reference)->slug().'.pdf';
+        $pdf = Pdf::loadView("pdf.receipts.{$template}", $data);
+        $template === 'ticket' ? $pdf->setPaper([0, 0, 226.77, 430 + $payment->allocations->count() * 14]) : $pdf->setPaper('a4');
+
+        return $request->boolean('download') ? $pdf->download($filename) : $pdf->stream($filename);
+    }
+
+    // ── Aperçu d'un modèle d'impression (Master système) ───────────────────
+    public function preview(Request $request, string $kind, string $template): Response
+    {
+        $user = auth()->user();
+        $cid = company_id();
+        switch ($kind) {
+            case 'receipt':
+                abort_unless($user->canAccessModule('system') || $user->canAccessModule('cash'), 403);
+                $payment = Payment::where('company_id', $cid)->where('direction', 'in')->has('allocations')->latest('paid_at')->first()
+                    ?? Payment::where('company_id', $cid)->latest('paid_at')->first();
+                abort_unless($payment, 404, 'Aucun paiement enregistré pour l’aperçu.');
+
+                return $this->renderReceipt($payment, $template, $request);
+            case 'exit_voucher':
+                abort_unless($user->canAccessModule('system') || $user->canAccessModule('vouchers'), 403);
+                $voucher = Voucher::where('company_id', $cid)->where('type', 'sortie')->has('lines')->latest('id')->first();
+                abort_unless($voucher, 404, 'Aucun bon de sortie enregistré pour l’aperçu.');
+
+                return $this->renderVoucher($voucher, $template, $request);
+            default:
+                abort_unless(in_array($kind, ['quote', 'proforma', 'invoice', 'purchase_order'], true), 404);
+                abort_unless($user->canAccessModule('system') || $user->canAccessModule($kind === 'purchase_order' ? 'purchases' : ($kind === 'invoice' ? 'invoices' : 'quotes')), 403);
+                $document = Document::where('company_id', $cid)->where('type', $kind === 'proforma' ? 'quote' : $kind)->has('items')->latest('id')->first();
+                abort_unless($document, 404, 'Aucun document enregistré pour l’aperçu.');
+                $request->query->set('modele', $template);
+                if ($kind === 'proforma') {
+                    $request->query->set('format', 'proforma');
+                }
+
+                return $this->document($request, $document);
+        }
     }
 
     // ── Bons ────────────────────────────────────────────────────────────────
     public function voucher(Request $request, Voucher $voucher): Response
     {
         $this->own($voucher);
-        $voucher->load('lines.product', 'employee', 'contact', 'site', 'warehouse', 'requester', 'approver', 'executor', 'financialAccount', 'manufacturingOrder', 'salesOrder');
 
-        return $this->render('pdf.voucher', ['voucher' => $voucher, 'docTitle' => mb_strtoupper($voucher->typeLabel()), 'docReference' => 'N° '.$voucher->number], $voucher->number, $request);
+        return $this->renderVoucher($voucher, (string) $request->query('modele', $voucher->type === 'sortie' ? erp_setting('templates.exit_voucher', 'standard') : 'standard'), $request);
+    }
+
+    /** Bon : les bons de sortie disposent de 5 modèles ; les autres bons du modèle standard. */
+    private function renderVoucher(Voucher $voucher, string $template, Request $request): Response
+    {
+        $voucher->load('lines.product', 'employee', 'contact', 'site', 'warehouse', 'requester', 'approver', 'executor', 'financialAccount', 'manufacturingOrder', 'salesOrder');
+        $template = $voucher->type === 'sortie' && array_key_exists($template, config('erp.print_templates.exit_voucher')) ? $template : 'standard';
+        $view = $template === 'standard' ? 'pdf.voucher' : "pdf.exit-vouchers.{$template}";
+
+        return $this->render($view, ['voucher' => $voucher, 'docTitle' => mb_strtoupper($voucher->typeLabel()), 'docReference' => 'N° '.$voucher->number], $voucher->number, $request);
     }
 
     // ── Fiche de fabrication / dossier de construction ─────────────────────

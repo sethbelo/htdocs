@@ -11,6 +11,9 @@
         <x-slot:actions>
             <a href="{{ route('pdf.document', ['document' => $document, 'download' => 1]) }}" class="btn btn-secondary"><x-ui.icon name="arrow-down-tray" class="size-[18px]" /> Télécharger</a>
             <a href="{{ route('pdf.document', $document) }}" target="_blank" class="btn btn-secondary"><x-ui.icon name="printer" class="size-[18px]" /> Imprimer</a>
+            @if ($document->type->value === 'quote')
+                <a href="{{ route('pdf.document', ['document' => $document, 'format' => 'proforma', 'modele' => $template]) }}" target="_blank" class="btn btn-secondary" title="Même contenu, intitulé FACTURE PRO FORMA"><x-ui.icon name="document-duplicate" class="size-[18px]" /> Imprimer en pro forma</a>
+            @endif
             @if ($canManage && (float) $document->amount_paid == 0 && ! in_array($document->status->value, ['accepted', 'paid', 'cancelled']))
                 <x-ui.button variant="primary" icon="pencil-square" :href="route('documents.edit', $document)">Modifier</x-ui.button>
             @endif
@@ -81,7 +84,10 @@
                         @foreach ($document->allocations as $allocation)
                             <li class="flex items-center justify-between gap-3 border-b border-line px-5 py-3 text-[13px] last:border-0">
                                 <div><p class="font-semibold">{{ $allocation->payment?->method?->label() }}</p><p class="text-[12px] text-fg-subtle">{{ $allocation->payment?->paid_at?->format('d/m/Y H:i') }} · {{ $allocation->payment?->reference }}</p></div>
-                                <span class="font-semibold tabular-nums text-emerald-600">{{ money($allocation->amount, $document->currency_code) }}</span>
+                                <span class="flex items-center gap-2">
+                                    <span class="font-semibold tabular-nums text-emerald-600">{{ money($allocation->amount, $document->currency_code) }}</span>
+                                    @if ($allocation->payment)<a href="{{ route('pdf.receipt', $allocation->payment) }}" target="_blank" class="btn btn-ghost btn-sm" title="Imprimer le reçu"><x-ui.icon name="printer" class="size-4" />Reçu</a>@endif
+                                </span>
                             </li>
                         @endforeach
                     </ul>

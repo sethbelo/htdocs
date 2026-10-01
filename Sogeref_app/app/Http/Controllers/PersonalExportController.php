@@ -69,7 +69,11 @@ class PersonalExportController extends Controller
         abort_unless((int) $voucher->company_id === company_id() && (int) $voucher->requested_by === (int) auth()->id(), 404);
         $voucher->load('lines.product', 'employee', 'contact', 'site', 'warehouse', 'requester', 'approver', 'executor', 'financialAccount', 'manufacturingOrder', 'salesOrder');
 
-        return $this->pdf('pdf.voucher', ['voucher' => $voucher, 'docTitle' => mb_strtoupper($voucher->typeLabel()), 'docReference' => 'N° '.$voucher->number], $voucher->number, $request);
+        // Bon de sortie : modèle choisi par le Master (Master système › Documents & impressions).
+        $template = $voucher->type === 'sortie' ? (string) erp_setting('templates.exit_voucher', 'standard') : 'standard';
+        $view = $template !== 'standard' && array_key_exists($template, config('erp.print_templates.exit_voucher')) ? "pdf.exit-vouchers.{$template}" : 'pdf.voucher';
+
+        return $this->pdf($view, ['voucher' => $voucher, 'docTitle' => mb_strtoupper($voucher->typeLabel()), 'docReference' => 'N° '.$voucher->number], $voucher->number, $request);
     }
 
     // ── Tâches du jour ────────────────────────────────────────────────────

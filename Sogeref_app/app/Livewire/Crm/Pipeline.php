@@ -8,6 +8,8 @@ use App\Models\Opportunity;
 use App\Models\Pipeline as PipelineModel;
 use App\Models\PipelineStage;
 use App\Models\User;
+use App\Services\ContactService;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -27,6 +29,10 @@ class Pipeline extends Component
     public ?int $editing = null;
 
     public array $form = [];
+
+    public bool $newContact = false;
+
+    public array $contact = [];
 
     public function move(int $id, string $stageId, array $orderedIds = []): void
     {
@@ -52,17 +58,48 @@ class Pipeline extends Component
             'title' => $o?->title ?? '', 'contact_id' => $o?->contact_id, 'amount' => $o ? (float) $o->amount : 0, 'stage_id' => $o?->stage_id ?? $pipeline?->stages()->orderBy('position')->value('id'),
             'expected_close_at' => $o?->expected_close_at?->toDateString() ?? now()->addMonth()->toDateString(), 'owner_id' => $o?->owner_id ?? auth()->id(), 'notes' => $o?->notes ?? '',
         ];
+        // Création rapide du prospect depuis l'opportunité
+        $this->newContact = false;
+        $this->contact = ['segment' => 'b2c', 'name' => '', 'company' => '', 'phone' => '', 'email' => ''];
+        $this->resetValidation();
         $this->showForm = true;
     }
 
-    public function save(): void
+    public function save(ContactService $contacts): void
     {
         $this->authorizeModule('crm', 'manage');
+        if ($this->newContact) {
+            $this->form['contact_id'] = $this->createProspect($contacts)?->id;
+            if (! $this->form['contact_id']) {
+                return;
+            }
+        }
         $data = $this->validate(['form.title' => ['required', 'string', 'max:200'], 'form.contact_id' => ['required', 'integer'], 'form.amount' => ['numeric', 'min:0'], 'form.stage_id' => ['required', 'integer'], 'form.expected_close_at' => ['nullable', 'date'], 'form.owner_id' => ['nullable', 'integer'], 'form.notes' => ['nullable', 'string', 'max:2000']], [], ['form.title' => 'intitulé', 'form.contact_id' => 'contact'])['form'];
+        abort_unless(Contact::where('company_id', company_id())->whereKey($data['contact_id'])->exists(), 422);
         $stage = PipelineStage::findOrFail($data['stage_id']);
         Opportunity::updateOrCreate(['id' => $this->editing], $data + ['company_id' => company_id(), 'pipeline_id' => $stage->pipeline_id, 'currency_code' => 'USD']);
         $this->showForm = false;
         $this->toast('Opportunité enregistrée.');
+    }
+
+    /** Prospect saisi dans l'opportunité : réutilise une fiche existante (même téléphone / e-mail) sinon la crée. */
+    private function createProspect(ContactService $contacts): ?Contact
+    {
+        $data = $this->validate([
+            'contact.segment' => ['in:b2b,b2c'], 'contact.name' => ['required', 'string', 'max:120'], 'contact.company' => [Rule::requiredIf(($this->contact['segment'] ?? '') === 'b2b'), 'nullable', 'string', 'max:160'],
+            'contact.phone' => ['required', 'string', 'max:40'], 'contact.email' => ['nullable', 'email'],
+        ], [], ['contact.name' => 'nom du contact', 'contact.company' => 'entreprise', 'contact.phone' => 'téléphone'])['contact'];
+        if ($existing = $contacts->duplicates($data['phone'], $data['email'] ?: null, null)->first()) {
+            $this->toast("Fiche existante utilisée : {$existing->display_name}.", 'info');
+
+            return $existing;
+        }
+        [$first, $last] = array_pad(explode(' ', trim($data['name']), 2), 2, null);
+
+        return $contacts->create([
+            'type' => 'prospect', 'segment' => $data['segment'], 'company_name' => $data['company'] ?: null, 'first_name' => $last ? $first : null, 'last_name' => $last ?? $first,
+            'phone' => $data['phone'], 'email' => $data['email'] ?: null,
+        ]);
     }
 
     public function delete(): void

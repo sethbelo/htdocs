@@ -72,6 +72,7 @@ class DatabaseSeeder extends Seeder
             ['caisse', 'Grâce Mbuyi', 'Caissier', 'Caissière principale'],
             ['commercial', 'Dorcas Malala', 'Commercial', 'Chargée d’affaires'],
             ['accueil', 'Nadine Kabeya', 'Réceptionniste', 'Réceptionniste'],
+            ['communication', 'Rebecca Mwamba', 'Chargé de communication', 'Chargée de communication & marketing'],
             ['atelier', 'Joseph Kalala', "Chef d'atelier", 'Chef d’atelier menuiserie'],
             ['magasin', 'Rémy Lukusa', 'Magasinier', 'Magasinier'],
             ['achats', 'Serge Mutombo', 'Acheteur', 'Responsable achats'],

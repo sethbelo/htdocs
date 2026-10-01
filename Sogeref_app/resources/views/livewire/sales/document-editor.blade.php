@@ -11,6 +11,19 @@
         <div class="space-y-6">
             {{-- ═══ 2. EN-TÊTE DU DOCUMENT ═══════════════════════════════════ --}}
             <x-ui.card title="Informations" icon="identification">
+                @if ($type === 'quote')
+                    <div class="mb-5">
+                        <p class="label">Intitulé du document</p>
+                        <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Intitulé du document">
+                            @foreach (['devis' => ['Devis', 'Proposition chiffrée à faire accepter par le client.', 'document-text'], 'proforma' => ['Facture pro forma', 'Facture préalable pour commande, import, banque ou paiement anticipé.', 'document-duplicate']] as $value => [$label, $help, $icon])
+                                <label @class(['flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition', 'border-brand-600 bg-brand-50/60 ring-2 ring-sun-400 dark:bg-white/6' => $heading === $value, 'border-line hover:border-line-strong' => $heading !== $value])>
+                                    <input type="radio" wire:model.live="heading" value="{{ $value }}" class="mt-1">
+                                    <span><span class="flex items-center gap-1.5 font-semibold"><x-ui.icon :name="$icon" class="size-4" />{{ $label }}</span><span class="mt-0.5 block text-[12px] text-fg-subtle">{{ $help }}</span></span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <x-ui.select class="md:col-span-2" :label="$type === 'purchase_order' ? 'Fournisseur' : 'Client'" wire:model.live="contact_id" placeholder="Sélectionner…" required>
                         @foreach ($contacts as $c)<option value="{{ $c->id }}">{{ $c->display_name }} — {{ $c->reference }}</option>@endforeach
@@ -108,10 +121,12 @@
                                     @case('classique')<span class="flex gap-1"><span class="block h-4 flex-1 rounded-sm bg-ink-200"></span><span class="block h-4 flex-1 rounded-sm border border-ink-300"></span></span><span class="mt-1.5 block h-5 rounded-sm border border-ink-400"></span>@break
                                     @case('epure')<span class="block h-3 w-10 rounded-sm bg-ink-900"></span><span class="mt-2 block h-px bg-ink-900"></span><span class="mt-1.5 block h-1 w-3/4 rounded bg-ink-200"></span><span class="mt-1 block h-1 w-1/2 rounded bg-ink-200"></span>@break
                                     @case('chantier')<span class="block h-4 rounded-sm bg-brand-50 ring-1 ring-brand-200"></span><span class="mt-1 block h-2 rounded-sm bg-brand-600"></span><span class="mt-1 flex gap-1"><span class="block h-2 flex-1 rounded-sm border border-dashed border-ink-400"></span><span class="block h-2 flex-1 rounded-sm border border-dashed border-ink-400"></span><span class="block h-2 flex-1 rounded-sm border border-dashed border-ink-400"></span></span>@break
+                                    @case('prestige')<span class="block h-3 rounded-sm bg-sun-400"></span><span class="mt-1 block h-4 rounded-sm border-2 border-brand-600"></span><span class="mt-1 block h-1.5 rounded-sm bg-sun-400"></span><span class="mt-1 ml-auto block h-1.5 w-1/2 rounded-sm bg-brand-600"></span>@break
                                 @endswitch
                             </span>
                             <span class="block text-[13px] font-semibold">{{ $tpl['label'] }}</span>
                             <span class="block text-[11px] leading-snug text-fg-subtle">{{ $tpl['description'] }}</span>
+                            <a href="{{ route('pdf.preview', ['kind' => $type === 'quote' && $heading === 'proforma' ? 'proforma' : $type, 'template' => $key]) }}" target="_blank" class="mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-semibold text-brand-600 hover:underline dark:text-lagoon-300" x-on:click.stop><x-ui.icon name="eye" class="size-3.5" />Aperçu</a>
                         </button>
                     @endforeach
                 </div>

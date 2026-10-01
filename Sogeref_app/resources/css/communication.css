@@ -1,0 +1,14 @@
+/* =============================================================================
+   SOGEREF ERP — Communication & marketing
+   Fond discret des fils de discussion (WhatsApp / SMS / e-mails), clair et sombre.
+   ============================================================================= */
+.comm-wallpaper {
+    background-color: color-mix(in oklab, var(--ui-surface-2, #f4f6f8) 70%, transparent);
+    background-image: radial-gradient(circle at 1px 1px, color-mix(in oklab, #104a63 9%, transparent) 1px, transparent 0);
+    background-size: 18px 18px;
+}
+.dark .comm-wallpaper {
+    background-image: radial-gradient(circle at 1px 1px, rgb(255 255 255 / .05) 1px, transparent 0);
+}
+.comm-mail-body p { margin: 0 0 .6em; }
+.comm-mail-body a { text-decoration: underline; }

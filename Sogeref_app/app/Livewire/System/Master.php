@@ -47,6 +47,12 @@ class Master extends Component
     // Documents
     public array $templates = [];
 
+    /** Modèle par défaut de chaque catégorie d'impression. */
+    public const TEMPLATE_DEFAULTS = ['quote' => 'moderne', 'proforma' => 'prestige', 'invoice' => 'moderne', 'purchase_order' => 'classique', 'receipt' => 'moderne', 'exit_voucher' => 'standard'];
+
+    /** Aperçu PDF ouvert dans la fenêtre modale : [catégorie, modèle, libellé]. */
+    public ?array $preview = null;
+
     public string $quoteTerms = '';
 
     public string $invoiceTerms = '';
@@ -92,7 +98,7 @@ class Master extends Component
             'slogan' => data_get($c->settings, 'slogan'), 'line1' => data_get($c->address, 'line1'), 'line2' => data_get($c->address, 'line2'), 'city' => data_get($c->address, 'city'),
             'bank_details' => data_get($c->settings, 'bank_details'), 'document_footer' => $c->document_footer, 'base_currency' => $c->base_currency,
         ];
-        $this->templates = array_merge(['quote' => 'moderne', 'invoice' => 'moderne', 'purchase_order' => 'classique'], (array) data_get($c->settings, 'templates', []));
+        $this->templates = array_merge(self::TEMPLATE_DEFAULTS, (array) data_get($c->settings, 'templates', []));
         $this->quoteTerms = (string) data_get($c->settings, 'quote_terms', '');
         $this->invoiceTerms = (string) data_get($c->settings, 'invoice_terms', '');
         $this->disabled = (array) data_get($c->settings, 'modules_disabled', []);
@@ -152,12 +158,40 @@ class Master extends Component
     public function saveDocuments(): void
     {
         $this->guard();
-        $valid = array_keys(config('erp.document_templates'));
-        $this->validate(['templates.*' => ['required', Rule::in($valid)], 'quoteTerms' => ['nullable', 'string', 'max:2000'], 'invoiceTerms' => ['nullable', 'string', 'max:2000']]);
-        Tenant::putSetting('templates', $this->templates);
+        $documents = array_keys(config('erp.document_templates'));
+        $this->validate([
+            'templates.quote' => ['required', Rule::in($documents)], 'templates.proforma' => ['required', Rule::in($documents)],
+            'templates.invoice' => ['required', Rule::in($documents)], 'templates.purchase_order' => ['required', Rule::in($documents)],
+            'templates.receipt' => ['required', Rule::in(array_keys(config('erp.print_templates.receipt')))],
+            'templates.exit_voucher' => ['required', Rule::in(array_keys(config('erp.print_templates.exit_voucher')))],
+            'quoteTerms' => ['nullable', 'string', 'max:2000'], 'invoiceTerms' => ['nullable', 'string', 'max:2000']]);
+        Tenant::putSetting('templates', array_intersect_key($this->templates, self::TEMPLATE_DEFAULTS));
         Tenant::putSetting('quote_terms', $this->quoteTerms);
         Tenant::putSetting('invoice_terms', $this->invoiceTerms);
         $this->toast('Modèles de documents enregistrés.');
+    }
+
+    /** Ouvre l'aperçu PDF d'un modèle (données réelles les plus récentes). */
+    public function previewTemplate(string $kind, string $template): void
+    {
+        $catalog = self::templateCatalog();
+        abort_unless(isset($catalog[$kind]['templates'][$template]), 404);
+        $this->preview = [$kind, $template, $catalog[$kind]['label'].' — '.$catalog[$kind]['templates'][$template]['label']];
+    }
+
+    /** Catégories d'impression proposées au Master, chacune avec ses modèles. */
+    public static function templateCatalog(): array
+    {
+        $documents = config('erp.document_templates');
+
+        return [
+            'quote' => ['label' => 'Devis', 'icon' => 'document-text', 'templates' => $documents],
+            'proforma' => ['label' => 'Pro forma', 'icon' => 'document-duplicate', 'templates' => $documents],
+            'invoice' => ['label' => 'Factures', 'icon' => 'document-currency-dollar', 'templates' => $documents],
+            'receipt' => ['label' => 'Reçus de paiement', 'icon' => 'receipt-percent', 'templates' => config('erp.print_templates.receipt')],
+            'exit_voucher' => ['label' => 'Bons de sortie', 'icon' => 'arrow-up-tray', 'templates' => config('erp.print_templates.exit_voucher')],
+            'purchase_order' => ['label' => 'Bons de commande fournisseurs', 'icon' => 'truck', 'templates' => $documents],
+        ];
     }
 
     // ── 3. Modules ──────────────────────────────────────────────────────────

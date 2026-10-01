@@ -72,13 +72,15 @@ final class Modules
     public const APP_DESCRIPTIONS = [
         'personnel' => 'Notes, tableurs, bons, congés et tâches du jour',
         'pilotage' => 'Tableau de bord et suivi des commandes',
-        'relation' => 'Accueil, pipeline, clients et fidélité',
+        'accueil' => 'Accueil, courrier, visites et rendez-vous',
+        'relation' => 'Pipeline, contacts, annuaire, pro forma et fidélité',
+        'communication' => 'Messagerie, WhatsApp, SMS, e-mails et campagnes',
         'ventes' => 'Devis, factures, point de vente et location',
         'operations' => 'Atelier, chantiers, projets et planning',
         'stock' => 'Entrepôts, achats et bons',
         'finance' => 'Caisse, comptabilité, trésorerie et rapports',
         'rh' => 'Employés, congés et paie',
-        'systeme' => 'Messagerie et paramétrage',
+        'systeme' => 'Paramétrage, intégrations et API',
     ];
 
     /**

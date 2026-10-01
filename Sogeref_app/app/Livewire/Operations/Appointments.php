@@ -6,7 +6,9 @@ use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\Appointment;
 use App\Models\Contact;
 use App\Models\User;
+use App\Models\Visitor;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -34,6 +36,10 @@ class Appointments extends Component
     public function mount(): void
     {
         $this->week = $this->week ?: now()->startOfWeek()->toDateString();
+        // ?nouveau=1 (raccourci depuis l'Accueil du jour de la Réception)
+        if (request()->boolean('nouveau') && auth()->user()->canManage('appointments')) {
+            $this->edit();
+        }
     }
 
     public function shift(int $weeks): void
@@ -73,6 +79,23 @@ class Appointments extends Component
         ]);
         $this->showForm = false;
         $this->toast($conflict ? 'Rendez-vous enregistré — attention : chevauchement avec un autre rendez-vous.' : 'Rendez-vous enregistré.', $conflict ? 'warning' : 'success');
+    }
+
+    /** Accueil : le visiteur du rendez-vous est arrivé → entrée au registre des visites (Réception). */
+    public function arrive(): void
+    {
+        $this->authorizeModule('reception', 'manage');
+        $a = Appointment::with('contact')->where('company_id', company_id())->findOrFail($this->editing);
+        DB::transaction(function () use ($a) {
+            Visitor::create([
+                'company_id' => company_id(), 'appointment_id' => $a->id, 'contact_id' => $a->contact_id, 'host_id' => $a->user_id, 'full_name' => $a->whoName(),
+                'organization' => $a->contact?->company_name, 'phone' => $a->contact?->phone ?? $a->visitor_phone, 'purpose' => $a->title, 'checked_in_at' => now(),
+                'badge_number' => 'V-'.str_pad((string) (Visitor::where('company_id', company_id())->whereDate('checked_in_at', today())->count() + 1), 2, '0', STR_PAD_LEFT),
+            ]);
+            $a->update(['status' => 'done']);
+        });
+        $this->showForm = false;
+        $this->toast("Arrivée de {$a->whoName()} enregistrée au registre des visites.");
     }
 
     public function delete(): void

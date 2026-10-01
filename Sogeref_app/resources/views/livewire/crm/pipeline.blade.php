@@ -1,5 +1,5 @@
 <div>
-    <x-ui.page-header title="Pipeline CRM" eyebrow="Relation client" subtitle="Suivez chaque opportunité de la première demande jusqu’à la signature. Glissez les cartes d’une étape à l’autre.">
+    <x-ui.page-header title="Pipeline CRM" eyebrow="Relations clients" subtitle="Suivez chaque opportunité de la première demande jusqu’à la signature. Glissez les cartes d’une étape à l’autre.">
         <x-slot:actions>
             <label class="flex items-center gap-2 text-[13px] text-fg-muted"><input type="checkbox" wire:model.live="mine" class="checkbox"> Mes opportunités</label>
             @if (auth()->user()->canManage('crm'))<x-ui.button variant="accent" icon="plus" wire:click="edit">Opportunité</x-ui.button>@endif
@@ -36,6 +36,9 @@
                                     </div>
                                     @if ($o->expected_close_at)<p @class(['mt-1.5 flex items-center gap-1 text-[11.5px]', 'text-flame-600' => $o->expected_close_at->lt(today()) && ! $stage->is_won, 'text-fg-subtle' => ! $o->expected_close_at->lt(today()) || $stage->is_won])><x-ui.icon name="calendar" class="size-3.5" />{{ $o->expected_close_at->format('d/m/Y') }}</p>@endif
                                 </button>
+                                @if ($o->contact && auth()->user()->canAccessModule('contacts'))
+                                    <a href="{{ route('contacts.show', $o->contact) }}" wire:navigate class="mt-1.5 inline-flex items-center gap-1 text-[11.5px] text-fg-subtle hover:text-brand-600"><x-ui.icon name="user" class="size-3.5" /> Fiche contact</a>
+                                @endif
                                 @if ($stage->is_won && auth()->user()->canManage('quotes'))
                                     <a href="{{ route('quotes.create', ['contact' => \App\Support\RouteKey::encodeOrEmpty(\App\Models\Contact::class, $o->contact_id)]) }}" wire:navigate class="btn btn-soft btn-sm mt-2 w-full"><x-ui.icon name="document-text" class="size-4" /> Créer le devis</a>
                                 @endif
@@ -50,7 +53,26 @@
     <x-ui.drawer wire:model="showForm" :title="$editing ? 'Opportunité' : 'Nouvelle opportunité'" icon="funnel">
         <div class="space-y-4">
             <x-ui.input label="Intitulé" wire:model="form.title" required placeholder="Ex. : Mobilier de la nouvelle agence" />
-            <x-ui.select label="Client / prospect" wire:model="form.contact_id" placeholder="Choisir…" :options="$contacts->mapWithKeys(fn ($c) => [$c->id => $c->display_name.($c->type->value === 'prospect' ? ' (prospect)' : '')])" required />
+            @if ($newContact)
+                <div class="space-y-3 rounded-xl border border-line p-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[13px] font-semibold">Nouveau prospect</p>
+                        <button type="button" class="link text-[12.5px]" wire:click="$set('newContact', false)">Choisir un contact existant</button>
+                    </div>
+                    <div class="segmented"><button type="button" wire:click="$set('contact.segment', 'b2c')" aria-pressed="{{ ($contact['segment'] ?? '') === 'b2c' ? 'true' : 'false' }}">Particulier</button><button type="button" wire:click="$set('contact.segment', 'b2b')" aria-pressed="{{ ($contact['segment'] ?? '') === 'b2b' ? 'true' : 'false' }}">Entreprise</button></div>
+                    @if (($contact['segment'] ?? '') === 'b2b')<x-ui.input label="Entreprise" wire:model="contact.company" required />@endif
+                    <x-ui.input label="Nom du contact" wire:model="contact.name" required />
+                    <div class="grid grid-cols-2 gap-3"><x-ui.input label="Téléphone" type="tel" wire:model="contact.phone" required /><x-ui.input label="E-mail" type="email" wire:model="contact.email" /></div>
+                </div>
+            @else
+                <x-ui.select label="Client / prospect" wire:model.live="form.contact_id" placeholder="Choisir…" :options="$contacts->mapWithKeys(fn ($c) => [$c->id => $c->display_name.($c->type->value === 'prospect' ? ' (prospect)' : '')])" required />
+                <div class="-mt-2 flex items-center justify-between text-[12.5px]">
+                    <button type="button" class="link" wire:click="$set('newContact', true)">+ Nouveau prospect</button>
+                    @if (! empty($form['contact_id']) && auth()->user()->canAccessModule('contacts') && ($picked = $contacts->firstWhere('id', (int) $form['contact_id'])))
+                        <a href="{{ route('contacts.show', $picked) }}" wire:navigate class="link">Voir la fiche</a>
+                    @endif
+                </div>
+            @endif
             <div class="grid grid-cols-2 gap-3">
                 <x-ui.input label="Montant estimé" type="number" step="100" wire:model="form.amount" suffix="USD" />
                 <x-ui.input label="Signature prévue" type="date" wire:model="form.expected_close_at" />

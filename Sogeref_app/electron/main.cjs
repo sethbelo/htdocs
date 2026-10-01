@@ -280,6 +280,7 @@ function browserWindowOptions() {
         webPreferences: {
             contextIsolation: true,
             sandbox: true,
+            plugins: true, // visionneuse PDF intégrée (aperçus des modèles, reçus, bons)
             devTools: !app.isPackaged,
             preload: path.join(__dirname, 'preload.cjs'),
         },

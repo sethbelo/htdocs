@@ -6,6 +6,7 @@ use App\Livewire\Concerns\InteractsWithUi;
 use App\Models\CashSession;
 use App\Models\Document;
 use App\Models\FinancialAccount;
+use App\Models\Payment;
 use App\Models\SalesOrder;
 use App\Models\Voucher;
 use App\Services\CashService;
@@ -116,6 +117,9 @@ class Cash extends Component
             : FinancialAccount::where('company_id', company_id())->where('type', $this->method === 'mobile_money' ? 'mobile_money' : 'bank')->value('id');
     }
 
+    /** Dernier encaissement de la session d'écran, pour imprimer son reçu. */
+    public ?int $lastPaymentId = null;
+
     public function collect(CashService $cash, OrderWorkflow $workflow): void
     {
         $this->authorizeModule('cash', 'manage');
@@ -130,7 +134,7 @@ class Cash extends Component
         $account = FinancialAccount::where('company_id', company_id())->findOrFail($this->collectAccountId);
 
         $done = $this->attempt(function () use ($cash, $workflow, $invoice, $account, $session) {
-            $cash->receive($invoice, (float) $this->amount, $this->method, $account, $this->reference ?: null, "Encaissement caisse {$session->reference}");
+            $this->lastPaymentId = $cash->receive($invoice, (float) $this->amount, $this->method, $account, $this->reference ?: null, "Encaissement caisse {$session->reference}")->id;
             if ($order = SalesOrder::where('invoice_id', $invoice->id)->first()) {
                 $workflow->syncPayment($order);
             }
@@ -162,6 +166,7 @@ class Cash extends Component
 
         return view('livewire.finance.cash', [
             'session' => $session,
+            'lastPayment' => $this->lastPaymentId ? Payment::where('company_id', $cid)->find($this->lastPaymentId) : null,
             'expected' => $session ? $cash->expected($session) : 0,
             'movements' => $session ? $cash->movements($session)->limit(50)->get() : collect(),
             'cashAccounts' => FinancialAccount::where('company_id', $cid)->where('type', 'cash')->where('is_active', true)->get(),

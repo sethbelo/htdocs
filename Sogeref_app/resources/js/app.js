@@ -12,6 +12,7 @@
 import Chart from 'chart.js/auto';
 import Sortable from 'sortablejs';
 import './personal';
+import './communication';
 
 window.Chart = Chart;
 

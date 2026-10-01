@@ -194,7 +194,7 @@ class DocumentShow extends Component
             'canManage' => auth()->user()->canManage($this->module()),
             'accounts' => FinancialAccount::where('company_id', company_id())->where('is_active', true)->get(),
             'warehouses' => Warehouse::where('company_id', company_id())->where('is_active', true)->get(),
-            'label' => ['quote' => 'Devis', 'invoice' => 'Facture', 'purchase_order' => 'Bon de commande', 'credit_note' => 'Avoir'][$type],
+            'label' => ['quote' => $this->document->isProformaHeading() ? 'Pro forma' : 'Devis', 'invoice' => 'Facture', 'purchase_order' => 'Bon de commande', 'credit_note' => 'Avoir'][$type],
             'backRoute' => $this->module(),
         ])->title($this->document->number);
     }

@@ -2,7 +2,7 @@
     <tr>
         <td style="width: 54%; vertical-align: top; padding-right: 14px;">
             <div class="box-fill">
-                <div class="label">Arrêté{{ $type === 'quote' ? ' le présent devis' : ($type === 'purchase_order' ? ' le présent bon de commande' : 'e la présente facture') }} à la somme de</div>
+                <div class="label">Arrêté{{ ($isProforma ?? false) ? 'e la présente facture pro forma' : ($type === 'quote' ? ' le présent devis' : ($type === 'purchase_order' ? ' le présent bon de commande' : 'e la présente facture')) }} à la somme de</div>
                 <div class="bold navy" style="margin-top: 3px;">{{ \App\Support\AmountInWords::make((float) $document->total, $document->currency_code) }}</div>
             </div>
             @if ($type === 'invoice' && (float) $document->amount_paid > 0)

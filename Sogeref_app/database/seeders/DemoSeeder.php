@@ -86,6 +86,7 @@ class DemoSeeder extends Seeder
         $this->services($clients, $hr, $sites);
         $this->finance($hr, $sites);
         $this->personalSpace();
+        $this->call(CommunicationDemoSeeder::class);
     }
 
     // ═════════════════════════════════════════════════════════════════════

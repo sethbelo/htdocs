@@ -36,6 +36,9 @@ class DocumentEditor extends Component
 
     public string $template = 'moderne';
 
+    /** Intitulé d'un devis : « devis » ou « proforma » (facture pro forma). */
+    public string $heading = 'devis';
+
     public string $notes = '';
 
     public string $terms = '';
@@ -68,6 +71,7 @@ class DocumentEditor extends Component
                 'notes' => $document->notes ?? '',
                 'terms' => $document->terms ?? '',
                 'openOrder' => false,
+                'heading' => data_get($document->meta, 'heading') === 'proforma' ? 'proforma' : 'devis',
             ]);
             $this->items = $document->items->map(fn ($i) => [
                 'product_id' => $i->product_id, 'description' => $i->description, 'quantity' => (float) $i->quantity, 'unit' => $i->unit,
@@ -81,10 +85,28 @@ class DocumentEditor extends Component
         $this->authorizeModule($this->module(), 'manage');
         $this->issue_date = now()->toDateString();
         $this->due_date = now()->addDays($this->type === 'purchase_order' ? 15 : 30)->toDateString();
-        $this->template = erp_setting("templates.{$this->type}", $this->type === 'purchase_order' ? 'classique' : 'moderne');
+        $this->heading = $this->type === 'quote' && request()->query('intitule') === 'proforma' ? 'proforma' : 'devis';
+        $this->template = $this->defaultTemplate();
         $this->terms = (string) erp_setting($this->type === 'quote' ? 'quote_terms' : ($this->type === 'invoice' ? 'invoice_terms' : ''), '');
         $this->contact_id = Contact::decodeRouteKey(request()->query('contact'));
         $this->items = [$this->blankLine()];
+    }
+
+    /** Modèle par défaut défini par le Master pour ce type (et cet intitulé). */
+    private function defaultTemplate(?string $heading = null): string
+    {
+        $key = $this->type === 'quote' && ($heading ?? $this->heading) === 'proforma' ? 'proforma' : $this->type;
+
+        return (string) erp_setting("templates.{$key}", ['purchase_order' => 'classique', 'proforma' => 'prestige'][$key] ?? 'moderne');
+    }
+
+    /** Changer d'intitulé applique le modèle par défaut correspondant, sauf choix manuel. */
+    public function updatingHeading(string $value): void
+    {
+        abort_unless(in_array($value, ['devis', 'proforma'], true), 422);
+        if ($this->template === $this->defaultTemplate($this->heading)) {
+            $this->template = $this->defaultTemplate($value);
+        }
     }
 
     private function module(): string
@@ -193,6 +215,9 @@ class DocumentEditor extends Component
             'notes' => $this->notes ?: null,
             'terms' => $this->terms ?: null,
         ];
+        if ($this->type === 'quote') {
+            $payload['meta'] = array_merge((array) $this->document?->meta, ['heading' => $this->heading === 'proforma' ? 'proforma' : 'devis']);
+        }
         $items = array_map(fn ($i) => [
             'product_id' => $i['product_id'] ?: null, 'description' => $i['description'], 'quantity' => (float) $i['quantity'], 'unit' => $i['unit'] ?: 'unité',
             'unit_price' => (float) $i['unit_price'], 'discount_rate' => (float) ($i['discount_rate'] ?: 0), 'tax_rate' => (float) ($i['tax_rate'] ?: 0),
@@ -222,7 +247,7 @@ class DocumentEditor extends Component
     public function render()
     {
         $partyType = $this->type === 'purchase_order' ? 'supplier' : 'client';
-        $labels = ['quote' => ['Devis', 'Nouveau devis'], 'invoice' => ['Facture', 'Nouvelle facture'], 'purchase_order' => ['Bon de commande fournisseur', 'Nouveau bon de commande']][$this->type];
+        $labels = ['quote' => $this->heading === 'proforma' ? ['Pro forma', 'Nouvelle pro forma'] : ['Devis', 'Nouveau devis'], 'invoice' => ['Facture', 'Nouvelle facture'], 'purchase_order' => ['Bon de commande fournisseur', 'Nouveau bon de commande']][$this->type];
 
         return view('livewire.sales.document-editor', [
             'labels' => $labels,

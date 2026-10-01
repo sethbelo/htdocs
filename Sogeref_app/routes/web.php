@@ -27,6 +27,8 @@ if (env('SOGEREF_DESKTOP')) {
     })->where('path', '.*')->name('desktop.storage');
 }
 
+require __DIR__.'/modules/communication-webhooks.php';
+
 // ── Authentification ────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::view('/connexion', 'auth.login')->name('login');
@@ -35,6 +37,10 @@ Route::middleware('guest')->group(function () {
 Route::post('/deconnexion', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::middleware(['auth', 'active'])->group(function () {
+
+    // ── Modules découpés par service ────────────────────────────────────────
+    require __DIR__.'/modules/reception.php';
+    require __DIR__.'/modules/communication.php';
 
     // ── Espace personnel (tous les employés) ────────────────────────────────
     Route::middleware('module:personal')->prefix('espace-personnel')->name('personal')->group(function () {
@@ -150,6 +156,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/ticket/{posOrder}', 'ticket')->middleware('module:pos')->name('ticket');
         Route::get('/rapport/{report}', 'report')->middleware('module:reports')->name('report');
         Route::get('/papier-entete', 'letterhead')->name('letterhead');
+        Route::get('/recu/{payment}', 'receipt')->name('receipt');
+        Route::get('/apercu/{kind}/{template}', 'preview')->whereIn('kind', ['quote', 'proforma', 'invoice', 'purchase_order', 'receipt', 'exit_voucher'])->where('template', '[a-z]+')->name('preview');
     });
 
     // ── Pièces jointes de la messagerie ─────────────────────────────────────

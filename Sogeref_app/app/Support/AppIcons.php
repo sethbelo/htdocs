@@ -90,6 +90,15 @@ class AppIcons
             'personal.sheets' => "<rect x='4' y='6' width='40' height='36' rx='6' fill='#1A8D91'/><rect x='9' y='12' width='30' height='25' rx='2' fill='#fff'/><path d='M9 20h30M9 28h30M19 12v25M29 12v25' stroke='#1A8D91' stroke-width='2'/><rect x='9' y='12' width='10' height='8' fill='$Y'/>",
             'personal.vouchers' => "<path d='M8 4h24l8 8v32H8z' fill='$V'/><path d='M32 4v8h8' fill='$Y'/><rect x='13' y='16' width='18' height='4' rx='2' fill='#fff'/><path d='M13 33c3-5 5 3 8-2s4 2 7 0 4-2 6 0' fill='none' stroke='$Y' stroke-width='2.5' stroke-linecap='round'/>",
             'personal.tasks' => "<rect x='6' y='5' width='36' height='38' rx='7' fill='$Y'/><path d='m12 17 3 3 6-6' fill='none' stroke='$P' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/><rect x='24' y='15' width='12' height='4' rx='2' fill='$P'/><path d='m12 30 3 3 6-6' fill='none' stroke='$P' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/><rect x='24' y='28' width='12' height='4' rx='2' fill='$P' opacity='.6'/>",
+            'reception.mail' => "<rect x='4' y='10' width='40' height='30' rx='5' fill='$T'/><path d='m6 13 18 14 18-14' fill='none' stroke='$P' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><circle cx='38' cy='12' r='7' fill='$R'/><path d='M38 9v4' stroke='#fff' stroke-width='2.5' stroke-linecap='round'/>",
+            'reception.visits' => "<rect x='6' y='8' width='36' height='34' rx='6' fill='$P'/><rect x='18' y='4' width='12' height='8' rx='3' fill='$Y'/><circle cx='24' cy='22' r='6' fill='$T'/><path d='M13 37a11 11 0 0 1 22 0z' fill='$T'/>",
+            'directory' => "<rect x='9' y='4' width='32' height='40' rx='5' fill='$P'/><rect x='5' y='10' width='7' height='4' rx='2' fill='$Y'/><rect x='5' y='22' width='7' height='4' rx='2' fill='$Y'/><rect x='5' y='34' width='7' height='4' rx='2' fill='$Y'/><circle cx='26' cy='19' r='6' fill='$T'/><path d='M16 34a10 10 0 0 1 20 0z' fill='$T'/>",
+            'communication' => "<path d='M6 18h8l18-11v34L14 30H6z' fill='$P'/><rect x='4' y='17' width='10' height='14' rx='3' fill='$T'/><path d='M14 30l3 11h6l-3-11z' fill='$Y'/><path d='M37 17a8 8 0 0 1 0 14' fill='none' stroke='$R' stroke-width='3.5' stroke-linecap='round'/>",
+            'communication.whatsapp' => "<path d='M24 4a20 20 0 0 0-17 30L4 44l10-3A20 20 0 1 0 24 4z' fill='#25D366'/><path d='M17 14c-1 0-3 2-3 5 0 6 8 14 14 15 3 0 5-2 5-3l-1-3-5-2-2 2c-3-1-6-4-7-7l2-2-2-5z' fill='#fff'/>",
+            'communication.sms' => "<rect x='11' y='3' width='26' height='42' rx='6' fill='$P'/><rect x='14' y='9' width='20' height='28' rx='2' fill='$T'/><rect x='17' y='13' width='14' height='6' rx='3' fill='#fff'/><rect x='17' y='23' width='10' height='6' rx='3' fill='$Y'/><circle cx='24' cy='41' r='2' fill='$Y'/>",
+            'communication.emails' => "<rect x='4' y='10' width='40' height='30' rx='5' fill='$Y'/><path d='m6 13 18 14 18-14' fill='none' stroke='$P' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><rect x='4' y='30' width='14' height='10' rx='3' fill='$C'/>",
+            'communication.campaigns' => "<circle cx='24' cy='24' r='20' fill='$T'/><circle cx='24' cy='24' r='13' fill='#fff'/><circle cx='24' cy='24' r='7' fill='$R'/><path d='M24 24 40 8' stroke='$P' stroke-width='3.5' stroke-linecap='round'/><path d='m36 5 5 2 2 5-4 1z' fill='$Y'/>",
+            'communication.templates' => "<rect x='12' y='4' width='30' height='34' rx='5' fill='$T'/><rect x='6' y='10' width='30' height='34' rx='5' fill='$P'/><rect x='11' y='18' width='20' height='4' rx='2' fill='$Y'/><rect x='11' y='26' width='14' height='4' rx='2' fill='#fff' opacity='.7'/>",
         ];
     }
 
@@ -106,7 +115,8 @@ class AppIcons
         'payroll' => 'hr.payroll', 'attendance' => 'hr.attendance', 'system' => 'settings.company', 'manufacturing.boms' => 'products.index',
         'personal.leaves' => 'hr.leaves',
         // Applications (groupes du registre)
-        'personnel' => 'personal', 'pilotage' => 'dashboard', 'relation' => 'clients.index', 'ventes' => 'invoices.index',
+        'personnel' => 'personal', 'pilotage' => 'dashboard', 'relation' => 'clients.index', 'accueil' => 'reception', 'communication' => 'communication',
+        'chat' => 'messages', 'ventes' => 'invoices.index',
         'operations' => 'sites', 'stock' => 'inventory.index', 'finance' => 'accounting.index', 'rh' => 'hr.employees', 'systeme' => 'settings.company',
     ];
 

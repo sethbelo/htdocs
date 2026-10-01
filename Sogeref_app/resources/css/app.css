@@ -27,6 +27,7 @@
 @import '@fontsource/saira/600.css';
 @import '@fontsource/saira/700.css';
 @import './personal.css';
+@import './communication.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

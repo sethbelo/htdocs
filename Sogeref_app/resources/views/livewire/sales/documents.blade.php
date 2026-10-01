@@ -1,9 +1,10 @@
 <div>
     {{-- ═══ 1. EN-TÊTE ═══════════════════════════════════════════════════════ --}}
-    <x-ui.page-header :title="$isQuote ? 'Devis' : 'Factures'" eyebrow="Ventes"
-                      :subtitle="$isQuote ? 'Propositions commerciales : validez-les pour ouvrir un dossier de commande.' : 'Factures clients, encaissements et relances.'">
+    <x-ui.page-header :title="$isQuote ? 'Devis & pro forma' : 'Factures'" :eyebrow="$isQuote ? 'Relations clients' : 'Ventes'"
+                      :subtitle="$isQuote ? 'Propositions commerciales et factures pro forma : validez un devis pour ouvrir un dossier de commande.' : 'Factures clients, encaissements et relances.'">
         <x-slot:actions>
             @if (auth()->user()->canManage($isQuote ? 'quotes' : 'invoices'))
+                @if ($isQuote)<x-ui.button variant="secondary" icon="document-duplicate" :href="route('quotes.create', ['intitule' => 'proforma'])">Nouvelle pro forma</x-ui.button>@endif
                 <x-ui.button variant="accent" icon="plus" :href="route($isQuote ? 'quotes.create' : 'invoices.create')">{{ $isQuote ? 'Nouveau devis' : 'Nouvelle facture' }}</x-ui.button>
             @endif
         </x-slot:actions>
@@ -37,7 +38,7 @@
                     @forelse ($documents as $document)
                         @php $late = ! $isQuote && $document->due_date?->lt(today()) && ! in_array($document->status->value, ['paid', 'cancelled', 'draft']); @endphp
                         <tr wire:key="d-{{ $document->id }}">
-                            <td><a href="{{ route('documents.show', $document) }}" wire:navigate class="link">{{ $document->number }}</a></td>
+                            <td><a href="{{ route('documents.show', $document) }}" wire:navigate class="link">{{ $document->number }}</a>@if ($document->isProformaHeading()) <x-ui.badge tone="accent" class="ml-1">Pro forma</x-ui.badge>@endif</td>
                             <td><div class="flex items-center gap-2.5"><x-ui.avatar :name="$document->contact->display_name" size="xs" /><span class="max-w-[220px] truncate">{{ $document->contact->display_name }}</span></div></td>
                             <td class="whitespace-nowrap text-fg-muted">{{ $document->issue_date->format('d/m/Y') }}</td>
                             <td @class(['whitespace-nowrap', 'font-semibold text-flame-600' => $late, 'text-fg-muted' => ! $late])>{{ ($isQuote ? $document->valid_until : $document->due_date)?->format('d/m/Y') ?? '—' }}</td>
@@ -46,6 +47,7 @@
                             @unless ($isQuote)<td class="num {{ $document->balance_due > 0 ? 'text-fg' : 'text-fg-subtle' }}">{{ money($document->balance_due, $document->currency_code) }}</td>@endunless
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('pdf.document', $document) }}" target="_blank" class="btn btn-ghost btn-sm btn-icon" title="PDF"><x-ui.icon name="printer" class="size-4" /></a>
+                                @if ($isQuote)<a href="{{ route('pdf.document', ['document' => $document, 'format' => 'proforma']) }}" target="_blank" class="btn btn-ghost btn-sm btn-icon" title="Imprimer en pro forma"><x-ui.icon name="document-duplicate" class="size-4" /></a>@endif
                                 <x-ui.button variant="ghost" size="sm" square icon="chevron-right" :href="route('documents.show', $document)" aria-label="Ouvrir" />
                             </td>
                         </tr>
